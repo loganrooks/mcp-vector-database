@@ -1,0 +1,1955 @@
+So let me say a few things about the idea of this class.
+So Hegel has always suffered from the problem
+that he is very hard to teach.
+And the reason he is very hard to teach
+is because there is no book by Hegel
+that is the equivalent of the critique of pure reason,
+or the ethics of Spinoza, or the Republic of Plato,
+or Truth is a Human Nature.
+That is to say, a single book that you
+could teach either in the course of a semester,
+or you could teach a significant chunk of a semester,
+that gives you, if not the philosopher's whole system,
+at least enough of it that you can kind of figure out
+how everything fits into it.
+The closest thing in Hegel would be the philosophy of right.
+But that is really only a very small part of Hegel's system.
+The books by Hegel that do contain a more complete
+presentation of the system have this problem
+that they are unbelievably hard to read,
+in particular this one, the Phenomenology of Spirit.
+So the standard way that Hegel gets
+taught at the undergraduate class
+is you teach the Phenomenology of Spirit.
+So in the past when I've taught this class,
+I have done the standard thing.
+You try to read the Phenomenology of Spirit.
+The problem with that is that in one semester,
+you can only really do half of the Phenomenology.
+I never managed to get to the end.
+And the Phenomenology of Spirit is, I think,
+the hardest book in the entire Western philosophical tradition.
+So what has this experience teaching the Phenomenology
+of Spirit that, at a certain point, people aren't really
+reading the book anymore.
+They're just kind of getting a kind of indirect high level
+summary of it.
+And they're kind of talking about Hegel,
+but they're not really talking about what's in the book.
+And that's not just true of students
+in undergraduate classes.
+On Hegel, I sometimes have the impression
+with a lot of so-called Hegel scholars
+that they're not really reading the same book that I am.
+They're kind of like doing this second hand high level
+summary of Hegel.
+So the last time I taught 316, I went the opposite direction.
+We read the Phenomenology of Spirit line by line.
+In fact, in at least one three hour course,
+we didn't get past a single sentence.
+That had the contrary benefit that people were really, really
+reading the text.
+However, it had the complementary problem
+that we didn't get very far.
+And after a certain point, even if you're
+reading it sentence by sentence, Hegel
+is extraordinarily difficult.
+So this class is going to go in the opposite direction.
+The idea of this class is that we're going to do,
+or I'm going to present, the entirety of Hegel's system,
+or at least not the whole thing.
+You can't do the whole thing one semester.
+I'm going to talk about all of the main structural moments
+of Hegel's system.
+And I'll talk about this in more detail, a little bit more
+detail later today, and much more detail in several weeks.
+We're going to talk about the Phenomenology of Spirit, which
+is the introduction to the system, which has three parts,
+logic, philosophy of spirit.
+Sorry, I really should bring my notes with me.
+Philosophy of nature, that's an embarrassing mistake.
+The philosophy of spirit.
+So we're obviously not going to read every part.
+The book that presents this whole thing is called the Psychopedia.
+We're not going to read the entire Encyclopedia.
+That would be ridiculous.
+But we're going to talk about all of the main structural moments
+of this.
+So we're going to spend the first two weeks on the Phenomenology
+of Spirit.
+We're going to spend three, four, five, six, from weeks three
+to six on the logic, which means we're
+going to talk about the beginning.
+And we're going to talk about the end.
+And then we're going to spend a week on the transition
+to the philosophy of nature.
+Then we're going to spend a week talking
+about the move from the philosophy of nature
+to the philosophy of spirit.
+And then we're going to spend one week on the philosophy of right.
+It's week nine.
+We're going to spend, I feel like I've missed a week somewhere
+in here.
+This is not quite accurate.
+But you get the basic picture.
+And then we're going to spend one week on art, one week on religion,
+and then one week on philosophy, which
+is the return of the philosophy of spirit back to the logic.
+So we're not going to cover every single part of the system.
+But we are going to talk about all the major moving parts.
+So the other idea that sort of mixed in with this idea for this course
+is we're going to read all the parts of Hegel you can just read.
+We're going to read all the easy parts of it.
+And we're going to read them in systematic order
+so that you have some idea of what Hegel's philosophical system actually
+is.
+The other problem with reading the phenomenology of spirit,
+the other problem with treating the phenomenology of spirit
+as like the textbook for an undergraduate Hegel course,
+is I'll talk about this more later today and more next week.
+The phenomenology of spirit is in a certain way,
+although this requires qualifications, only Hegel's negative view.
+It should bear the subtitle wrong answers only.
+So the phenomenology of spirit is a series of failed attempts,
+failed accounts of what knowledge is.
+So it's just very weird that this book has become treated
+as the critique of pure reason of Hegel.
+That is just, I mean, Hegel would be totally shocked
+that this is the book that everyone reads,
+because it's basically his jubinellia.
+And he wasn't even really sure what to do with it
+once he had completed the mature system, which is this.
+OK.
+So that's the idea of what you've gotten yourself into.
+OK.
+Some course mechanics.
+The syllabus is on Quercus.
+I will just say a few things about it.
+I find discussing course mechanics in the beginning
+of the semester really boring.
+So I'm going to do this very quickly.
+You have to write two essays, and there is a final exam
+during the exam period.
+The, you know, it couldn't be more straightforward.
+OK.
+Your participation grade will be determined
+on the basis of how many weeks you submit questions
+about the reading.
+So the questions about the reading should be written.
+You can type them if you want, but it's also
+fine to submit them just handwritten,
+as long as your handwriting is legible.
+And they should be questions about the reading for that week.
+And not, you know, like, I was an undergraduate too once.
+I know all the tricks, right?
+So not like you just turn to a random page in the reading,
+and you find Hegel saying, the study of philosophy
+is hindered by the conduct of only clever argumentation.
+Why does Hegel say the, you know,
+that's not what I'm looking for.
+You know, put, like, say a little bit more
+about why this question is relevant or contextualize it.
+Given that Hegel says this, and he says this other thing,
+how is this compatible?
+Why does Hegel think that this transition is unproblematic?
+Why is this argument supposed to be good?
+How is this consistent?
+Something like that.
+Two for every week.
+OK.
+So some of you probably, how many of you
+brought reading questions for this week?
+OK, good.
+That's great.
+A lot of you joined the class later,
+didn't know about this, so I'm going
+to treat those as extra credit.
+You can hand them, you can give them to me
+at the end of the day.
+But in general, they're due first thing.
+So you know, this is like, don't show up
+and think you can scribble a few questions about the reading
+and grab total credit for it.
+That's not going to work.
+OK.
+Other than that, how many of you here are auditing this class?
+OK.
+That's a lot.
+That's like an insane number.
+OK.
+So let me just say, those of you who
+are taking this class for credit,
+you have something of great value that other people want,
+which means you have to earn it.
+So do your best work.
+Because if you don't do your best work,
+I would prefer that you just drop the class
+and one of the people who's auditing it take your spot.
+Because many of them are very, very motivated.
+OK.
+Let me say one or two things more.
+Why is Hegel relevant, or why is Hegel important?
+Why should you spend the amount of energy
+that you're going to have to expend this semester on Hegel?
+I mean, the other reason that I've designed this class
+is I wanted to finally teach a Hegel class that
+wasn't impossibly difficult.
+This is supposed to be like moderate level difficulty
+Hegel.
+OK.
+I mean, for the most part, not a sign of a really impossible
+hard things in Hegel.
+But there's a few weeks where we are
+going to read some really hard stuff in Hegel,
+and I will kind of hold your hand through those.
+OK.
+So I regard Hegel as the philosophical equal,
+the peer of Plato and Aristotle.
+I think he's the only modern philosopher other than Kant,
+who has that kind of status.
+In a more generous mood, or if Tariq Dicco were here,
+I would include Heidegger.
+But, and Hegel has had an enormous influence
+on European philosophy, the Western philosophy,
+after that.
+But always, I think, in a distorted form.
+That is to say, the Hegel that was taken up
+and was influential in philosophy after that
+was always in one way or another distorted version of Hegel.
+So that, in a certain way, the true Hegel
+remains to be understood and really
+philosophically appreciated.
+Which also makes reading Hegel very exciting,
+because there's more work to be done in understanding Hegel,
+not just exegetically, but philosophically,
+than there is with any other comparably
+important modern philosophy, even Kant, especially Kant.
+Kant is, in a certain way, relatively well understood,
+vastly better understood than Hegel.
+And Hegel has only himself to blame for this.
+The books are, aside from the philosophy of right,
+extraordinarily kind of maddeningly difficult.
+Sometimes read as though they are.
+So Hegel has a reputation, especially
+in the English language tradition,
+of just being an author of Gable de Gug of gibberish.
+That's not true.
+That reflects more on the readers who say that,
+or that he's some kind of mystic.
+Also, that's just a simple misreading.
+But the books are forbiddingly difficult and dense.
+There are significant chunks.
+I mean, I've spent so much time reading these books.
+I'm on my second read.
+I read the Phonology of Spirit cover to cover
+with some friends, and then I immediately
+started rereading it from scratch.
+And that's my fourth complete read through in my life.
+And I'm constantly rereading the Science of Logic.
+There are chunks of these books that I just
+have to throw my hands around.
+I don't really know what's going on.
+Now, there's a reason, and we'll see this
+over the course of the semester.
+It's not just that Hegel was a bad writer, which he wasn't.
+So Hegel has this reputation for being a bad writer.
+This is simply false.
+When Hegel wants to, he can be eloquent, indeed beautiful.
+There's actually a philosophical reason
+for why the books are written as densely as they are.
+I also think part of the reason why some parts of the books
+are as dense as they are is because Hegel had not fully
+worked out his theory.
+He had not fully worked out his system in all of the detail
+that he presents it as having been worked out in.
+Failures of presentation are often failures of thought.
+And I think to some extent, that's
+part of what's going on with Hegel in some places.
+And also, I think there are philosophical reasons
+for why the books have to be written in this way that
+is extremely difficult to read.
+But because Hegel has, in my view,
+never been received as Hegel, that is to say,
+the reception of Hegel has always been the distortion
+of Hegel.
+That makes Hegel exciting.
+In a certain way, in other moods,
+I would say this more vociferously.
+In a certain way, the big, unaccomplished task
+of philosophy in Western tradition
+is fully understanding and grappling with Hegel.
+I think that's the thing that hasn't really been done.
+And this class can serve as a kind of introduction
+to doing that, and maybe an inspiration to you
+to do that further.
+Because one of the ways that I hope this class will function
+is as a propagutic for you to read more of Hegel
+on your own, an entry point in Hegel
+so that you can study it more on your own.
+OK, there is no textbook for this class.
+All of the readings are going to be online
+on corkis in the form of PDFs, which
+means that if you want to, you can read them on screens.
+And that means that I will have to allow laptops
+in this class if normally I don't, which I hate doing.
+The reason I hate doing that is because these things are just
+distraction machines.
+So whenever you see a screen, what you should see
+is a conspiracy by very rich and powerful people
+to destroy your mind and ruin your life,
+because that's, in fact, what they are.
+They are the great toxin of our contemporary world.
+And so I would prefer to not have them in the classroom.
+Somehow, all of the best philosophy ever written
+was written without them, so we don't actually
+need them for any of this.
+In fact, all of the best philosophy
+was done and taught without artificial light.
+So I would really like to someday teach a class.
+If you go to old German universities,
+if you go to what is now Pumboldo Investitatie
+in Berlin, the University of Berlin,
+where Hegel is a professor, the Bruins
+have these gigantic floor-to-ceiling windows,
+because of course, there was no artificial light.
+And teaching by candlelight is not really a safe or
+particularly practical.
+So in fact, we don't even need this horrible fluorescent
+or a headlighting that's ugly and destroys,
+diminishes the human spirit.
+But unfortunately, we are stuck with this institutional setup.
+So that was all a way of saying, I encourage you
+to print out the reading and read Hegel in print,
+because all of the evidence is that you understand
+and remember things better when you read them in print.
+When you read something on paper,
+you have this multimodal sensory experience of it.
+It's both tactile.
+If it's a pretty old book, it has an olfactory dimension.
+You shouldn't taste the books.
+You have a gustatory dimension.
+But there's all the physical, it's carrying it around.
+You develop a physical relationship with your book.
+So if you've ever taken a class under critique of pure reason,
+by the end of the semester, your critique is like this.
+Binding has been destroyed.
+It's covered in notations.
+And it's like a physically important object to you.
+And that physical defecation to the book, I think,
+actually improves your learning and reading experience.
+Even better would be if you wanted to buy or somehow
+acquire the physical books.
+But I'm not going to require that because, of course,
+we're only going to read a little bit of this
+and then a little bit of the science of logic.
+If I made you buy the books for all this class,
+it would be more expensive than I can reasonably expect from you.
+OK.
+So that is everything that I'm going
+to say about course mechanics before we
+dive into the phenomenology of spirit itself.
+Let me just say, normally, so GWF Hegel, born in 1770,
+you need 31, normally the principle
+in which I operate with respect to historical philosophers
+is all that we need to say about them is they were born,
+they worked, and they died.
+Now, I'm going to slightly violate my own rule
+because I'm a big fan of the digression.
+And in being a fan of the digression in the lecture,
+I have no less eminent of precursor than Hegel himself
+because in the transcripts of Hegel's lectures, some
+of which we will read, Hegel's constantly
+going on these digressions, some of which
+are totally off topic and some of which are hilarious.
+He'll talk about some recent play that's been displayed.
+So a little bit of digression is fun,
+distracts us from what Hegel calls the rigor of the concept.
+But occasionally, biographical remarks about Hegel
+will actually be exegetically relevant.
+And so I'll say a few things about Hegel's life.
+OK.
+This was all that I want to say initially
+about Hegel's philosophy.
+I don't like beginning a class by giving
+this big aerial overview of the philosopher
+or the philosophical work precisely because it's
+given purely externally.
+It's just narration.
+It's something you could learn from the Stanford
+Encyclopedia of Philosophy or YouTube.
+It's not philosophy.
+It wouldn't be philosophically justified.
+It wouldn't be doing any philosophy for you.
+We wouldn't be doing any philosophy together.
+I'd just be telling you some stuff.
+So as we'll see, because Hegel takes very seriously
+the ambition that philosophy should develop everything
+from itself, it's particularly inappropriate to Hegel
+to begin with this external just telling you something,
+mere reports.
+I would prefer to begin talking about Hegel
+by doing philosophy in the Hegelian way, which
+is developing it internally just through thinking something
+through.
+So that's all that I want to say initially
+about Hegel's philosophy.
+I'll just say one or two things more
+about what's special about Hegel.
+Hegel is probably the most ambitious philosopher
+who's ever existed.
+So the ambition of Hegel's philosophy
+is to develop all of this, which is
+to say a completely systematic epistemology,
+a completely systematic metaphysics,
+a completely systematic account of the natural world,
+a completely systematic account of the mind, which
+includes a completely systematic account
+of moral and political philosophy,
+a completely systematic account of art and its history,
+a completely systematic account of the history of religion,
+And true religion, Hegel calls consonant religion,
+without any presuppositions.
+That's the most ambitious that I think philosophy has ever
+gotten.
+So Hegel is, in a certain way, the person
+who has the most faith or confidence in philosophy
+that I can think of.
+Everyone since Hegel has been more disillusioned
+about philosophy.
+Or another way of pointing that point
+is Hegel is even more than Kant.
+The person, the philosopher, with the most confidence
+that reason, just reasoning, can do everything that we want.
+That it can be completely satisfactory.
+Reason can be completely self-determinate.
+Doesn't need anything outside.
+Everyone in philosophy, since Hegel,
+has been more pessimistic about the possibility
+of this complete self-determination
+of rational thought.
+Questions about that before we dive
+into the phenomenology of spirit itself?
+No?
+Yeah.
+Hey.
+I'm not sure what that's supposed to be,
+but can I ask something about the question?
+Sure.
+The question is this.
+On the set of us, that's like two, three lines.
+But you ask us to contextualize it.
+That would require us to pull up Hegel.
+But that makes it less space, like one line or two.
+So by two or three sentence, do you
+make two or three sentence of a whole world together?
+You're taking, like, we'll figure it out.
+Yeah, you're taking a rule of thumb too precisely.
+Oh, the other thing I want to say
+is if anyone reads German, I would
+encourage you to try to read at least some of this in German.
+The translations vary a great deal in quality.
+And so one of the themes of this semester
+that you will probably learn to find really annoying
+will be complaining about various Hegel translations.
+I haven't been hard about whether to use this
+as the textbook for the course.
+This is the closest thing to a collection
+of all of the relevant texts that we
+would read in this class.
+The reason I decided against it is the translations
+are, in some cases, very strange.
+And the selections are, in some cases, I think not ideal.
+And so then I thought, OK, then they're
+going to have to listen to me complain, not only
+about the translations, but also Holgate selections.
+That will open order the hell out of them.
+So I'll just make my own selections.
+Yes?
+I don't know if it's too early, but I
+want to know how Hegel connects logic to aesthetics and how.
+Oh, that's way too early.
+Way too early.
+We're not even.
+We don't even know what logic is yet.
+That's just a word on a blackboard.
+So using the Cambridge translations.
+Using the Cambridge translations insofar as it's possible.
+So the Cambridge translations, the Cambridge Hegel
+translations, you might think, oh, my god,
+they're going to translate everything.
+But they have now translated the phenomenology
+of spirit, the science of logic, the encyclopedia logic,
+the Hegel's writings from Heidelberg, and that's it.
+And so you might think, oh, everything's coming out more.
+No, Hilary Gaskin, the main philosophy
+editor at Cambridge University Press,
+has announced it's complete.
+That's all they're going to do.
+And that's all they ever intended to.
+That is not, in fact, a complete story.
+In fact, so I'll tell you, at some point
+when I feel like we need a break,
+I'll give you the complete backstory about how
+the Cambridge Hegel translation is so radically incomplete.
+And it was, of course, never intended to be in complete
+this way.
+The short answer is they decided to woefully
+underpay the editorial order, who all resigned.
+And then at some point, the new editorial board,
+some point Cambridge just realized
+it wasn't worth the money.
+So we're now in this totally ridiculous situation
+that there is never going to be, in the foreseeable future,
+a good, complete translation of the works
+of Hegel in England.
+So now, OK, I'll say one other thing.
+There are two different, there's basically
+two different editions of the works of Hegel in German.
+The first one is published by a, is now
+published by a press in Germany called Zuk.
+Those are, if you ever see, they're
+sort of very dark blue paperbacks.
+That translation goes back to a translation that was made,
+sorry, an edition that was made immediately
+after Hegel's death by this group called themselves
+the Friends of Hegel.
+Now, the problem with that edition
+is that it isn't up to contemporary
+filmological snuff.
+In particular, with respect to Hegel's lectures,
+they did this thing that from a contemporary point of view
+was totally outrageous.
+People, the people who were editing Hegel's lectures,
+took all of Hegel's notes and the student transcripts
+and then composed one sort of condensed version
+of all of this information and then destroyed,
+in many cases, the originals so that we can't verify
+whether their edition was correct.
+So this was for, this was until the 70s, the only edition
+of Hegel that there was.
+Now, after that, there's the Academy edition,
+where people actually sat down and did
+the really philologically respectable thing.
+I mean, the other thing is, for instance, the Friends of Hegel
+edition only contains one edition of the Encyclopedia.
+It only contains one edition of the Science of Logic.
+That, by contemporary philological standards,
+is radically inadequate.
+The Academy edition does this much more complete job.
+But the weird result of that is almost all
+of the translations of Hegel into English that
+existed historically are based on this.
+And so you would think, well, this
+would be a perfect opportunity for Cambridge
+to do the English translations from that.
+But that's not going to happen because they
+underpaid the editorial board.
+Also, these editorial board guys,
+like they're all tenure professors
+drawing massive salaries.
+They could just do it for free.
+But I wouldn't tell that to their face.
+So the other thing that's weird is,
+so there are all these people make a big deal about this.
+They just think, oh, you can never
+talk about Hegel's lectures from the old Friends of Hegel
+edition.
+You have to only cite the Academy edition.
+But the problem is, almost all of the reception of Hegel
+through the history of philosophy
+from his death in 1831 until whenever this was published
+in the 60s or 70s was based on the old edition.
+So these poorly edited editions of Hegel's lectures
+are the things that are really influential.
+So when people talk about Hegel's philosophy of history,
+almost everyone who's ever engaged
+with Hegel's philosophy of history
+was engaging with the poorly edited edition,
+including Marx and everyone else.
+So I think you can't just ignore this one.
+In many cases, the older edition, the not so good edition,
+makes the text much more readable and fluent.
+And so when we come to read some of Hegel's lectures,
+for instance, his lectures on the philosophy of art,
+the philosophy of religion, and the history of philosophy,
+I will assign some of the translations
+from the older editions because they're
+just more readable.
+And they are the things that everyone's been talking about.
+Ever since, so if you hear someone talking about Hegel
+and some other book, they're almost certainly
+talking about this.
+So what value would it be to you?
+You're like, oh, well, actually, the Hotho transcript.
+You don't care.
+I barely care.
+OK.
+Other questions before we start talking
+about the phenomenology of spirit?
+Yes.
+I've heard that three years ago,
+you called it a people person.
+That only went through 40 or 50 pages of the phenomenology.
+Yeah.
+What would be the content-wise difference
+between these two persons in terms of yours?
+More of you will understand what I'm saying in this course.
+Or no, the problem with that course is, so I got through
+about, did Siwan tell you that?
+Yeah.
+OK.
+Siwan likes that word.
+So let's see.
+If I did 50 pages in that class, I got more than that.
+I got all the way up to maybe sort of skepticism.
+But I kind of rushed through some of skepticism.
+So we did maybe like 70 pages.
+And the problem with that is you just
+learn in a lot of detail the early moves
+of the phenomenology of spirit, which doesn't tell you.
+That basically taught people 10% of this.
+This is 10% of this weird, immature, semi-juvenalia
+introduction to Hegel system.
+It's not Hegel system.
+OK.
+But to say more about why just teaching
+the phenomenology of spirit would be so inadequate,
+I mean, certainly this version of 360
+is an elaborate apology for the last time I taught 360.
+Let's just dive into the text.
+So if you do not have a copy of the text,
+rearrange yourself so that you are sitting next to someone
+who does have a copy of the text.
+So I'll give you a few minutes to do that.
+So if two of you are sitting next to each other
+and you have copies of the text, yeah, sorry, what?
+Yeah, I mean, there'll be some differences.
+But you'll basically know what's going on.
+Is anyone in a Hegel island isolated
+from any other copy of the text?
+I would have brought additional copies of the text
+if I had thought of that.
+Yeah, no screen.
+OK.
+It is a natural supposition that in philosophy,
+before one gets down to dealing with what is that issue,
+namely the actual cognition of what in truth is.
+So the issue of philosophy is actually
+cognizing what in truth is.
+Now, there's two words here in German, erkenen and bissen.
+Pinker has, in almost all cases, translated erkenen
+has to cognize, and bissen has to know.
+But he's, now there is a difference between erkenen
+and bissen in Hegel.
+But erkenen and bissen are both totally ordinary words
+in German for knowledge.
+So epistemology in German is referred to as erketnesteri,
+the theory of erketens.
+That's the noun for erketens.
+So it would be totally fine to translate both of them
+as knowledge.
+But Pinker has decided to just mark in English
+a distinction in the German.
+So it would be totally fine if we read this as saying,
+before one gets down to dealing with what is at issue,
+namely the actual knowledge, actually knowing what is true.
+So now, Hegel uses the difference
+between bissen and erkenen to mark some kind of difference.
+But it isn't super crucial right now.
+So we can also just read cognition here as knowledge.
+It is a natural supposition that in philosophy,
+before one gets down to dealing with what is at issue,
+namely the actual knowledge of what in truth is.
+So the business of philosophy is actually
+knowing what in truth is.
+So not potentially knowing or kind of knowing or having faith,
+but knowing and knowing what is true, what is actually true.
+It is first necessary to come to an understanding
+about knowledge, which is regarded
+as the instrument by which one seizes hold of the absolute
+or as the means by which one catches sight of it.
+So the first word you should stumble over here
+is the absolute.
+So the absolute is this major topic
+and preoccupation of German philosophy from Kant to Hegel.
+So in the context in which Hegel is writing this,
+roughly Jena in 1807, the absolute
+is the thing everyone cares about.
+But I want to put the absolute aside for a moment,
+because this is kind of provisional.
+Over the course of today, you'll understand better
+what I mean by this.
+Hegel won't, in the introduction to the phenomenology,
+yet have an argument that the topic of philosophy
+should be the absolute, or that what the topic of knowledge
+is is the absolute.
+He, over the course of the phenomenology and the logic,
+will develop that.
+So this is a foreshadowing of something
+that you usually have to argue for,
+although his audience in 1807 would assume, of course,
+what we really wanted to have knowledge of is the absolute.
+So what the absolute is, I'm going
+to set aside until we see Hegel's view of the absolute.
+But if you need a sort of precursor,
+you can think of it as God a little bit better.
+You can think of it as the unconditioned in Kant.
+A little bit better, you can think of it as Spinoza's God.
+Even better, you could think of it as Spinoza's God,
+where Spinoza's God is understood neither
+determinately as a subject or as an object.
+And if that sounds very weird, that's fine.
+We'll come back to it.
+So the important thing about paragraph 73,
+the beginning of the introduction,
+is Hegel is playing off various tropes in modern philosophy.
+So when you read the beginning of the introduction
+of phenomenology, you should think of the beginning
+of Locke's essay, concerning the understanding,
+or the beginning of conscripti capuris.
+The characteristic move of modern philosophy
+is before we investigate the object,
+we have to investigate the cognitive powers
+of the subject.
+So what Hegel does now is then riff on various tropes
+in modern philosophy.
+So he's presenting this thing that you would normally assume.
+It is a natural supposition.
+Although we'll see that in a certain way,
+Hegel doesn't share this supposition.
+He's distancing himself from this supposition.
+So the natural supposition is, before we
+go about the business of knowing objects,
+we first have to investigate the power of the knowledge
+itself.
+We have to know what knowledge is.
+So he then riffs on various metaphors
+that you find in early modern philosophy.
+For one, there might be one rather than another form
+of cognition that is better suited to achieving
+this final end.
+So the idea is, well, you have to decide,
+is it the senses that give us knowledge of what is?
+Or is it the intellect?
+Or is it reason if there's a difference
+between the intellect and reason?
+Is it faith that gives us knowledge of what is?
+So those are the kinds of issues that he's gesturing.
+If cognition is a faculty of a determinant kind and scope,
+then without a more precise determination
+of its nature and limits, one ends up grasping clouds of error
+rather than the heaven of truth.
+So if knowledge is a particular human ability
+among other abilities, then there
+are things that that ability can be exercised with respect to
+and things that it cannot be exercised with respect to.
+So we have to get clarity on that before we
+try to go about knowing objects.
+If cognition is the instrument for seizing hold
+of the absolute, then we don't get the absolute
+as it is in itself, but we form and change.
+So the idea of, if cognition is something like a tool,
+then what it gets us is not the object in itself,
+but the object introverse that's shaped by the tool.
+So once again, these are not things
+I think Hegel needs to put a lot of argumentative weight on.
+What he's doing is pointing out that these standard moves
+in modern epistemology bring with them these kinds of thoughts.
+And he's raising this as a way you could begin in philosophy,
+but then also distancing himself by them
+by pointing out that those kinds of moves in modern philosophy
+bring with them very familiar concerns about whether we'll
+ever be able to know reality as it is in itself.
+Most importantly, in 1807, the thing that's
+always in the back of Hegel's mind is Kant and the idea
+that Kant's investigation to the powers of human mind
+in the critique of pure reason winds up
+proving that we don't know reality as it is in itself.
+So he's riffing on all these various thoughts
+that if you begin by investigating knowledge
+itself, you'll always wind up being distanced from the object
+as it is in itself.
+Likewise, if we think of knowledge as a passive medium,
+well, if you really think through the idea of a passive medium,
+a medium kind of changes what passes through it.
+And so then you can kind of remove.
+So the metaphor is, well, if it's a medium changes,
+the light passes into glass.
+There's an angle of refraction.
+So if we know this, maybe we can infer exactly where
+the thing came from.
+But then all we'll know is the direction
+from which the ray came from.
+So Hegel is just riffing on standard metaphors
+about knowledge in modern philosophy
+and very familiar reasons for thinking
+that if you think of knowledge that way,
+you will wind up with a conclusion
+that you don't know reality as it is itself,
+you know it only as it appears to you,
+or you know it only in relation to the human mind,
+et cetera, et cetera.
+Yeah.
+So how much we have prior knowledge of the world,
+and how he gets to the absoluteness?
+Is it relative to us, or is it universal?
+We're way too early to get there.
+We're at super, super preliminary steps here.
+So now I'm going to just, because this is not the last time
+I'm on 2016 where I only got 370 pages,
+I'm not going to go through sentence by sentence.
+I'm going to jump through to particular passages
+that I think are eliminated.
+So then paragraph 74 begins, and he says, well, look,
+if this we could just as well, so let me just read this passage.
+If the common concern about falling into error
+sets up a mistrust of science, which itself,
+untroubled by such scruples, simply sets itself to work
+and actually cognizes it, it is still
+difficult to say why on the contrary,
+a mistrust of this mistrust should not be set up,
+and why one should not be concerned
+that this fear of erring is already the error itself.
+So what he's pointing out is the things that
+get us into a mistrust or skepticism
+about our ability to know are themselves something
+that we could be skeptical about.
+In particular, we don't have to assume
+that knowledge is an instrument or a tool or a passive media
+or one ability among others, that those themselves,
+those standard assumptions that structure modern epistemology
+and that lead to the conclusion that we don't know realities
+of itself are themselves something that is questionable.
+Skipping a little bit, but above all, this picture
+that he's been somewhat satirically riffing on
+presupposes that the absolute stands on one side
+and that cognition stands on the other or itself
+and separated from the absolute, though cognition is
+nevertheless something real.
+So what he's saying is the assumption here
+in all of this stuff, let's just once again, for now,
+treat the absolute as the object of knowledge.
+The assumption is I'm over here, the object is a distinct being,
+and then somehow I have to overcome this distinctness
+in order to know.
+And the standard early modern thought
+is, well, how could I know an object that's distinct for me?
+Well, it would have to affect me, have to affect my senses.
+And I would have to have some capacity
+to be affected sensorily by it.
+And then all of these early modern worries
+from Locke, Hume, Kant, Descartes, everyone else,
+arise, namely, would that allow us to know the object as it is
+or only as it affects us?
+Would it allow us to know the way the object really is
+or only as it appears to our senses?
+So he's pointing out that that very standard picture
+of knowledge as a particular relation of one being
+to another, or let's say, a capacity that one being has
+to know another being or other beings,
+is itself something we can question.
+We're not stuck with that.
+OK.
+I'm going to skip 73.
+OK.
+So now he says, look, instead of fussing around with answers
+to all of this, that is to say, instead of fussing around
+with the whole problem space of early modern epistemology,
+empiricism, rationalism, sensibility, understanding,
+reason, instead of all of that, instead of fussing around
+with answers to all of this, it is
+possible to reject these outright
+as contingent and arbitrary representations
+and to regard the affiliated use of words,
+such as absolute cognition, and also objective and subjective,
+and countless others, whose meaning is assumed
+to be generally known as even a kind of deceit.
+So one thing we can do is step back and say,
+the meaning of subject, object, cognition, absolutely,
+they themselves are things that have to be determined.
+It's not self-evident what these things mean,
+and it's not self-evident that we have to begin philosophy
+by assuming a particular meaning of them
+or a particular set up for epistemology, namely,
+that one, skipping a little bit.
+They constitute only an empty appearance
+of a knowing, which immediately vanishes
+in the face of the science, which comes onto the scene.
+OK.
+So just a little note about language.
+Bissen is to know.
+Bissenschaft is science.
+But that means just etymologically in German,
+there's a very close connection between Bissen and Bissenschaft.
+So for now, Hegel has a very distinctive notion
+of what a Bissenschaft is.
+He hasn't developed it yet.
+So let's just take on board the idea
+that if the aim of philosophy is to know, to have Bissen,
+the aim of philosophy is to be a Bissenschaft,
+that is to say, to be a science, a body of knowing.
+Now, this is unnatural in English
+because we have two different words.
+And because we have this, frankly,
+stupid tendency in English to assume that the word science
+only applies to the natural sciences.
+That just doesn't make sense in German.
+In German, the study of literature
+is the Tsozwe Bissenschaft, the study of politics
+is Politische Bissenschaft.
+Any systematically ordered body of knowledge is Bissenschaft.
+So the introduction of science at this point
+is not as arbitrary as it seems, although over the course
+of the system, we'll get a much, much richer notion of science.
+So all that Hegel is doing is saying, look,
+it's standard to begin by assuming
+that we want in philosophy is knowledge,
+that is to say, scientific knowing, science,
+of what actually is.
+And the standard way we begin is by assuming this.
+But this leads very quickly by arguments
+that are familiar from early modern philosophy
+to the conclusion that we don't know objects
+as they are in themselves.
+We only know their appearances or other structural features.
+Or even more radically, in Hume, in some way,
+we don't really know anything other than our own impressions
+of objects.
+But we don't have to assume that because it's not obvious
+what any of these terms mean.
+OK.
+But then he says, all of this vanishes
+when science comes on the scene.
+So when someone who has scientific knowing,
+who knows what, in actuality, is the case,
+and does so scientifically, when they show up,
+all of the rest of this is revealed to be deceit.
+But science, insofar as it comes on the scene,
+is itself an appearance.
+Science is coming onto the scene is not yet science
+as it is carried out and unfolded in its truth.
+So if I don't have knowledge, I just
+have various beliefs involving these concepts.
+I'm just a standard early modern epistemology person.
+And someone comes on the scene who does have knowing,
+that's just one more claim to knowledge among others.
+We don't yet know who has knowledge.
+Merely, the first appearance of knowing,
+the first person who knows, doesn't necessarily
+know that they know.
+So Hegel goes on to say, for with regard
+to a knowing that is not truthful,
+science cannot simply reject it as just a common view of things
+while giving out the assurance that it is itself
+a completely different kind of cognition
+and that the other knowing counts as absolutely nothing
+for science.
+Skip the rest of the sentence, through such an assurance,
+science declares its being to be its power.
+But untrue knowing, just as much appeals to the fact
+that it is, and it gives out the assurance that science counts
+as nothing to it, but one bear assurance
+is just as valid as another.
+So bear assurance is the old translation.
+It just sounds better.
+It's perfectly fine.
+So what does that mean?
+What it means is, if you don't know but have mere opinion,
+and I come on the scene and I know,
+my assertion that I know is worth just as much
+as your assertion that you know, even if I know.
+So the issue here is how we know what knowledge is,
+or how we justify our epistemic standard.
+So the issue is not knowledge of objects.
+It's knowledge of what knowledge is.
+So the idea is, it's not enough simply to know,
+because your claim to know is just a mere assertion,
+a bear assurance, just as valid and just as invalid
+as the person who doesn't actually know their claim to know.
+So we need to find somewhere to adjudicate
+between the mere claim to knowledge, mere opinion,
+and knowledge.
+So knowing is agreement?
+Argument?
+Agreement.
+Agreement, no.
+OK.
+Skipping a bit, 77.
+Because this exposition has for its object only
+knowing as it appears.
+So what we're going to do is we're
+going to look at appearances of knowledge.
+That is to say, claims to know.
+But once again, we're not interested in particular.
+I claim to know that Bismarck is the capital of South Dakota.
+I claim to know that Fargo is not the capital of South Dakota.
+Maybe someone, some poor, benated, Canadian,
+ignorant of the geography of the Upper Midwest, my homeland,
+might claim to know falsely that Fargo is the capital of South
+Dakota.
+It is not.
+We're not interested in that.
+We're interested in the sort of one level more general
+about what you think knowledge is.
+So the exposition has for its object only knowing as it appears.
+That is to say, appearances of conceptions of knowledge.
+So you have a conception of what knowledge is.
+I have a conception of what knowledge is.
+Even if my conception is right, let's just assume yours is right.
+My claim about what knowledge is is just as valid as yours.
+One is just to bear assurance just as much as the other.
+It does not itself seem to be the science, which
+is free and self-moving within its own proper shape.
+So this exposition does not itself seem to be the science.
+So when Hegel says something doesn't appear or merely appears,
+that's really important.
+So he's saying you would think at the beginning
+this exposition is not going to be science
+because we don't know what science is yet.
+We don't know what knowledge is.
+It will actually turn out to be more complicated than that later on.
+But let's just take the appearance at face value for now.
+So this exposition where there's an appearance of knowing
+is just someone's claim to knowing backed up
+by some conception of knowledge.
+That doesn't look to be knowing yet because they
+don't know that they know.
+But from this standpoint can instead
+be taken to be the path of natural consciousness,
+pressing forward towards true knowing.
+It can be taken to be the path of the soul wandering
+through this series of ways it takes shape,
+as if these were stations put forward in advance to it
+by its own nature so that it purifies itself into spirit
+by arriving at a cognition of what it is in itself
+through the complete experience of its own self.
+So that description, 77 is a description of this book.
+It's an exposition, which appears not to be science
+itself yet, and let's stick with the appearance.
+Let's assume that this is from the first page not yet science,
+but merely the appearance of science.
+But what it really is is it's the path of natural consciousness.
+So what is natural consciousness?
+It's something like the conception of knowledge
+we begin with pre-philosophically.
+Very roughly, it's this.
+It's the idea that there's a distinction
+between consciousness, the subject,
+and its other, the object, and that consciousness
+has to somehow overcome that, maybe
+by the object affecting its senses, et cetera, et cetera.
+This is natural consciousness.
+So the exposition, this book is going
+to be an exposition of the path of natural consciousness
+pressing forwards towards true known, towards science.
+Or it can be taken to be the path of the soul wandering
+through the series of ways it takes shape.
+So the phenomenology of this will
+be an exposition of different shapes or forms
+of consciousness, which means different conceptions
+of what knowledge is, different conceptions
+of the relationship between consciousness and its object.
+As if these were stations put forward in advance to it
+by its own nature.
+So these stations, these different forms of consciousness,
+are not given to it from outside,
+but they develop out of it itself,
+so that it purifies itself into spirit
+by arriving at a cognition of what it is in itself
+through the complete experience of its own self.
+So this is going to be the exposition
+of how natural consciousness becomes spirit,
+and therefore truly knows itself and has scientific knowledge.
+Now, what is this exposition?
+What is the character of the exposition of the phenomenology?
+So one very standard way of reading the phenomenology
+that I think is totally wrong is to think of it
+as an historical description of various shapes of human
+consciousness over time.
+So on this reading, some of the beginning of the book
+is like Stone Age consciousness, and by the end
+we have like early 19th century German consciousness.
+This has various problems, one of which
+is it gets the chronology as out of order.
+So somehow like Newtonian science comes before the Greeks.
+There are other problems with it, namely,
+it makes the whole book completely incoherent.
+It turns it into the world's most incoherently written
+piece of intellectual history.
+It's like Will Durant, as written by Hegel.
+And it also completely undermines
+the philosophical account, because what happened does not
+in and of itself have any necessity.
+So I don't think that it's historical.
+I think that this exposition is a purely
+philosophical or logical.
+So what we do is we start with natural consciousness, which
+is a conception of what knowing is.
+It's roughly this.
+As we'll see, it's going to start even more minimally
+than this.
+We're going to start with this, and then we're
+going to develop out of this other shapes of consciousness,
+other conceptions of what knowledge is,
+till we get to what Hegel identifies as science, what
+he identifies as the knowing of the absolute,
+and what he here identifies as consciousness becoming spirit.
+Now, all of those things are going to be the same.
+They're all going to be identical.
+But let me just say something about the latter.
+What does it mean that consciousness becomes spirit?
+As Hegel says at the end of 77, it's
+not that consciousness wasn't spirit and then becomes spirit.
+It's that consciousness becomes aware of itself as spirit.
+So one way of thinking about the phenomenology, the one
+that I'm going to emphasize, is its consciousness developing
+out of itself a series of shapes of consciousness,
+conceptions of knowing, until it gets to one
+that is knowing, full stop.
+True scientific knowing of what in actuality is.
+That will turn out also to be knowledge of the absolute.
+For the preview of incredibly weird Hegel stuff to come,
+it will turn out that that is the absolute.
+The absolute is the absolute knowing itself.
+And you can be part of it too.
+But the thing I just want to mention now
+is it will also be consciousness coming
+to know what it itself is, namely, spirit.
+Now we're going to talk a lot more about spirit in this class
+because it's one of the three parts of the system.
+And we'll spend roughly half this whole semester on spirit.
+What exactly spirit is in Hegel is if you gave me a pop quiz
+and gave me a blue book and said you have three hours to say
+what spirit is for Hegel, I think
+I would throw myself out of a window.
+I don't really know how I would do that.
+But let me just say very briefly something about the word.
+The word in German is geist.
+OK.
+Now, sometimes that gets translated in English
+as spirit, sometimes it gets translated as mind.
+So in particular, the translation
+of the philosophy of spirit that we're
+going to read, the only one ever published in English
+because Cambridge underpaid the editorial board,
+translated as the philosophy of mind.
+Now, what is the relationship between spirit and mind?
+They're the same word in German.
+If you want to say that someone lost his mind in German,
+you say, he hasein geistfel.
+So we have two words where the Germans have won.
+Now, Hegel is exploiting a feature of German, which
+is that the word that you would use for my individual mind,
+is also the word that you would use
+for collective mental phenomena, like the spirit of the age.
+If you say in English, the mind of the 19th century,
+people will be like, what?
+What's that like?
+That sounds like the board.
+Everyone in the 19th century was hooked up
+into some big telepathic worldwide web.
+Now, if you say zeitgeist, the spirit of the age in German,
+that sounds totally normal.
+So what Hegel is playing on the fact
+that there's one word for individual mental phenomena
+and collective mental phenomena.
+Because what he wants us to see is
+that those aren't really separate things.
+Not that there's only one mind and we're all parts of it,
+or that the collective mind is just the combination
+of the little minds, as Margaret Thatcher famously said,
+there's no such thing as society.
+But neither of those views.
+As always in Hegel, a third weirder thing.
+But just very briefly, what matters
+in the phenomenology of spirit is
+that over the course of the phenomenology,
+consciousness comes to realize that it's spirit.
+Consciousness comes to realize that it's a mind.
+No, no, no.
+He means spirit in a more technical sense.
+Consciousness will come to realize
+that there is no difference between it and its author.
+Spirit is mind in so far as it understands
+that it has no other.
+Now that is not going to mean that everything is spirit.
+So Hegel's view is not like this is spirit.
+Hegel's fully aware that there is no spirit on the moon.
+The view that the phenomenology is building up towards
+is that the other of spirit, nature, things that have reality
+but aren't minds, are not fundamentally
+different from spirit.
+So that although spirit has another,
+its other isn't fundamentally other to it.
+Or it's the same structurally as spirit.
+Now this is all provisional.
+All of this is going to be worked out
+in the rest of the system.
+But the basic idea is that spirit is consciousness
+raised to the point where it understands
+that the basic structure in which consciousness thinks
+is the same structure as what it thinks about.
+So although there's a difference between myself and the object,
+it's not an ultimate difference.
+The way I think about things is fundamentally the way they are.
+And what's important for Hegel is
+that we're going to prove that.
+We're not going to presuppose it.
+Hegel's way of thinking about this, preconti and rationalism
+just presupposes that the categories of thought,
+basically subject, predicate, and logic,
+are the metaphysical structure of being.
+Or they assume something even worse,
+which is that God just decided, because he's
+nice, to set things up that way.
+Because what God really cares about
+is that we do metaphysics properly.
+The murder of innocence and the complete slaughter field
+that is history was relatively different to him.
+He was figuring out how to create the world.
+But he was like, wait, if I do it this way,
+there's going to be all these genocides and all this slavery
+and all this horrible shit.
+But they'll be able to do metaphysics.
+Yes, I'll do that.
+So Hegel thinks that's even worse.
+So what we need to do over the course of the system
+is show that consciousness has to be spirit.
+That is to say, there can't be a fundamental difference
+between the categories in which thought thinks and the beings
+that it thinks about.
+And so that's going to mean that there's
+a structural identity between spirit and nature.
+Yes?
+The individual mental phenomena,
+collective mental phenomena, are key names
+or is it too much experience?
+You're getting ahead of us.
+We're not there yet.
+Yeah, Isaac, right.
+Yeah.
+So is there any comparable traits
+between the non-monetary atmosphere
+and the non-monology of this technology in 20th century?
+Is there any connection at all?
+I will answer that question when we
+get to a particular passage.
+Notice the word phenomenology has not been used yet.
+Maybe a bit naive, but why start with natural consciousness?
+We will get there.
+Yeah?
+What is the concept of what is the notion?
+Oh, it's the bad old English translation of the concept.
+To the next question, what is the concept?
+That's, we will, it's going to take us a couple weeks.
+But it doesn't use it here.
+He uses it here, but he uses it in a non-technical sense
+here to mean something like one's conception.
+OK.
+Yeah.
+I know you said consciousness realizes that it's spirit.
+Maybe it's a silly question, but what's the difference
+before we know, before I as a consciousness realize
+that I am spirit?
+What is the difference between spirit and consciousness?
+It's the difference between being something
+and being aware of yourself as being that.
+So your spirit all along.
+Where consciousness is always spirit,
+but it doesn't grasp itself as spirit.
+Or I mean, once again, it's important not
+to think of this temporally.
+This is not about a guy named consciousness
+who realizes at the end that he's spirit.
+It's about consciousness.
+And consciousness is spirit, but at the level
+at which we describe consciousness at the beginning,
+that is not a description of consciousness as spirit.
+What we're going to do is unfold from that description
+of consciousness, just from what consciousness is so
+described that it must be spirit.
+OK.
+Moving on.
+Natural consciousness will prove
+to be only the concept of knowing,
+or it will prove to be not real knowing.
+OK, good.
+So this is a non-technical use of concept.
+This is something like what we mean
+by concept in the ordinary sense.
+It's a conception of knowing.
+So natural consciousness thinks of itself as knowing,
+and it has a conception of knowing, namely this one.
+But it will prove to be not real knowing.
+He also said already for that.
+While it immediately regards itself rather as real knowing,
+this path has negative meaning for it.
+And what is the realization of the concept
+will count instead to it as the loss of itself,
+for on this path, it loses its truth.
+In this exposition, consciousness
+is going to realize that what it thinks knowing is is not
+knowing.
+So the truth that it thinks it knows, it doesn't know.
+This path could accordingly be regarded
+as the path of doubt, or more properly,
+as the path of despair.
+On this path, what happens is not
+what is customarily understood as doubt,
+a shaking of this or that supposed truth,
+followed by the disappearance again of the doubt,
+and then a return to the former, so that in the end,
+the thing at issue is taken as it was before.
+Rather, this path is the conscious insight
+into the untruth of knowing as it appears.
+A knowing for which that which is the most real
+is rather in truth only the unrealized concept.
+So what that means is consciousness
+is going to realize, not that it's wrong about it
+thought it knew something, but it didn't know that thing.
+It thought it knew that Fargo is the capital of North Dakota,
+but it isn't.
+Or it's nor is it going to doubt, it's
+going to say, well, there's a bunch of stuff I don't know.
+I don't know anything about how things are in themselves.
+I didn't know the external world.
+What it's going to doubt is its conception of knowledge.
+And that is the loss of itself, because a conception
+of knowledge is a conception by consciousness
+of what consciousness is.
+So in losing that, it loses itself.
+So there's this kind of existential dimension.
+These are losses of self-conceptions.
+So the phenomenology is also an exposition
+of a sequence of self-conceptions
+that consciousness might have of itself.
+I'm going to skip a bunch.
+So we know where we start, natural consciousness.
+Although we don't really know what natural consciousness is,
+this is my preliminary sketch of it.
+He hasn't really told us what natural consciousness is.
+We know roughly where things are going to end.
+They're going to end with scientific knowledge,
+where whatever doubt is generated
+about these models of knowledge,
+that will not be able to be generated anymore.
+We don't really know why.
+The completeness of the forms of non-real consciousness
+will emerge through the very necessity
+of their progression and their interrelations.
+The progression of one form of consciousness,
+one conception of knowledge to another,
+is going to be necessary, not contingent.
+To make this comprehensible, it can
+be noted in general at the outset
+that the exposition of non-truthful consciousness
+in its untruth is not merely a negative movement.
+So Hegel now needs to explain why we transition
+from one shape of consciousness to the next.
+Now, rereading the introduction today,
+I think this is, I came to the conclusion
+this text is not actually in the best order
+that it could be in, because only a little bit later
+will he explain exactly how consciousness
+undermines a shape of consciousness.
+But let's set that aside.
+Let's assume there's some notion of consciousness
+realizing that its conception of knowledge is wrong.
+Now we need to understand how it moves to the next one.
+Now, I just want to emphasize one thing,
+that this is a process, or this development,
+is not about particular knowledge claims.
+We're not interested in particular knowledge
+claims about particular objects.
+It's at the level of a whole epistemology,
+a whole conception of what knowledge is.
+That's what's getting under it.
+That's why doubt about that is the loss
+of consciousness itself.
+If you find out that you thought you knew
+that South Dakota was the capital of,
+sorry, that Fargo was the capital of South Dakota,
+and then you find out you're wrong,
+you don't lose yourself in that,
+unless you have way more invested
+in the geography of the Upper Midwest than you should.
+Assuming that we're counting as the Dakotas
+as part of the Midwest, which, okay,
+we can debate about that.
+You guys are probably not as invested
+in inter-Midwest rivalry as I am.
+But that's how we learn from each other.
+Okay, so it's not merely a negative movement.
+So when consciousness realizes
+that its conception of knowledge is false,
+that isn't, it doesn't merely reject it.
+It's not just like not that.
+However, only when taken as the nothing
+of that from which it is, from which it emerges,
+is the nothing, in fact, the true result.
+Thus, it is itself a determinate nothing,
+and it has a content.
+So when consciousness undermines
+some shape of consciousness, some conception of knowledge,
+the result is not just pure,
+just the abandonment of knowing.
+Not just pure nothing.
+It's a specific or determinate negative nothing.
+It's the rejection of that previous shape,
+which is itself its own shape.
+So what Hegel needs to do is give us a principled reason
+or a function for why one shape of consciousness
+undermines itself and gives rise to the next.
+So there has to be, so to speak, a law of the series.
+So we have an account of where we start,
+we have a kind of preliminary account
+of where we're gonna end,
+but we also have an account of why we move
+to the next one that we do move to.
+By contrast, while the result is graphed,
+as it is in its truth, as determinate negation,
+a new form has thereby immediately arisen.
+And in the negation, the transition is made
+whereby the progression through the complete series
+of shapes comes about on its own accord.
+So to say that a shape of consciousness
+is a determinate negation is to say that it isn't something,
+but it's not nothing in general.
+It's not just nothing.
+There's a specific thing it isn't,
+namely the previous shape of consciousness.
+In particular, it's a shape of consciousness
+that arises in a principled way out of the failure
+of the previous shape of consciousness.
+And Hegel is now going to give us an account
+of exactly what that function is
+that gets you from one shape of consciousness
+that fails to the next.
+But again, rather than doing that,
+he then skips to the next topic, which is where it ends.
+So what we need is an account of where we start,
+how we move, and where we end.
+We've seen a little about where we start,
+a little about how we move,
+and now Hegel's gonna tell us more about how we end.
+However, to knowing the goal is necessarily fixed
+as the series of the progression
+is as necessarily fixed as the series of the progression,
+although you haven't really told us exactly
+what the series of the progression is, Hegel.
+The goal is the point.
+The goal is the point at which knowing
+no longer needs to go beyond its own self.
+Where knowing itself finds itself,
+and where the concept corresponds to the object,
+and the object to the concept.
+The progression towards this goal
+is thus also unrelenting,
+and at no earlier stage dissatisfaction to be felt.
+So this process will end
+when there's so little distinction
+between subject and object,
+between knowing and the object of knowing,
+that no skepticism about that shape of consciousness
+is possible.
+So it's going to end only with such a complete coincidence
+of knowing at its object
+that the skeptical problem
+about these conceptions of knowledge cannot arise.
+Now what exactly that is,
+is only described at the end of the book.
+It's very, very hard to understand.
+But that's where we're supposed to go.
+Okay, now why can consciousness not stop
+anywhere short of the entity?
+Consciousness therefore suffers this violence
+at its own hands,
+and brings to ruin its own restricted satisfaction.
+So the failure of these forms of consciousness,
+these shapes of consciousness,
+these conceptions of knowledge,
+is not something external.
+Consciousness itself realizes
+that its conception of knowledge is wrong.
+It does it to itself.
+With the feeling of this violence,
+anxiety over the truth might well withdraw
+and strive to hold onto what it is in danger of losing.
+But this anxiety can find no rest.
+Even if it wants to remain in thoughtless indolence,
+thought spoils the thoughtlessness,
+and its unrest disturbs the indolence.
+So as Hegel says on the next page,
+where can I never find this?
+I know I have this underlined.
+Okay, as he says in the next couple of pages,
+which we will come to,
+it is an issue for consciousness
+whether or not its knowing of the object
+corresponds to the object, that's 56.
+So consciousness, it cannot be indifferent
+to consciousness whether it knows.
+So consciousness purports to no objects.
+It has a conception of what knowledge is.
+And Hegel says it is not indifferent to consciousness.
+Consciousness can't just not care
+about whether what it thinks knowing is, is knowing.
+Now, you might think, well,
+knowledge is just one thing in life.
+Like I have a lot of family members
+who don't care that much about what knowledge is.
+They do, only philosophers are so,
+only a philosopher could say consciousness
+with feeling of this violence,
+anxiety over the truth might well withdraw
+and strive to hold on to what is in danger of losing.
+This anxiety can find no rest.
+Even if it wants to remain in thoughtless indolence,
+thought spoils the thoughtlessness
+that its unrest disturbs the indolence.
+A lot of people, their anxiety does find a rest.
+They don't, they wanna remain in thoughtless indolence
+and thought doesn't spoil their thoughtlessness
+and unrest does not disturb their indolence.
+They're very happy to not think or not know.
+So this is not supposed to be a psychological claim
+about particular conscious subjects.
+So whatever Hegel's claim is here,
+is not supposed to be contrary to
+and therefore not refutable to psychological claims
+about particular human beings.
+As we'll see over the course of the phenomenology
+or if we were to read the whole phenomenology
+as we would see, knowledge,
+Hegel thinks of as a very, very general phenomenon.
+It's sort of ubiquitous or structural
+in human life.
+So doing something, action is also a kind of knowledge.
+It's a representation of the object
+as being in conformity with your representation of it,
+as being choice worthy.
+So there's no way of being indifferent to knowledge.
+Any acting, any willing, any belief about the world
+is making a claim to knowledge.
+So notice I haven't said that knowledge here
+is this thing that analytic philosophers
+are kind of pointlessly obsessed with.
+S knows that P.
+This is a much more general structure.
+This is the structure of your relationship with the world.
+This you might not care about.
+You probably shouldn't care about it.
+Stop caring about it.
+This you walk around life
+carrying with you a conception of this.
+It cannot be indifferent to you
+whether the world does actually relate to you
+the way you conceive it as related to you.
+Okay, a little bit further and then we'll take a break.
+Just as these preliminary and general remarks
+about the manner and the necessity of the progression
+have been made, so too it might be useful to recall something
+about the method of the way it is carried out.
+So Hegel is now gonna tell us more about
+how consciousness undermines
+its own conception of knowledge or the law of the series.
+Sorry, not the law of the series.
+The law of the series is how we go from
+shape of consciousness and the shape of consciousness
+and plus one, but why we have to move on.
+Why one shape of consciousness fails.
+Just as these preliminary and general remarks
+about the manner and the necessity
+of the progression have been made,
+so too it might be useful to recall something
+about the method of the way it is carried out.
+This exposition represented as the conduct of science
+in relation to knowing as it appears
+and represented as the investigation and testing
+of the reality of cognition seems incapable
+of taking place without some kind of presupposition
+with underlies it as a stem.
+So it looks like, once again, it appears.
+That means he's suggesting this is something you might think
+he's ultimately gonna undermine it.
+You might think that what we need to do
+is have a standard of what knowing is
+and then investigate each shape of consciousness
+and say, that doesn't meet the standard.
+That's not what knowing is.
+For the testing consists in the application
+of an accepted standard and in the resulting equality
+or inequality between the standard and what is tested
+lays the decision as to what is tested
+is correct or incorrect.
+The standard, likewise, science itself,
+if science were to be the standard,
+is thereby accepted as the essence or as the in itself.
+Ignore, we'll come back to essence and in itself.
+But here, at the point where science
+first comes on the scene,
+where someone makes a claim to scientific knowledge,
+neither science itself nor anything else
+has justified itself as the essence or as the in itself.
+And without something like that taking place,
+it seems that no examination could take place at all.
+So there's this problem.
+It looks like we need to apply a standard.
+Where does the standard come from?
+One can have a more determinant grasp of this contradiction
+and the removal of the contradiction.
+If, first of all, one is reminded
+of the abstract determinations of knowing and truth
+as they come before consciousness.
+Okay, so what Hegel is doing in 81
+is he's making a reference
+to something called the dilemma of the criterion.
+I'm going to erase Hegel's system.
+It's actually very Hegelian.
+When we get into Hegel's logic,
+there's going to be a lot of erasure.
+That's going to be like a main metaphor.
+Hegel's a great philosopher to teach on the blackboard.
+Okay.
+The dilemma of the criterion
+comes from a work of ancient philosophy
+by Sextus empiricus.
+Called outlines of purism.
+Here's the basic idea.
+Or this is how Hegel is thinking of the idea in Sextus.
+That's what matters for our purposes.
+Someone makes a claim to knowledge.
+We have to have a standard
+for whether that counts as knowledge or not.
+Whether that's a valid knowledge group.
+Whether that person in fact knows what they claim to know.
+Now either that standard
+is that person's own conception of knowledge.
+In which case it's circular.
+Very easy.
+Now, totally useless.
+Everyone's conception of knowledge agrees with itself,
+so everyone meets their own standard.
+Or the standard has to be external
+to their conception of knowledge.
+But then it's question-making.
+So, what Hegel is doing
+is raising this as a problem for his own project.
+What we don't want to do
+is apply external standards or criterions.
+Criteria.
+We'll also call it the dilemma of the standard.
+Maschab.
+So, what he's going to do is develop a way
+of how consciousness can undermine
+its own conception of knowledge
+that doesn't run into the dilemma of the criteria.
+One can have a more determinate grasp of this contradiction
+and the removal of the contradiction
+if first of all, one is reminded
+of the abstract determinations of knowing their truth
+as they come before consciousness.
+Okay, abstract determinations means
+these are sort of,
+Hegel's now going to give us a very abstract model
+of what consciousness acknowledges.
+Now, if we were reading the whole phenomenology,
+one question would be whether this model
+in the introduction actually applies to the whole book.
+I don't think it does,
+but I think it's fine for our purposes
+because it applies to the parts of the book
+that we're going to read.
+So, consciousness distinguishes something from itself
+while at the same time it relates itself to it.
+Okay, so I'm going to remove the term subject and object
+because those are not yet Hegel's terms.
+So we have consciousness.
+It has a relation to something distinct from itself
+and it also distinguishes itself from it.
+Or, as it is expressed,
+the something is something for consciousness.
+This is for consciousness.
+Something consciousness is of.
+This something is something for consciousness
+and the determinate aspect of this relating
+or of the being of something for a consciousness is known.
+So knowing is a relation of consciousness to the object.
+In this direction, this object is for consciousness.
+In this direction, consciousness knows this object.
+However, we distinguish the being for another
+from being in itself.
+That which is related to knowing
+is just as much distinguished from knowing
+and is positive as being also external to this relation.
+The aspect of this in itself is called truth.
+So the aspect of being in itself
+that it can be if outstanding in this relationship is truth.
+Now what does that mean?
+What it means is this is a super abstract structural
+description of consciousness and knowledge.
+Consciousness distinguishes itself from something,
+the object of consciousness,
+but also relates itself to knowing.
+And remember, knowing here
+is not necessarily propositional knowledge.
+Don't worry about that.
+It could be acquaintance, perceiving something.
+That's a kind of note, willing something.
+But what it knows has some kind of independence
+of its relationship to it.
+That is to say that being,
+what it knows is not identical to its knowledge.
+Now that doesn't mean
+that this thing is completely independent of this.
+It means that it isn't simply identical to this.
+It means that if we got rid of this entirely,
+we would have a completely different model.
+Okay, that's all Hegel is assuming.
+Now, Rota's truth here does not mean P.
+analytic philosophy is very into P's and Q's and R's.
+It is, as I like to call it, philosophy in the key of P.
+Hegel is not a philosopher in the key of P.
+As we'll see over the course of this semester,
+I think it's actually super crucial to understanding Hegel
+that Hegel cannot be put in the form of P.
+There is no P, there's no value of P,
+especially Hegel's view is P.
+Yes.
+Knowing determines consciousness
+or consciousness determines knowing.
+Consciousness, for now we're assuming
+that knowing is the relationship
+of consciousness to the object.
+Knowing is a relation that consciousness has to the object.
+We only call something consciousness right now
+insofar as it stands in a knowing relation
+to the object, to the in itself.
+Okay, skip a paragraph, but the nature of the object
+which we are investigating goes beyond this division
+or to this semblance of division and presupposition.
+So it looks like we have a distinction
+between consciousness and our conception of consciousness.
+This thing on the blackboard is a conception of consciousness.
+But the nature of this object is that distinction
+between this and the whole thing is overcome.
+Consciousness in its own self provides its own standard
+and the investigation will therefore be a comparison
+of itself, of it with itself, for the difference
+which has just been made falls within consciousness.
+That is to say, consciousness itself
+has a conception of this.
+So this difference between consciousness
+and being in itself falls within consciousness
+because consciousness is consciousness.
+We can also know if I was a better drawer,
+I could have put this thought bubble inside consciousness.
+Hard to draw with chalk.
+Consciousness is its own self, provides its own standard.
+So consciousness brings with it a standard
+of what knowledge is.
+Therefore, skipping again a few sentences,
+therefore in what consciousness declares within itself
+to be the in itself or the true, we have the standard
+which consciousness itself sets up to measure its known.
+So consciousness has a standard, it has to know this.
+That sets a standard.
+If we designate knowing as the concept,
+but designate the essence or the true over here
+as what is or the object, then the examining consists
+in whether the concept corresponds to the object.
+Does this correspond to that?
+Is this a way of knowingly relating to that?
+Well remember, what relation knowing is also,
+it's up to consciousness to say.
+So don't assume that it's true justified belief
+or whatever.
+Let me just go a little bit further.
+Oh, 84.
+End of 84.
+What is essential throughout the whole investigation
+is to hold fast to this, that both of these moments,
+concept and object, being for another,
+being for consciousness and being in itself,
+themselves fall within the knowing that we are investigating.
+They fall within consciousness.
+They fall within consciousness's conception
+of itself as known.
+And that we thus do not need to bring standards with us
+and in the investigation to apply our ideas and thoughts.
+But now you might think, okay,
+isn't Hegel running into one horn
+of the dilemma of the criterion?
+Every conception of knowing is just going to agree
+with its own standard.
+No, Hegel's about target.
+That actually shapes of consciousness in general
+do not agree with their own standard.
+However, from this aspect,
+not only will it be superfluous for us to add anything,
+and not only because concept and object,
+the standard and what is to be examined
+are present in consciousness itself,
+the only thing that remains is for us to purely look on.
+So now this is a super important aspect
+of the way Hegel does philosophy.
+And this is the first instance of it
+that we've seen in the phenomenology.
+Hegel's philosophy is supposed to always be imminent.
+That means there's some subject matter
+and the further development of the claims
+about that subject matter in Hegel's philosophy
+arise from the subject matter itself.
+That means at no point in the phenomenology
+can Hegel say, look, it's plausible that this,
+or I think that, or in my view this,
+everything has to come out of consciousness itself.
+And since the beginning of the phenomenology
+is natural consciousness,
+it has to arise from natural consciousness itself.
+So what we do in the phenomenology
+is we just observe natural consciousness
+developing itself through these shapes of consciousness
+to absolute knowing.
+It is consciousness of what to it is the true.
+So it's consciousness of this
+as well as consciousness of its knowing of the truth.
+So it's conscious not only of this,
+but of this whole thing.
+So it's object consciousness,
+but also consciousness of itself as knowing
+under a particular description of what knowing is.
+It is an issue for that consciousness
+whether or not it's knowing of the object
+corresponds to the object.
+So consciousness cannot be indifferent
+to whether this agrees with that.
+Because it itself has supplied the criteria.
+Okay, so we're gonna somehow argue
+that various shapes of consciousness
+fail their own criteria.
+That they think this is a knowing of that,
+but this as they themselves conceive it
+is not a knowing of that.
+Okay, we'll take one a little bit
+and then we'll take a break
+and then we'll read the last three paragraphs
+really carefully.
+This dialectical movement.
+Ah, okay, so you've been wondering,
+you're taking a Hegel class
+and he's been doing it for two hours.
+He hasn't said the word dialectic yet.
+Okay.
+Dialectic.
+Hegel.
+In some sense, all of Hegel's philosophy
+works by something called the dialectic
+or dialectical progression.
+I think the structure of the dialectic
+in phenomenology is different
+than the structure of the dialectic in the larger.
+I don't understand the dialectic
+of the philosophy of nature
+or really the philosophy of spirit either,
+but I really don't understand
+the dialectic philosophy of nature.
+No one really understands the dialectic philosophy of nature.
+But what does Hegel mean by the word dialectic?
+There's two historical sources that are relevant.
+One, in ancient philosophy,
+dialectic, very simply put,
+is the science of refuting what other people say.
+So it's a negative logical art
+where you say something
+and I reduce you to absurdity.
+In Kant, there's something called the transcendental dialect.
+Now the transcendental dialectic actually has three parts,
+but Hegel always associates the dialectic with the antinomies.
+The idea of the antinomies of pure reason
+in the first critique is that reason itself
+is subject to a dialectic.
+So it's not that someone comes along and refutes reason,
+reason refutes itself.
+It refutes itself and so far as it assumes
+that objects in space and time are things in themselves
+because it forms this conception
+of something called the unconditioned.
+So you take something, you take its conditions
+and then you take the complete sequence of its conditions.
+And it has a proof that that sequence of conditions
+terminates in an unconditioned first condition
+and it has a proof that it cannot terminate,
+that it goes on infinitely.
+That's a contradiction.
+And so the resolution to that contradiction, Kant thinks,
+is to recognize that objects in space and time
+are appearances and so there is no such thing
+as the unconditioned totality of their conditions.
+If you haven't taken 3.14,
+that wouldn't really make a lot of sense to you,
+but you should all just take 3.14.
+Okay, who's taking 3.14?
+Good, the rest of you should model yourselves
+on those who are taking 3.14.
+So what Hegel means by a dialectic
+is as in ancient philosophy,
+refutation is a negative, it's negative.
+But as with Kant, it's not refutation by some other person.
+It's not external refutation, it's self-refutation.
+It's the self-refutation here in the phenomenology
+of shapes of consciousness,
+of conceptions of what knowledge is.
+The difference between both ancient dialectic,
+Kantian dialectic and Hegelian dialectic
+is as we saw earlier, Hegel thinks that dialectic
+is not purely negative.
+It's productive or positive.
+So when we dialectically undermine
+the shape of consciousness,
+we don't go, oh fuck, we have a contradiction.
+That generates positive content.
+What Hegel calls the determinant negation
+of the refuted shape of consciousness,
+which is the successor shape of consciousness,
+which in a principled fashion, non-orbitarily,
+attempts to resolve the contradiction
+in the earlier shape of consciousness.
+So no, that's why.
+So that means the phenomenology of spirit
+is the inner dialectic of knowing.
+But it's not just refutation, it's also position.
+It's also positive.
+The self-refutation of one shape of consciousness
+generates the next shape of consciousness.
+And that's why it's important
+that Hegel give us a principled function
+from shape of consciousness n
+to shape of consciousness n plus one.
+Because otherwise, the imminence
+of the phenomenology of spirit would be wrecked.
+That is to say, we would have to supply it.
+We'd be like, what's a reasonable
+next shape of consciousness?
+Well, this seems good.
+And it would no longer be consciousness developing itself.
+And so in a certain way, it would fall a foul
+of the problem of the criterion.
+Something external to consciousness
+would be telling it what its next standard should be.
+And consciousness would not be rationally obliged
+to accept that.
+So we require an in-principle account
+of how one shape of consciousness
+gives rise to the next shape of consciousness.
+Okay, why don't we take a 10-minute break
+and come back at 54 past?
+If you are auditing this class
+and you have not yet been added to Quirkus,
+please come speak to me
+and I will add you to Quirkus right now.
+Hello.
+Can I add it?
+Yes, you just.
+It makes me so warm.
+Dial in.

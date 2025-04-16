@@ -1,0 +1,3179 @@
+So the project of the phenomenology of spirit
+is to determine what knowledge is or what knowing is.
+And the reason that we want to do that
+is to determine whether knowledge of the absolute
+is possible or whether, as Kant argued in the first critique,
+the absolute lies beyond the limits, at least,
+of theoretical knowledge we're going to be in.
+Now, what the absolute is for Hegel
+is something that it's going to take us a while to see.
+And there's kind of no, I don't think
+it's probably helpful to say the Hegelian formula of what
+the absolute idea is before we get there.
+So the short version is it's what
+Hegel will call the absolute idea at the end of the logic.
+Before we get there, you can think of it as God.
+A little bit better, you can think of it as Spinoza's God.
+A little bit better, you can think of it
+as the unconditioned in Kant.
+And even better than that would be
+if you thought of it as neither subjective, so neither
+a mind nor nature, but something that's both.
+What the hell that means, you'll see.
+So Hegel then discusses what I call
+the meta-epistemological problem, a problem about how
+we determine what the correct epistemology is,
+what the correct account of what knowing is.
+And the problem is, how do we decide,
+not just between different knowledge claims,
+but between different epistemologies?
+So if I claim to know that Fargo is
+the capital of North Dakota, and you claim that I don't know
+that because it's false, but we share the same epistemology,
+namely looking at an atlas, then that's not a big problem.
+But if you and I have different epistemologies,
+and I claim I know that God exists
+on the basis of immediate religious state,
+then you say, well, you couldn't know whether God exists,
+because the proposition God exists appears nowhere
+in natural science.
+Well, first of all, we both have really shitty epistemologies.
+But secondly, and arguably the second one
+is worse than the first, there's no way
+to adjudicate which of us has the correct conception
+of knowledge on the basis of which we could then
+adjudicate who knows what they claim to be.
+So Hegel relates this to the problem of the criterion,
+which was originally formulated by sextus empiricus
+in the outlines of purinism.
+And the problem of the criterion takes the form of a dilemma.
+Either we have some can someone makes a knowledge claim,
+and they have a certain conception of knowledge.
+They claim to know that God exists
+on the basis of immediate religious faith.
+We either apply their own conception of knowledge,
+in which case trivially, their knowledge claim
+is going to be vindicated.
+So if we either, for each person's
+conception of knowledge, we simply apply it to itself,
+everyone's going to pass that task.
+The other possibility is that we apply
+a different conception of knowledge.
+The problem with that is that looks question made.
+Someone says, I know that God exists
+on the basis of immediate religious faith.
+And then I say, well, that epistemology
+doesn't justify that knowledge claim,
+because that epistemology fails the criterion
+of my epistemology.
+Namely, you know those and only those things
+that appear as propositions in empirical natural science.
+I've banked the question against the person
+who has a different criterion of knowledge
+or a different conception of what knowledge is.
+So Hegel's solution is a version of the first one,
+where we apply some conception of knowledge to itself.
+But the difference is he thinks that these conceptions
+of knowledge, or concepts, as he calls them
+in the phenomenology, typically do not agree with themselves.
+When you look at them, what you see
+is their conception of knowledge and their conception
+of the object of knowledge don't agree.
+And now you might think that's very artificial.
+But actually, if you look at a lot of epistemology,
+certainly in the history of philosophy,
+you'll find it is very often these problems do arise.
+If you read Locke, it's very unclear how Locke
+thinks he knows all of the things he thinks he knows,
+because he thinks he knows everything
+he knows through sensation, ultimately.
+But that he claims to know that God exists,
+that there are substances with powers that are extended,
+or at least have primary qualities that
+resemble our ideas of them.
+And it's very unclear from Locke how he could know any
+of the things he claims to know.
+Likewise, the My Little Toy epistemology,
+the person who knows only the propositions enumerated
+in the empirical natural sciences, which
+here's one of the propositions.
+Here's a proposition that occurs nowhere
+in empirical natural science.
+You know all and only those things
+that are stated in the empirical natural science.
+But their own epistemology, they don't
+know what they claim to know.
+So Hegel's solution, which is to examine
+the internal coherence of these concepts of knowledge,
+is more productive than it might at first appear.
+So what Hegel is going to then engage in
+is an imminent or internal critique
+of various conceptions of knowledge,
+or as he calls them, forms or shapes of consciousness.
+Gestadens büliskes.
+Now they're imminent because we are not
+going to impose our own criteria of knowledge
+on these shapes of consciousness.
+We're going to examine them purely internally
+and see whether their conception of knowledge
+matches their conception of the object of knowledge.
+That is to say, whether you could
+know, according to their conception of what knowledge
+is, the object of knowledge according to their conception
+of the object of knowledge.
+Now Hegel adopts for expository or analytic purposes
+a kind of abstract model of what consciousness is.
+And that is we have consciousness,
+we have an object, which we call the in itself,
+because it isn't reducible to its being for consciousness,
+and we have the relationship of that object for consciousness,
+how it is for consciousness, which
+is another way of describing it.
+Now a few comments about this.
+One, you might say, but wait, aren't there
+conceptions of knowledge on which consciousness knows itself?
+Absolutely.
+But we're going to unfold those in the course
+of the phenomenon.
+So we start with what Hegel thinks
+of as the most immediate natural conception of knowledge, one
+in which you know something that is distinct from
+and irreducible to your knowledge of it.
+That's what Hegel characterizes as consciousness.
+Now the question is going to be, does this relation,
+as consciousness conceive of it, constitute knowledge
+of this object as consciousness conceives it?
+Another question is, where are these conceptions coming from?
+They're coming from consciousness itself.
+Or as Hegel will say, consciousness
+is the concept of itself.
+Consciousness has a conception of it.
+That means in the ordinary sense of self-consciousness,
+consciousness is self-conscious from the beginning
+of the phenomenon.
+In the ordinary sense of not only knowing objects,
+but also having some conception of what you're
+doing in knowing objects, who you are,
+what knowledge is, what the object is,
+self-consciousness is present from the very beginning.
+Self-consciousness in Hegel's conception,
+in the technical sense in which it emerges in the phenomenology,
+refers to review on which what knowledge fundamentally
+is, is self-consciousness, so that consciousness doesn't
+fundamentally know an object.
+It knows itself knowing an object.
+So that we're not going to get to in this case.
+You don't think that somehow consciousness
+has no conception of itself.
+Because if it did from the first page of the phenomenology,
+the project would fail.
+If this doesn't match this as consciousness conceives of it,
+then this is not a way of knowing this
+as consciousness conceives of it,
+and this shape of consciousness contradicts it.
+But now if this shape of consciousness contradicts itself,
+the result is not what Hegel calls an abstract negation.
+That is to say, we just give up on knowledge.
+The result is what Hegel calls a determinate negation.
+Or that is to say, a new shape of consciousness, which
+is determinately, specifically, not this shape of consciousness.
+And the new shape of consciousness,
+if this is object one, object two
+is the being of object one for consciousness.
+So the idea is we have some conception of knowing.
+We have some conception of the object of knowledge.
+That turns out not to be a way of knowing that object.
+So then what results from that is not, well,
+let's just give up on knowing.
+But oh, what we can know is objects
+insofar as they can be for consciousness in this way.
+And a very good example of this is,
+in the beginning of the Transcendent of Critique of Pure
+Reason, Kant's first view, this is
+a kind of slightly hokey, big alien reading
+of the beginning of the Critique of Pure Reason,
+you could think of the first shape of consciousness
+in the Critique of Pure Reason as transcendental realism.
+What we know is things in themselves,
+totally mind-dependent objects, and we
+know them in their mind-dependent nature.
+And we know them through their effects upon our sensibility.
+And then the argument of the first critique
+very early on in the Transcendental Aesthetic
+is that that way of knowing, sensible cognition,
+is not a way of knowing things in themselves.
+So then the second shape of consciousness,
+Kant's own view, Transcendental Idealism,
+is we know the being of consciousness
+of the first object for consciousness.
+What we know is not things in themselves
+via sensory cognition.
+We know the being of them for sensory cognition.
+That is to say, their appearance is sensory cognition.
+So the second object is the being of the first object
+for consciousness.
+In this case, the appearing of things in themselves
+to sensory cognition.
+That's just an illustration.
+So now we have a conception of how the phenomenology moves.
+That is to say, how we go from one shape of consciousness
+to the next.
+A complete account would have to also include
+an account of where we start.
+But we're going to spend a lot of today talking about that.
+So I'm going to bracket that for now.
+Where does the phenomenology end?
+The phenomenology will end.
+Oh, we have some math.
+All right.
+The phenomenology will end when the relation of, let's say,
+consciousness, although it won't be called consciousness
+anymore, for reasons I'll go into,
+or the relation of consciousness to the in itself,
+where these things are so tightly identified
+that no possible gap between being for itself
+and being for consciousness could possibly arise.
+That is to say, where being in itself
+is being for consciousness, and being for consciousness
+is being for being in itself.
+Now, there's various names for that that Hegel has.
+One is, where truth becomes identical to certainty.
+One of the names for the in itself is truth.
+Another name for it is, another name
+for being for consciousness is certainty.
+So where truth and certainty are so closely identified
+that none of the skeptical problems
+that undermine forms of consciousness
+could possibly arise.
+The official name for this is absolute knowing.
+That's where the book ends.
+OK.
+So the book ends with section absolute knowing,
+or absolute knowledge, absolute citizen.
+I've put it on the reading next week,
+because although the idea of this class
+is let's read all the parts of Hegel you can read,
+I want you to also have a sense of what I'm sparing you.
+So try to read absolute knowing.
+You won't really succeed.
+It's kind of unreadable.
+Just a word further about reading in this class,
+if I were you, I would expect to read every text,
+every one of the readings in this class, three times.
+Read it once, and you'll be like, what is going on?
+I sort of a vague sense.
+Read it a second time, you'll understand much better.
+So the good news with Hegel is you do actually understand it
+the more you read it.
+Sometimes it won't feel that way.
+Now the phenomenology of getting really into Hegel,
+phenomenology in the ordinary sense of what it feels like,
+is you're constantly understanding it better.
+So you're tempted into the fallacy.
+Eventually, I'll understand it all.
+But constant improvement doesn't mean
+that you'll ever reach any finite value,
+because it might plateau.
+This is my worry.
+This is what keeps me up.
+This is time.
+This is staying to understanding.
+And then actual understanding would be here.
+But who knows?
+But I'm constantly increasing every time I'm going up,
+ever less.
+So let me just say a few more things.
+I forgot to say something about course mechanics.
+My office hours this week are.
+Wednesday 4.30 to 6, and Friday 3 to 4.
+My office hours will vary from week to week,
+because there's all these different job searches going
+on in the philosophy department.
+And I have to attend some of them.
+Some of you have asked me about secondary literature.
+My attitude towards secondary literature
+is the attitude towards those of you who have cool Gen X
+parents probably have towards your doing drugs, which
+is they tell you, do not do them.
+But if you were to do drugs, your parents
+would give you advice on how to do them safely.
+They would tell you, OK, don't do heroin.
+But if you could smoke a little weed,
+we're not going to throw you out of the house.
+So my advice is do not do drugs.
+Do not read secondary literature.
+But if you're going to, I would prefer
+you do it in a controlled, safe environment.
+And you do the marijuana equivalent of Hegel
+secondary literature rather than the fentanyl equivalent.
+I won't even tell you what the fentanyl equivalent of Hegel
+secondary literature is, because I don't
+want you to know about it.
+So if you come to me and you say,
+stay, I am going to read secondary literature.
+I'll try to talk you out of it.
+But if I fail to, I'll give you some advice on what to read.
+So another analogy.
+Reading the secondary literature,
+it's the older version of using AI.
+So why is it bad to use AI?
+Do you learn nothing?
+Are all the answers on Claude or Chachupiti wrong?
+No, you can learn stuff from that.
+But if you use AI, you do not develop your own capacities
+till now.
+And that is what an education is about.
+An education is not about us telling you stuff
+that you didn't know.
+You could do that on your own.
+An education is about developing your own capacities.
+And when you use AI, you do not develop your own capacities.
+The aim of learning is not that it be known the P.
+It is for me to know the P. So when
+you read secondary literature, what you do not develop
+is your own capacity to read and engage
+in philosophical text.
+That was my little speech about why I hate AI
+and why I hate secondary literature.
+So another thing that I want to emphasize,
+the phenomenology of spirit is a conceptual development.
+So we talk about a process or a development
+in phenomenology of spirit, a sequence
+of shapes of consciousness.
+This is not a historical or temporal sequence.
+Although these shapes can be and are exhibited historically,
+they correspond, to varying degrees,
+to conceptions of knowing, conceptions
+of the relation of the subject to the object that
+have been present historically in different periods of history.
+Now there's a distinction in the phenomenology,
+which will come up numerous times
+in this class between what is for consciousness
+and what is for us.
+I'm looking for a special chalk that I've already lost.
+Under the whiteboard.
+Under the whiteboard.
+Is that not it?
+No, it is not.
+So I think I need the glasses to find the chalk.
+This will be sorted out later.
+So there's a distinction in the phenomenology
+between what is for consciousness.
+And what is for us.
+Sometimes, Hegel uses the term in itself.
+So that marks the distinction between what
+a given shape of consciousness is aware of.
+You're counted.
+What is imminent to a given shape of consciousness?
+What a given shape of consciousness
+is aware of of itself?
+What is for us is something that we
+understand about that shape of consciousness,
+but it doesn't understand about itself.
+So we, as the readers of the phenomenology,
+sometimes called the phenomenological observer,
+will note certain things about shapes of consciousness.
+That's not going to work.
+That's kind of stupid.
+Hegel never said that.
+Or this sort of is like a previous shape of consciousness.
+Or you can tell that this is going to be a problem.
+Or consciousness will face this problem.
+Those are not imminent remarks for consciousness.
+So one other remark.
+I talked about this a little bit last time,
+and I felt like what I did so really unclearly.
+Hegel uses, I'll just encompass the questions in a second.
+Hegel is very typical of Hegel.
+So there's this book called the Hegel dictionary.
+If you were to read secondary literature,
+which you should not do, you might be aware of it.
+And the joke about the Hegel dictionary is every entry,
+ultimately, if you read all the entries,
+they ultimately just go back to idea or spirit.
+Because everything is just another synonym
+for idea or spirit.
+So in Hegel, there's this problem of massive,
+this multiplication of terms that all
+refer to the same thing, but they mean different things.
+Or there are different modes of presentation of one
+underlying reality.
+So consciousness, self-consciousness, reason,
+and spirit in the phenomenology really all
+refer to the same thing.
+But they refer to that underlay.
+They refer to spirit.
+They refer to different grades or degrees
+of that thing's conception of itself.
+So that means they are all spirit in itself,
+but they are not yet spirit for itself.
+Spirit is in and for itself fully and totally
+only at the end of the book.
+Only at the end of the book are we
+talking about a shape of consciousness
+that is fully and completely aware of what it is.
+But all along, they're in itself spirit.
+So in itself sometimes means something like implicitly.
+Well, for itself means explicitly.
+Sorry, the exact opposite.
+Now, that means when Hegel refers to something,
+some shape of consciousness as reason,
+he's referring to it at the highest level of actualization
+that it is aware of itself.
+So reason is spirit in itself that is not yet spirit.
+Sorry, spirit in itself that is not yet spirit for itself.
+It's only for itself reason.
+Now, it's also for itself consciousness
+and self-consciousness.
+But Hegel doesn't call it that because, or doesn't usually
+call it that because he wants to draw attention
+that he's talking about this thing at a level where
+it's aware of itself as reason.
+These give rise.
+And of course, between these is religion.
+But I'm skipping that because some of you
+at some point in this class are going
+to have this lingering suspicion that this is just
+all super poopy religious stuff.
+And I'm trying to delay as long as possible
+the anti-religious reaction to Hegel.
+So I'm just going to skip the religion thing.
+So when Hegel talks about reason,
+he's talking about, in some sense, the same entity.
+That's not the right word.
+The same thing, also not the right word.
+The same phenomenon as consciousness, self-consciousness,
+and spirit, but at a lower level of its conception
+of itself, of its understanding of itself as what it is.
+So the process of the phenomenology of spirit
+is consciousness coming to itself as spirit,
+or spirit in itself becoming spirit in and for itself,
+consciousness becoming fully and completely
+aware of itself as spirit.
+OK.
+Questions about this.
+Yes.
+I'm still stumbling a little bit over the fact
+that in the first distinction between what
+is for consciousness and what is for us or in itself,
+how in itself and for us can mean the same thing.
+For me, they mean the opposite.
+What is for me, I'm opposing what the object is for me.
+I'm opposing to be different from what it is in itself.
+Yes.
+So OK.
+So OK, good.
+So what Hegel means by calling what's for us in itself
+is that this is what consciousness is only
+implicitly.
+What it really is is something that isn't aware of.
+Yeah.
+So let me take a non-Hegelian example.
+You might say the Renaissance doesn't realize
+that what it is is the dissolution of Catholic era.
+This is a full example.
+But in itself, that's what it is.
+It is this thing that's a better example.
+Socrates, Hegel actually thinks, the appearance of Socrates
+within Athenian society is the destruction
+of Athenian society.
+Once you have Socrates, the form of life
+that is classical Athens can survive.
+So Socrates is in himself the end
+of the Athenian form of life.
+But he's not that for himself.
+That's why he's so surprised they want to put him to death.
+He's not like, I'm bringing it all to an end, guys.
+Because if he was, then they'd be like,
+well, we have to kill you.
+So there's a distinction between what
+something is in itself implicitly,
+but not yet if it's developed and realized for.
+And what we as the observers can see on who knows what grounds,
+it will eventually become and become
+aware of itself explicitly as.
+There was another one.
+Yes.
+Can we say consciousness and knowledge or experience?
+No.
+So experience, the technical meaning of experience in Hegel
+is the process.
+It's this.
+It's one shape of consciousness undermining itself
+and being replaced by an object.
+That's what experience is.
+So this, consciousness of an object,
+is not technically what Hegel means by experience.
+Yeah.
+So just back to movie star twist, is that right?
+So you said initially that knowing is often
+a conflict with consciousness, perceive of the object.
+Can you elaborate on that?
+Because that's two kinds of a relation.
+And if consciousness perceive of the object,
+wouldn't that also be knowing?
+Yeah, OK.
+So first of all, I just want to note, no,
+and this is relevant to the beginning of the book,
+self-certainty, your sense of certainty.
+So if this chalk is supposed to not get all over,
+it means the pot is not succeeding.
+It's because you wait for it.
+It's probably because I wait.
+It's probably my fault.
+So knowing here is an incredible,
+that's a very, very general term.
+So we're not assuming at the beginning of the phenomenology
+that knowing is anything like you would normally
+assume in philosophy.
+So it doesn't have a propositional object.
+It isn't true justified belief.
+It isn't opposed to illusion.
+It isn't opposed to mere opinion or belief.
+In sensuous certainty, just to anticipate,
+knowing is just, sensuous certainty can't really
+say this, but it's just sensuously
+apprehending something.
+This is knowing.
+That's knowing.
+Now that means that knowing in its most general sense
+is just the being of an object for consciousness.
+And so before we get, Hegel will develop
+over the course of phenomenology notions of knowledge
+that look more like what we normally
+talk about in epistemology.
+But at the very beginning, it's just
+whether this can be an object of consciousness.
+Yeah.
+So for consciousness, consciousness
+cannot see its own developments.
+It's only from the standpoint of for us
+that I can see the whole program.
+At the beginning.
+Yes.
+Eventually, consciousness will become self-conscious
+or aware of its development in the phenomenology.
+We won't get there.
+Yeah.
+I want to clarify imminence, because, for example,
+in your example, if Socrates himself is not aware of it
+or himself, he's not aware of the fact
+that he's a distraction of being in society,
+then the fact that Socrates is such a distraction
+would still be imminent, because it's not?
+If you said it in the courtroom in which Socrates
+is being tried, no.
+But it would be imminent if you could,
+as a Hegelian philosopher, figure out
+the underlying structure of Athenian society
+and then show that it cannot allow someone like Socrates
+within it and that once you even have
+the possibility of someone like Socrates,
+it's no longer stable.
+And that, therefore, historically destroys the Greek city
+state and give rise eventually to the Roman form of life,
+then you would have made explicit
+and you would have done so purely imminently
+within, so to speak, the logic of these different historically
+determined shapes of life that Socrates
+is the end of the Athenian society.
+But that was merely an illustration.
+I know, but in that case, it's not
+imminent for Socrates, but it's imminent for the Athenian
+society.
+It can be developed imminently, even
+if the people in that historical period are not aware of it.
+Or in other ways, we're getting way ahead of ourselves.
+History for Hegel is the process of contradictions
+in themselves being contradictions for themselves.
+That is to say, implicit contradictions becoming
+explicit contradictions, people being like, oh, wait.
+How can it be that all men are created equal in a doubt
+by the creator of certain inalienable rights
+if our entire society is founded on the labor of enslave?
+There was a question over here.
+Yes.
+It's just a simple question.
+So for that process, is Hegel actually
+being prescriptive or descriptive?
+Descriptive.
+Yes.
+Yeah, just a follow-up.
+So knowing just become the object of consciousness,
+how can it be at all with itself or contradict itself?
+We'll see.
+We'll see.
+Yes.
+Is there some even more meta thing
+that's supposed to happen to the observer
+as they move through the shapes of consciousness?
+Yes.
+I'm not going to emphasize that in this class,
+but I'll talk about this a little bit.
+But you, who I've never read the farm culture before,
+are supposed to have your consciousness raised
+to the level of spirit over the course of reading this book.
+So that is to say, you are all spirit in itself,
+but not yet spirit for itself, because you are not
+aware of what you are, namely spirit and what spirit is.
+So one of the roles the phenomenology of spirit
+is supposed to play is to get you off to that level.
+Now, the reason it's supposed to get you off to that level
+is so that you can then begin Hegelian science.
+So the phenomenology of spirit is essentially,
+in a certain way, it's the prerequisite
+for all of Hegel's classes at the University of Berlin.
+And in fact, at the beginning of the encyclopedia,
+he says something to the effect of like,
+what if you want to take this class without a prerequisite?
+And the answer is like, you can do that,
+but there are certain objections you're not allowed to raise.
+And this book answers all the objections
+you're not allowed to raise when you take logic
+at the University of Berlin in the 1820s with Professor
+Hegel.
+Now, I should have said this last time, but I didn't say it.
+So the way you should think about this class
+is the professor is Hegel.
+But in classic German professor style,
+he doesn't show up to his own lectures.
+He sends his assistant, me, to teach his lectures
+and to run his office out.
+So what we're trying to do is figure out
+what Professor Hegel thought, but he never shows up.
+So all we have is his books and the guy
+that he's forced to teach his classes for several years.
+And also in classic German professor style,
+we'll then completely ignore me and never help me professionally.
+OK, that's why.
+So let's start sense certainty.
+Before I begin, who found this reading hard?
+Who found this reading very hard?
+OK, just to give you an idea of the phenomenology,
+this is by far the easiest thing in the phenomenology.
+This is the thing that everyone kind of
+feels comfortable teaching in the phenomenology.
+So let us begin with the very opening of sense certainty.
+Now, in classic style, I have to sit down and read the text.
+It seems somehow sacrilegious to stand while reading.
+I don't feel the need to cover my head when reading Hegel,
+but OK.
+OK, so let me just dive in.
+Knowing which is initially our object or immediately
+can be nothing but immediate knowing of the immediate
+or of what is.
+Now, knowing is initially our object.
+So we have to begin by talking about knowing.
+We have to begin by talking about a shape of consciousness.
+Now, this is the beginning.
+That means we can't have arrived at this shape of consciousness
+by something else.
+So it can't have been mediated by a previous shape
+of consciousness or anything else in knowing.
+Now, mediation, this is a word you're
+going to hear a million, million, million times in this class.
+Just the simplest meaning of mediation,
+I think just like the most general way
+to think about it in Hegel, the place you should begin
+is just mediation just means by means of something else
+or by means of something else-ness.
+But now notice, by means of something else
+involves being one thing rather than another.
+So mediation goes together with determinism.
+So let me just give some examples.
+Mediate knowing is knowing something
+by knowing something else.
+The classic example is inference.
+If I know that Q, because I inferred it from P,
+and if P then Q, then my knowledge of Q is immediate.
+But that means if my knowledge is mediated,
+there are other items of knowledge it is not.
+It is determinantly Q rather than P or if P then Q.
+For there to be immediate or inferential knowledge,
+there has to be determinacy among the propositions.
+Now, determinacy is being one thing rather than another.
+Now, why does determinacy require mediation?
+Because if I'm this rather than that, if I'm x rather than y,
+I'm x partly by means of not being y.
+So mediacy and determinacy go together.
+Now, we have to start immediately.
+Because this is the beginning, the beginning has to be immediate.
+It can't be mediated by anything else.
+But that means it also has to be indeterminate.
+Now, what does it mean that we have to have an immediate knowing
+which is initially our object, or immediately,
+can be nothing but immediate knowing.
+So we have to have an immediate conception of knowing,
+not mediated by anything else.
+If it were knowledge of something mediated,
+then it wouldn't be an immediate conception of knowing.
+Because in order for it to be knowledge of that mediated thing
+or conceive of it, it would have to be knowledge of that thing
+as opposed to something else.
+And therefore, it would be mediated by that something else.
+So we have to immediately start with immediate knowledge,
+which is knowledge of the immediate.
+Now, what is knowledge of the immediate?
+It has to be knowledge of the indeterminate.
+That is to say, we don't know this rather than that.
+We just know this.
+We don't know one object as opposed to another.
+We just know the object.
+Now, there's a theme in the sensuous certainty
+that's going to be super important to this class
+that I'm going to delay a little bit for the end of class.
+And I'll just say it right now.
+So Hegel assumes that what knowledge is
+is knowledge of what is.
+You know what is.
+Just as you think about what is, you judge what is, et cetera.
+So you can see this from the very first sentence
+of the phenomenology.
+It is natural supposition that in philosophy,
+before one gets down to dealing with what is at issue,
+namely, the actual cognition of what in truth is.
+So basic assumption of phenomenology, what you know
+is what is or what has been.
+Now, you might ask, but don't I know things?
+I can know shadows.
+Not being is in a certain way a kind of being.
+It's relevant or determinate with respect to being.
+I want to set the being theme aside for now,
+because I'll come back to it later,
+and it's even more abstract than everything else.
+So we start with an immediate form of knowledge.
+That knowledge has to be immediate knowledge
+or knowledge of the immediate.
+Because otherwise, it would be mediated
+by something else, some conception of its knowledge
+as distinct from some other kind of knowledge,
+and then it wouldn't be the beginning,
+or knowledge of its object as distinct
+from some other object, and it wouldn't be immediate.
+So we know the first shape of consciousness
+is immediate knowledge of the immediate.
+It's just so it can't be knowing by mediation,
+and it can't be knowledge of what is immediate.
+Why?
+Because knowledge determines what the object of knowledge is.
+There has to be a fit between being for consciousness
+and the object of consciousness.
+So the being of consciousness, the being for consciousness
+is immediacy, and the object is immediate.
+We therefore are to alter nothing in the object
+as it presents itself, and we must
+keep our conceptualizing it apart
+from our apprehending of it.
+So that means both we as the phenomenological observer
+simply have to observe what this immediate shape of knowing is.
+It's not our job to alter it.
+We have to just observe what this shape of consciousness
+says about itself.
+But likewise, this shape of consciousness
+can't conceptualize its object.
+Why?
+Because conceptualizing something is determining it.
+It's representing it as falling under one concept rather than
+another, and that involves mediation.
+Conceptualizing is mediate, so the immediate
+has to be non-conceptual.
+Let me just read a little bit from here.
+The concrete content of sensuous certainty
+permits itself to appear immediately
+as the richest cognition.
+So this shape of consciousness thinks of itself.
+It's just immediate apprehension of the object.
+It's sensuous because we're in consciousness,
+and so we think the object is what determines what knowledge
+is.
+There's an object outside of consciousness
+that is the thing that we have to map or match onto.
+So it's sensuous, immediate circle.
+And it thinks of itself as the richest form of cognition
+because it lets the whole sensuous richness of the world
+be what it is without bringing it under consciousness.
+So Hegel is playing off this idea
+that people had in this period that conceptualizing things
+deprives them of their life or their richness.
+Concepts, of course, are only about generalities.
+I'll get to you in a second what things have in common.
+And so when you conceptualize, you ignore the infinitely rich
+particularity of every individual thing.
+So this form of consciousness thinks,
+I'm not doing any of that.
+I'm not desiccating anything or generalizing.
+I'm just purely apprehending everything immediately
+in its sensuous richness.
+Indeed, there's a knowing of an infinite wealth
+in which no limit is to be found,
+whether we venture out into the reaches of space and time
+as the place where that wealth extends itself
+or when we take a piece out of this pontitude
+divided and thereby delve into it.
+So there's no limits because a limit would,
+if there were a limit,
+there would be something beyond the limit
+that would involve mediation.
+So there's no limits extensively.
+There's no point beyond sensuous certainty.
+And there's no limits within the object.
+Sensuous certainty can dive further into the object,
+look further and further and further into the object.
+In addition, it appears as the most veritable
+where it has not omitted anything from its object
+because it isn't conceptually determining it.
+It's not leaving out some of its details
+and conceptualizing only some of them.
+But rather has its complete entirety before itself.
+However, this certainty in fact yields the most abstract
+and the very poorest truth.
+It expresses what it knows as this.
+It is.
+And its truth only contains the being of the object.
+Now this is, I wanna separate the being issue
+from the it issue for the following reason.
+It can't really properly speaking be the case
+that what sensuous certainty knows is it is or this is
+because that it is is not immediate
+because it involves a subject and a predicate.
+And so it would involve the difference
+between a subject and a predicate.
+It would involve immediate relationship
+between subject and predicate.
+It would be determining the it as being.
+So I wanna focus on it and then I'll come back to it.
+So now what Hegel is saying, he's gonna argue
+that contrary to what sensuous certainty thinks,
+it doesn't know, it isn't the richest
+and most variegated form of consciousness.
+In fact, what it does is the most universal and abstract.
+So just a little bit further.
+For sensuous certainty, this is what is essential
+and this pure being where this simple immediacy
+constitutes its truth.
+So the truth is this, or it.
+And being for consciousness certainty
+is just immediate apprehending.
+Likewise, as a relation certainty
+is an immediate pure relation.
+Consciousness is I, nothing further,
+a pure this and the singular individual
+knows a pure this or he knows the singular.
+So let's just take the first shape of consciousness
+to be I know this.
+Where knowledge here is just immediate.
+So I'm not conceptualizing this.
+And so this is not an object of concepts.
+It's not a thing with many properties.
+All right, yes.
+What is the root of immediate knowledge?
+So immediate knowledge is knowledge
+that isn't mediated by any other knowledge.
+So the idea is to note, this is what sensuous certainty
+thinks, to know this, I don't need to know anything else.
+However, if what I knew about this was that it was a pencil,
+I would need to know what a pencil is.
+I would need to know the difference between pencil
+and a pencil, that is to say the pencil
+and the universal pencil, et cetera, et cetera.
+But immediate knowledge is knowledge
+not by means of anything else.
+Wherever there's mediation, there's determinacy.
+Being one thing and not being another.
+So if there's no immediacy, there's no mediation,
+there's no determinacy.
+So I don't know this as opposed to something else.
+I just know this.
+So how do I know this if I see it for the first time?
+That's what knowing is.
+So you're assuming that to know this,
+I need to know what it is.
+I need to bring it under a concept.
+Sensuous certainty is denying.
+Sensuous certainty says, this is knowledge.
+And so is this.
+And so is this, yeah.
+Isn't starting with immediate knowledge a kind of immediacy?
+Because we're starting with immediacy
+rather than mediacy.
+Okay, great.
+So that is gonna be the question.
+So hold on to that question
+until we get to the beginning of the science of logic.
+Because I agree with you.
+And I think that's the way we save
+Pedagorean philosophy.
+Yeah.
+In the first like, I know or something,
+it's like, it's as conceptualizing
+and in the footnote is as conceptually comprehending.
+Oh, yeah.
+That's because Terry Pinkard loves to insert
+his own interpretations into the translation.
+Which is, so let me just, I'm actually not seeing,
+where is the footnote actually?
+It's on the first page and.
+Yeah, but what sentence does it modify?
+I have so many.
+It's the last sentence of 90.
+The last sentence.
+Oh, conceptualizing.
+Yeah, so let's see what that is.
+That's almost certainly gonna be Begrifen.
+And Terry loves to translate Begrifen
+as conceptually comprehending, which is hilarious.
+Yeah, it's Begrifen.
+Okay, Begrifen just means comprehending or conceptualizing.
+It doesn't mean both.
+That is to say, basic rule of translation.
+Where there's one word, don't translate it as two words.
+Okay, like that just doesn't work.
+Okay, so what that should really be is comprehending.
+Okay, now the reason he's translated
+as conceptually comprehending,
+this is in German, Begrifen,
+is the word in German for concept is Begrif.
+That's what a concept is.
+Which is the noun form of the verb Begrifen,
+which is also to grasp.
+So Begrifen is also a grasping.
+So in some ways, obviously it's a conceptualizing.
+But in general, the closest thing in English to Begrifen
+in philosophical texts is comprehending,
+comprehending something.
+So you should just translate it as comprehending.
+Or you could translate it as conceptualizing,
+but you do not wanna translate it
+as conceptually comprehending.
+That's just adding complexity that's not in the original.
+Okay, so what Hegel is saying is
+we must not conceptualize this thing.
+Any, our job is to just ask what sensuous certainty says
+about itself, not to bring our own concepts to bear
+on and make sensuous certainty
+into something that we think it should be.
+Okay, so now going further,
+we're gonna skip 92, the end of 93.
+The I, a knowing that knows the object only
+for the reason that the object is,
+but which itself can just as well be as not be.
+So that means, so just to anticipate,
+sensuous certainty is gonna undergo various changes
+over the course of this chapter.
+So Hegel begins by talking about
+just the bare abstract idea,
+or I'm sorry, just you start someone
+by talking sensuous certainty,
+and then imminently criticizes it.
+And then sensuous, he allows sensuous certainty
+to modify itself in light of those imminent criticisms
+while remaining sensuous certainty.
+So the first form of sensuous certainty
+is one on which, in Hegelian terms,
+the object, this, is the essence.
+That means the object determines what it is to know it,
+which means the object can be there
+whether or not the subject is,
+or the subject is purely receptive in knowing the object.
+So the I, a knowing that knows the object
+only for the reason that the object is,
+but which itself can just as well be as not be.
+So the knowing can be or not be, and the object still is.
+However the object is, it is the true and the essence.
+The object is indifferent as to whether it's known or not.
+The object remains even when it is not known,
+but if the object does not exist, then there is no known.
+The object is therefore to be considered
+in terms of whether, in sensuous certainty itself,
+it is in fact the kind of essence
+which sensuous certainty passes it off as being.
+That is to say, is immediate,
+is immediate knowing a way of knowing this?
+That's the question,
+because that's what sensuous certainty says it is.
+That is, it is to be considered as to whether this,
+its concept, its conception of itself,
+the object and the being of the object forehead,
+which is to be the essence,
+corresponds to the way it is present within that certainty.
+To that end, we need not reflect on the object
+and mull over what it might be in truth.
+We need only to consider it as sensuous certainty
+has it in sensuous certainty itself.
+That is to say, we just have to do this imminently
+rather than transcendently, non-imminently,
+applying our own criteria to value.
+Therefore, sensuous certainty itself is to be asked,
+what is this?
+If we take it in the twofold shape of its being
+as the now and the here,
+so one interesting thing about the phenomenology
+is Hegel assumes from page one
+that consciousness is consciousness
+of objects in space and time.
+So whatever the project of the phenomenology is,
+he's not trying to answer the skeptic who's like,
+I didn't say anything about space and time.
+And as we'll see, he even assumes some very natural things
+about the structure of space and time,
+namely that it's divisible.
+So whatever the phenomenology is supposed to do,
+it's not supposed to refute the skeptic
+who denies that objects outside the mind
+are in space and time,
+nor is it supposed to derive space and time
+from something more fundamental,
+which weirdly is part of the project of the Hegel system.
+Notoriously.
+So what I know can be characterized just purely imminently.
+We're just unfolding what's sent to a certainty.
+What I know is this here now,
+if we take it in the twofold shape of its being
+as the now and here,
+then the dialectic,
+where the, remember the dialectic
+is the internal imminent dialectic
+of a Hegel consciousness,
+where it generates contradictions of itself
+and tries to resolve them.
+The dialectic, which it has in itself,
+will take on a form as intelligible as the this itself.
+To the question, what is the now?
+We answer, for example, the now is the night.
+So if we ask sensuous conscious,
+so this is a slightly artificial example
+that Hegel uses to make a point.
+So I'll just read it and then I'll explain
+what the point is.
+We answer, for example, the now is night.
+In order to put the truth of this sensuous certainty
+to the test, a simple experiment will suffice.
+We write down this truth.
+A truth cannot be lost by being written down anymore
+than it can be lost by our preserving it.
+And if now, this midday, we look at this truth,
+which has been written down,
+we will have to say that it has become rather staged.
+Okay, so the idea is the sentence,
+now is night.
+Is true, say, at 11 p.m. and is false at 2 p.m.
+So what Hegel is doing is arguing that
+in so far as sensuous certainty
+says that knowledge is I know this here now,
+it cannot make sense of now.
+Why?
+Because Hegel argues in the next paragraph
+that now is a universal.
+That is to say, it applies to multiple different times.
+It applies to every time at the time at which it's uttered.
+So for any time, now uttered at that time
+refers to that time.
+Now refers to noon, 1 p.m. and 2 p.m.
+Okay, now why would it be bad
+if the object of knowledge for sensuous certainty
+were a universal?
+It would be bad because a universal is a one over a minute.
+It applies to multiple particulars.
+But that means it is distinct from the particulars
+it applies to, and they are distinct from one another,
+which means that to know a universal requires determinancy.
+This is determinately this rather than that,
+and determinately a particular rather than a universal,
+and a universal is a determinately a universal
+rather than a particular.
+That means knowledge of a universal requires mediation.
+You know what a universal is
+by means of knowing it isn't a particular,
+namely the things that it can instantiate.
+But there can't be anything immediate
+in the object of sensuous certainty,
+so this cannot characterize its object.
+Now in contemporary philosophy,
+it's very weird to think of now as a universal.
+If you said that in contemporary philosophy of language,
+class, Imogen Dickey would kill you.
+So the more natural thing is to think of it now
+as what we call an indexical.
+Which is to say, something that refers to different things
+under different contexts of utterances, contexts of utterance.
+So now, as uttered at time t,
+refers to time t.
+So that's the more contemporary way
+of expressing the nature of now.
+That it's an indexical rather than a universal.
+But Hegel's point remains,
+because this also requires the difference
+between individual times
+and a general quantifier over times.
+This says for all times,
+so in order for sensuous certainty
+to have an indexical expression
+in the objects of its knowledge,
+it would have to understand indexicals.
+Which involves understanding that one expression
+can refer to different things at different times.
+That requires determinacy, requires mediation.
+So the same argument eliminates the indexical now
+from being within the content
+of sensuous certainty's knowledge.
+The same arises for Hugh,
+as Hegel goes on to say.
+We also express the sensuous, this is 98.
+The same case comes up in the other form of the this,
+namely in the here.
+For example, here is the tree.
+I turn around this truth vanishes,
+and it has inverted itself into its contrary.
+Here there is not a tree, but rather a house.
+The here itself does not disappear,
+rather it endures in the disappearance of the house,
+the tree, and it is indifferent to being a house, a tree.
+But this shows itself again to be a mediated simplicity
+or as being universality.
+So once again, Hegel thinks of here as a universal.
+That's slightly odd in a contemporary perspective
+to think that here is a universal
+that's instantiated by every location.
+It's more natural to think of it
+as a indexical for all locations L.
+As utter at L refers to L.
+If you want me to write out the clause for this.
+So the problem with this, right,
+is it depends on where you're pointing.
+And a disgraced former colleague of mine,
+Colin McGinn, has this famous paper
+where he tries to settle the question
+exactly which object is referred to by pointing.
+And so he literally has in this paper a diagram of a hand.
+And then there's this question of like,
+well, it's obviously, it doesn't have to be exactly.
+So like, you know, there's like a cone of reference
+and there's like an empirical question,
+what is the angle theta?
+Like if I say, can I say this
+and be referring to the lectern?
+No, it's too far away.
+There, can I be referring to the lectern?
+Questionable, definitely.
+So somewhere there's this vague boundary
+of the theta of reference.
+This is what, okay, this is what people
+like Colin McGinn spend their time doing.
+Okay.
+The fact that it was a hand is deeply ironic.
+Okay.
+So even if we think of here as an indexical
+expression rather than a universal,
+the same point applies.
+Because this requires there being a distinction
+between the general term location
+and the individual locations.
+That is to say, since you're certain
+you would have to understand differences among locations
+and the difference between a location
+and the general term location.
+That requires, that is determinate
+and that means it's median.
+You understand one thing via an object.
+And it can't do that.
+So it also can't have here in the content of what it knows.
+Yes.
+Doesn't the,
+Colin, thinking of knowledge as a knowledgeable object
+already presumed like a distinction between objects
+rather than just being an object,
+which to say now is night I feel
+it's already kind of giving some certainty,
+something that's uncertainty has already denounced.
+Now is not, it just is, isn't it?
+Exactly.
+And that means that either,
+so what you're really showing is
+sense certainty shouldn't even be talking
+about here and now.
+It should just say, I know this.
+Or if it wants to say here and now,
+it should just refuse to look at any other objects
+or at any other time.
+That is to say, it should say,
+what I know is this here now,
+don't tell me about any other objects or at any other times.
+I'm saying it shouldn't even recognize other objects.
+It just exists.
+Exactly.
+So Hegel's going to modify sensuous certainty
+to answer his own objection in the direction
+that you're indicating.
+Okay.
+Yeah.
+So this situation of I determines universal of no.
+So now in time, so now as P1 or P2 or P3
+is dependent on my situation.
+Yeah, so Hegel's going to do exactly the same move
+with I in one second.
+Because I is also an index.
+That is to say, in his terms, it's a universal.
+We would think of it more naturally as an index.
+But before we got there,
+Hegel said something really important in 97.
+We also express the sensuous as a universal,
+but we say is this,
+i.e. the universal this,
+or we say it is, i.e. being as such.
+Let's leave the being theme aside.
+We thereby, of course, do not represent to ourselves
+the universal, this for being as such,
+but we express the universal.
+Or in this sensuous certainty,
+we do not at all say what we mean.
+So there's a distinction,
+this is totally central to sensuous certainty
+between what we say and what we mean,
+by which Hegel means what we intend to say.
+So he's going to argue that what sensuous certainty
+intends to mean is this particular piece of chalk.
+But what it actually says is the universal this.
+So it can't say what it means to say.
+So what sensuous certainty is trying to do is express
+that what it knows is particulars.
+But with only this here and now, it can't do that.
+Because Hegel will argue over the course of the chapter,
+to know a particular, you have to have both
+something like this here and now,
+call it an indexical, call it an intuition,
+and a conception of a universal.
+You have to distinguish this from other particulars
+in terms of its properties.
+So sensuous certainty thinks of itself
+that it knows individual particulars.
+But what it says is, I know this,
+and this is a universal.
+Because that's this, that's this, that's this.
+Everything's at this.
+So if what it knows is this, it knows,
+rather than this.
+Yeah.
+I'm confused because I thought we are not,
+we're trying to not conceptualize in answering
+for the sensuous certainty person.
+But then we introduce the concept of a universal.
+Wouldn't they just not conceptualize that?
+Right.
+So one background worry here is whether Hegel is
+making sensuous certainty answer questions
+that according to sensuous certainty's own concept
+of itself, it doesn't have to.
+Yeah.
+Okay.
+It's important to note that sensuous certainty
+is not just mute.
+It's not like, this is not caveman consciousness.
+So it has a conception of itself of what it knows.
+Now, it can conceptualize its knowledge
+without thinking that what it knows
+is a conceptualized object.
+So in order, the whole setup is that we're examining
+concepts of knowledge.
+So sensuous certainty has to have a concept of itself.
+But what it knows is the object,
+and it knows it non-conceptually.
+Which means the project of the phenomenology
+is not to take each conception of knowledge and then ask,
+does that, or each shape of consciousness
+that has a conception of knowledge,
+ask does that shape of consciousness
+know its conception of knowledge?
+That is to say, we don't take the concept of knowledge
+and put it on the object side.
+Because sensuous certainty would immediately fail that.
+Because a concept of knowledge is conceptual.
+So sensuous certainty doesn't think it knows
+its concept of knowledge.
+That's just what it says if you ask it.
+What I know is this.
+But your concept of knowledge is not a this,
+yeah, yeah, yeah, epistemology is kind of bullshit.
+It's not something that it knows.
+It's just how it answers.
+It's how it conceives of this.
+And so it would be cheating, it would be cheap
+if we were like, well, you don't know that.
+It's supposed to be not cheating if what we say is,
+that immediate knowledge isn't knowledge of that object.
+It's not the object that you intend to know,
+the object that you mean.
+The object that you say is something different.
+Yeah?
+Well, why not start with the caveman consciousness?
+Well, because it's really hard to argue with caveman, right?
+The epistemological version of,
+oh, I'm just a caveman lawyer, right?
+I, that was just a gesture and a joke.
+I didn't really know what I needed to tell you that through.
+Yeah, because caveman consciousness
+sort of,
+by definition, doesn't have the conception of itself as knowledge.
+Okay, and that might mean, so background question,
+is Hegel assuming something to the effect that if you know,
+maybe you don't know you know,
+but you can coherently conceptualize your knowledge
+in a way that survives imminent dialectical critique?
+I think he is, potentially.
+Okay, so we've talked about 97 and 98, time check.
+Let's take a 10 minute break.
+Consciousness, Hegel has raised these problems
+for sensuous certainty.
+Here and now are universals.
+Therefore, either what sensuous certainty knows
+is the universal this,
+which applies to absolutely everything.
+Or, insofar as it wants to know this,
+it can't use here or now to figure it out.
+Okay, now sensuous certainty modifies itself.
+And it modifies itself in the direction
+of making itself the essence.
+Now what that means is, it says,
+okay, I determine what this is,
+because what is here or what is now,
+or what is this, is what is,
+it is where I am, and when I am, and what I'm pointing to.
+So it tries to solve this problem of this here now
+by anchoring the reference of this here and now to the I.
+So I could write those out, those indexical expressions,
+indexical clauses, using I, but I won't bother,
+because we can all see what the problem is gonna be.
+The problem is going to be that I itself is an indexical.
+I, as uttered by any subject S, refers to S.
+So Hegel will say I is a universal.
+I refers indifferently to every subject that can say I.
+Or, if we take the more contemporary conception
+on which it's an indexical,
+that cannot be within the content of what consciousness knows.
+Consciousness is explanation of how it knows its object
+cannot go by universals.
+So now Hegel says that this is the bottom of 102,
+oh he's saying 101, this just expresses this idea
+of tying, of using the I to anchor
+the reference of here and now.
+Now is daytime, because I see it.
+Here is a tree for precisely the same reason,
+however sensuous certainty experiences
+in these relationships, the same dialectic
+as it did within the preceding relationships.
+I, this, see the tree and assert the tree to be tree,
+to be here.
+Now, properly speaking, it doesn't assert anything
+to be here, that's 8%.
+However, another I sees the house
+and asserts that there is no tree here, but rather a house.
+Both truths have the same warrants,
+namely the immediacy of seeing and the surety
+and the seerons, which both have about their knowing,
+however one vanishes into the other.
+So I see a house, Christa sees a tree,
+I see a house, I see a tree.
+They can't both be right.
+And sensuous certainty, or let's see, I see a tree,
+I see a non-tree, or I don't see a tree.
+They can't both be right,
+and sensuous certainty doesn't have the means
+to distinguish the two in the way we would by saying,
+when I say I see a tree, it means Nick Stang sees a tree.
+And when Christa says I see a non-tree,
+it means Christa sees a tree,
+because that would involve having the distinction
+between the universal, one who can say I,
+and particular people who can say I.
+Okay, 102, the beginning of 102,
+I've already explained what's going on.
+So then at the very bottom of page 63,
+however much this demand is set before science
+as its touchstone,
+a demand which it would surely not last out,
+namely the deduce, construct, find a priori,
+however one wishes to express it,
+a so-called this thing, or this person,
+still it is reasonable that the demand should state
+which of the many things this thing,
+or which of the eyes this I means,
+but it is impossible to state this.
+So sensuous certainty says,
+what it knows is this here now,
+but it cannot, compatible with its own shape or consciousness,
+say which thing it knows.
+And so either it knows the universal,
+which is what it says, but it doesn't want to say that,
+it doesn't mean to say that,
+or it needs to be modified.
+Okay, 103, sensuous certainty therefore learns
+from experience in the technical Hegelian sense
+that its essence is neither in the object nor in the eye,
+and in the immediacy is in immediacy
+of neither one or the other of them.
+For in both, what I mean is instead what is inessential,
+and the object and eye are universals
+in which the now and the human eye
+that me and do not endure are not.
+So it's tried making the object be essential,
+a thing that determines what knowing is,
+it's tried making itself the essential
+by using it to anchor the reference of here and now,
+neither worked.
+We thereby come to posit the whole of sensuous certainty
+itself as its essence,
+and no longer only as a moment of sensuous certainty
+as happened in both cases,
+in which at first the object approaches the eye,
+and the eye itself reaches supposed to be
+the reality of sensuous certainty.
+It is thus only the whole of sensuous certainty itself,
+which links tenaciously in such sensuous certainty
+to immediacy, in which thereby excludes from itself
+all the opposition that took place in what proceeding.
+So sensuous certainty realizes,
+okay, I tried making the object the essence,
+I tried making myself the essence, neither worked.
+So you need to think of it,
+they're both essential or neither.
+I'm not gonna talk about essence anymore.
+So I'm just gonna take sensuous certainty itself.
+This situation of I know this,
+that's gonna be the whole thing.
+This pure immediacy therefore no longer has any concern
+with the otherness of the here as a tree,
+which is a here that is a non-tree,
+nor with the otherness of now as daytime,
+and which passes over into a now that is night,
+nor with another eye,
+for which something other is the object.
+So this new shape of self-consciousness,
+new shape of self-censored certainty claims,
+look, I know this, and if you raise any objections
+about trees or houses, things I don't know now,
+that isn't this, I'm going to ignore you.
+Or you could think of this as episodic sensuous certainty.
+This sensuous certainty knows this, now it knows this.
+And if you ask it, but now is the water bottle,
+now is the pencil is no longer true,
+what are you talking about?
+So now it's immunized itself
+against all of these Hegelian objections.
+So really these earlier Hegelian objections
+were just moves to get you to see the logic of the game.
+Because this is where sensuous certainty
+should have started from.
+Because all of these problems that were brought in
+were really properly speaking things
+that sensuous certainty never claimed to them.
+Objects that weren't sensuously present to them,
+like the tree when it was only perceiving the house,
+weren't only sensing the house.
+Like the daytime when now is night.
+And other eyes.
+So now sensuous certainty doesn't want to hear anything
+about a house when it's looking at a tree.
+It doesn't want to hear anything about daytime
+when it's night.
+And it doesn't want to hear anything about eyes.
+And if you raise that, it's going to tell you,
+I don't know what you're talking about.
+None of that's knowledge, that's all bullshit.
+Don't.
+I just have one question.
+Is it maybe even when we're talking about something
+like this thing, you could call it an object?
+Or is it more just like a bundle of sense data or something?
+Bundle of sense data already brings in too much.
+And object is a super, super general notion.
+It's literally just the accusative.
+That is to say, it's what consciousness is of.
+Whenever there's of-ness, there's an object.
+However much you use the word object, but OK.
+So at this stage, we're at the real caveman consciousness?
+Except that, unlike the caveman,
+it has a conception of its known.
+Otherwise, the whole project wouldn't go on.
+You cannot argue with cavemen.
+I mean, probably you could argue with cavemen.
+There's a great book about how it's called
+The Dawn of Everything by Ray Rundland Groud.
+And the basic idea is we all think
+of a prehistoric, so-called hunter-gatherer,
+societies as really boring and life-having soft.
+But actually, it was probably way better.
+It's just talking about consciousness
+or the sense of certain telling us something.
+I just wonder, because in this book,
+there's a concept called cognitive impenetrability.
+It says that in perception, it just perception itself.
+It doesn't tell us anything.
+But some people also argue that we can actually
+perceive some high-order property in things,
+for example, like unity, identity, and so on.
+Yeah, so this conception, this model of consciousness
+is several levels more primitive than anything
+you would find in contemporary analytic philosophy
+or cognitive science.
+Because this has not been developed
+because it's plausible as an account of consciousness
+or because it's something that emerges naturally
+from the sciences.
+It's been introduced purely to get the project started.
+This is way more primitive than any conception
+of perceptual consciousness that you will find
+in contemporary literature.
+Let's just read a little bit further.
+This pure immediacy, therefore, no longer has any concern
+with the otherness of the here as a tree,
+which is a here that is a non-tree,
+nor the otherness of now is daytime,
+which passes over into a now that is night,
+nor with another eye, for which something other is the object.
+Its truth is preserved as a self-consistent relation,
+which makes no difference of essentiality
+and non-essentiality between the eye and the object,
+and into which, therefore, no difference at all
+can force its entry.
+I, this eye, assert therefore that here is a tree.
+Once again, shouldn't say is a tree, just here.
+Happens to be a tree.
+And it's not the case that I turn around
+so that the here would become for me not a tree,
+or that I myself, at another time,
+take the here not to be a tree,
+the now not to be the daytime.
+Rather, I am pure intuitive,
+and I stick with, namely, that now is daytime,
+or else I also stick with here is a tree.
+I also do not compare the here and the now themselves
+with each other.
+Rather, I cling tenaciously to an immediate relation.
+Now it is daytime.
+So any of these previous or past experiences,
+any other objects in the environment,
+any other subjects are now just being completely left out
+by sensuous certainty as objects of knowledge.
+Since the certainty itself no longer wishes to step forward
+when we draw its attention to a now that is night,
+or to an eye for which it is night,
+we step up to it and let ourselves point
+to the now that is a certainty.
+So this angles, the metaphor is supposed to be,
+we now take up the standpoint of sensuous certainty.
+We look out from the eyes of sensuous certainty.
+Thus we must enter into the same point of time or space,
+point it out to ourselves,
+allow ourselves to be made into the same eye
+as that is a knowing uncertainty.
+Let us see therefore how what is immediate,
+which is pointed out to us is composed.
+Okay, so now Hegel first makes the point
+that he's going to make in 106 and 107 about time.
+And because it's about time,
+it's a little bit more complicated.
+But I'll just say it about time,
+you'll get the basic structure of it,
+and then we'll talk about space.
+So he first makes it about now, then he makes it about here.
+So the point about now is that I say,
+what I know is this here now,
+saying that takes a certain amount of time.
+And I haven't said it until I've said all of it.
+But by the time I've said it,
+what I intended to say,
+the object that I intended to say that I know
+the beginning of that no longer is.
+Because if it did, if the object persisted,
+it would be a universal.
+It would be a thing that's one over many.
+Not a property, but a thing that can exist
+at different times.
+And so for consciousness,
+to be able to give an account of why this here now
+refers either to the first moment of the thing,
+or the whole life of the thing,
+it would be able to have to distinguish
+the thing as a universal,
+or a thing that endures through time
+from its various moments of time.
+And that requires mediation.
+That requires a distinction among things.
+And that is not something that such a certain can know.
+So the idea is,
+time is not,
+there's more than one moment of time.
+So Hegel's just assuming there's more than one moment of time.
+Thinking the thought, what I know is this here now,
+or what I know is this now, takes some time.
+You haven't finished it until all that time has passed.
+But the object, the moment of time that began,
+no longer is, so either you're no longer able
+to refer to that moment of time,
+or you're referring to a thing that persists through time,
+and that requires mediation.
+That requires the idea of a thing
+that exists at different times.
+Is Hegel also assuming time is infinitely divisible?
+I don't think he's assuming it's infinitely divisible.
+I think he's assuming it's divisible.
+But he might be assuming it's infinitely divisible.
+The most he's assuming is that it's orbital.
+He's infinitely divisible.
+He's not assuming it's infinitely divided.
+That is to say, there's always a smaller interval of time.
+So that's the time point.
+More complicated.
+The here point is much simpler.
+So 108.
+The here that has been pointed out
+and to which I cling is likewise a this here,
+which is in fact not this here,
+but is rather an in front of and behind
+or an above and below or a right and left.
+So I refer to something that is spatially complex.
+That is to say, has parts.
+The here, which is supposed to be pointed out,
+vanishes into another here, but that one likewise vanishes.
+That is to say, here could refer,
+if I say here, that could refer to the whole object
+or refer to any of its parts.
+What is pointed out, held onto and which endures
+is a negative this, which only is as the here's are taken
+as they're supposed to be, but which in being so taken
+have sublated themselves.
+It is a simple summary of many years.
+Why did you guys do this to yourself?
+You could have taken bioethics instead you're reading this.
+Okay, so what he means by that is
+so he's assuming that physical objects
+are spatially extended, so they have parts.
+The thing that sensuous surgery knows
+is a spatially complex object with parts.
+And that means that it's spatially universal.
+That is to say, it's in all of these parts.
+Which means that to be conscious of it
+as opposed to any of its parts requires mediation.
+So why would I say this here, this here now,
+am I referring to the whole book rather than its parts?
+The only thing that could explain why my consciousness
+is of this whole book rather than its parts
+is because I'm aware of it as a book with parts
+rather than as the parts.
+I have to consciously separate it from its background,
+from its environment, and from its parts
+to be conscious of it as the whole object it is.
+The same problem applies if I want to be conscious
+of the page as opposed to the whole book,
+I have to be conscious of the page rather than the book.
+And that requires negation and that's a form of determinacy
+which is a form of mediation.
+And that is not allowed by essentially certainty.
+The here that is meant would be the point.
+However, the point is not, but rather as the point
+is demonstrated as existing, the demonstrating points
+to itself as showing itself to be not immediate knowing
+but instead of movement from out of the many years
+which we meant into the universal here,
+which is a simple plurality of years
+in the way that the daytime is a simple plurality of that.
+What does that mean?
+What that means is Hegel admits the existence
+of spatial points, but they have their being
+in being the intersection of lines,
+which have their being in being the intersection of planes,
+which have their being in being the intersection of solids.
+That is to say, to be conscious of a point
+is mediated by consciousness of the line
+that intersects at that point.
+So consciousness of a point is totally okay,
+but it's immediate.
+Okay, now what is Hegel assuming
+about the composition of space here?
+He's assuming that it is infinitely divisible
+because if there were,
+he seems to be assuming that it's infinitely divisible.
+I'd have to think about whether this argument
+could work without that assumption,
+but he does seem to be assuming that.
+Okay.
+Okay, so the idea is sensuous certainty says,
+okay, look, forget all these other objects.
+All I know is this here now,
+but now why is its consciousness of the whole pencil
+rather than the tip of the pencil,
+the upper half of the pencil,
+the lower half of the pencil,
+the color of the pencil, et cetera?
+The only thing that it could do that
+is because it's conscious of this thing
+as a unity of parts,
+which means it has to have a conception of the whole
+as opposed to the parts.
+That's just to say,
+it has to have mediacy within the content of its consciousness.
+Okay, so now to go back to this,
+so one of the classic worries
+about Hegel's critique of sensuous certainty
+is that he's putting in sensuous certainty
+the amount of things that sensuous certainty
+doesn't have to say.
+This is Zopan's question about,
+it's caveman consciousness.
+Now, if sensuous certainty was literally just mute,
+like staring at things,
+without any conception of itself as knowing,
+obviously Hegel's critique would not be imminent,
+but that just means that that can't possibly
+be the project of the world.
+So a shape of consciousness is a shape of consciousness.
+That is to say,
+it's something that has a conception of itself
+as relating to an object.
+That means it has to have a conception
+of why its consciousness is a consciousness of its object.
+And Hegel is assuming that the consciousness
+of the sensuous certainty's consciousness of its object,
+if that consciousness is not conceptually mediated,
+can't be a consciousness of a whole thing apart.
+Can you just explain what exactly the sensuous certainty
+person can afford to distinguish without concepts?
+Is it between particulars,
+or is it between the concept of a universal
+and that of a particular?
+So what it can say,
+so we're allowing it to say things in answer to us,
+which involves concepts,
+but what it can know involves no concepts.
+In sorry, it involves no universals.
+All it knows is this here now.
+So he tries to avoid Hegel's critique
+by claiming that this here now is not a universal
+because it doesn't care about the other instances,
+it just cares about this.
+But Hegel's point is that even this,
+being conscious of this,
+requires consciousness of a universal.
+It requires a consciousness of a one over man.
+And that means it requires consciousness
+of the one as being distinct from them,
+which is determinism, and that's a kind of mediation.
+Now, let's go a little bit further.
+109, it is clear both that the dialectic
+of sensuous certainty is nothing but the simple history
+of its movement that is its experience.
+So the dialectic of sensuous certainty
+is just this sequence of experiences,
+which is to say its awareness of apparent contradictions
+between its consciousness of the object and the object
+and attempts to resolve them.
+And that sensuous certainty itself is nothing
+but just this history.
+So the shape of consciousness,
+Hegel's now identifying with its own experience.
+Or sensuous certainty is,
+this is not something happening to sensuous certainty
+on that side, we're not doing anything to sensuous certainty.
+Sensuous certainty, just purely the concept
+of sensuous certainty when thought thread
+generates these problems.
+For that reason, natural consciousness also proceeds
+to this result, what is the true in sensuous certainty
+to keep pressing the other forward.
+It learns from experience about it,
+but then it likewise forgets it,
+and then it starts the whole movement all over again
+right from the beginning.
+It is thus a bit astonishing
+when in the face of this experience,
+it is set up as a philosophical assertion,
+whereas a universal experience,
+or even as the outcome of skepticism,
+that the reality or the being of external things as this
+or as sensuous is to have absolute truth for consciousness.
+Such an assertion does not say at,
+does not say at the same, does not at the same time
+know what it is saying.
+It does not know what it is saying,
+the opposite of what it wants to say.
+So sensuous certainty wants to say
+that the object of consciousness is the pencil
+in saying, all I know is this.
+But actually, this is a universal.
+In fact, this is the most abstract universal,
+because everything is a this.
+So now, let me turn to the theme
+that I said I would talk about, which is being.
+So sensuous certainty's official view is I know this.
+Now Hegel sometimes says what it knows is,
+I know this is, but that makes the object of consciousness
+complex, that is to say there's a difference
+between the subject and the predicate.
+You can't have that.
+So we're properly speaking, what it knows is this.
+But we can also just characterize that object as it.
+What it knows is it, or being.
+Now the object of consciousness has to be completely immediate.
+Immediacy goes with indeterminacy.
+Why?
+Because immediacy is the same or goes with determinacy.
+If something is determinate, it's
+one thing rather than another, it
+is what it is in virtue of what it is not.
+So if something has a determinate color, it's red.
+It's red in virtue of not being blue.
+Likewise, if something is mediated,
+it has to be mediated by something else.
+So it has to be determinately, not that.
+Now, there is this thing called self-mediation in Hegel.
+Something can mediate itself.
+But then there's a difference, there's
+determinacy between the role of the thing as mediator
+and the very same thing as mediator.
+So wherever there's mediation, there's
+determinacy, wherever there's determinacy, there's mediator.
+So wherever there's lack of mediacy,
+wherever there's immediacy, there's indeterminacy.
+So what if I know is this and it's immediate,
+it's an indeterminate this.
+Now, this is all stuff that we are saying.
+This is not something that consciousness gets at.
+This is for us, not for some sensuous certainty.
+What I know is the indeterminate this.
+So what sensuous certainty is saying
+is I know this, which is not just the cosmos.
+Because the cosmos is a determinate this.
+It's the most indeterminate possible this.
+Another way of putting that is what consciousness knows
+is not this determinate being, but completely indeterminate
+being.
+What it knows is being, pure being.
+OK.
+That means there's a structural parallel,
+this is just to anticipate a couple of things,
+between sensuous certainty and the beginning
+of the science of logic.
+The beginning of the first category of the science
+of logic is pure being.
+OK.
+Now, question.
+I myself am not really sure what I want to say about this.
+So Hegel draws a distinction between what sensuous certainty
+says and what it means.
+What it says it knows is pure being,
+completely indeterminate being.
+You take away all immediacy, you take all way determinacy.
+It's not that I know this being, because this being is
+this being, a virtue of not being, some other being.
+It's a determinate being, or a specific being,
+mediated by some other being.
+So completely immediate being, which
+is the absolutely pure, general being.
+Not just not even God, because God is traditionally
+conceived of as a being, a very special being,
+but one being among others, just pure being.
+So what Hegel says is sensuous certainty
+says what it knows is pure being.
+But what it means is it knows this being, this particular
+being.
+And so this contrast, this conflict,
+shows that this form of consciousness is incoherent.
+But you could argue on behalf of sensuous certainty.
+No.
+What you've shown is that sensuous certainty
+knows pure being.
+Now, I'm not sure what to do with that.
+And I want to leave this open, because one
+of the big problems in the science of logic
+is why, what entitles us to go beyond pure being?
+So why can't sensuous, why isn't Hegel just proven
+that what knowing is is the knowing of pure being?
+Done.
+Book ends.
+Now, one thing that Hegel could say is, look,
+it might be that knowing is just the pure knowing
+of pure being.
+But that's not sensuous.
+Whatever your access to pure being is,
+it's not through the senses.
+So that definitely is not what sensuous certainty means to me.
+It may be what it says, but it doesn't mean to me.
+So I just want to flag that.
+So this distinction between what sensuous certainty says
+and what it means.
+So first of all, general irony of the phenomenology.
+What is for consciousness is not always
+the same as what is for us.
+So certain things will seem a certain way to consciousness,
+but the observer can see that it's not that way.
+Irony is when the apparent meaning
+is different from the actual meaning.
+So Oedipus is like, why is there this plague affecting Athens?
+Someone must have cured it in some terrible crime.
+I wonder who it is.
+And we're like, we all know why.
+So likewise, there's an irony here
+in that sensuous certainty thinks
+that what it knows is the super concrete sensuous particulars.
+What it really knows is the most abstract thing of all, pure being.
+Now, the other thing, there's a sort of historical irony here
+in that there's a famous objection by this guy named
+Krug to basically Hegel and all of his pals,
+Fichte Schelling and Hegel, that these guys are just
+talking about these complete abstractions.
+This is all bullshit.
+The this is bullshit reaction to German idealism
+has an excellent pedigree.
+The number one, the great advocate
+of the this is bullshit reaction is Schopenhauer.
+Unfortunately for Schopenhauer, his position is just Schelling's.
+So Schelling is bullshit.
+So when Krug says someplace, I can't remember where he says this.
+He says, look, these guys talk about deducing all this stuff
+from pure self-conscious, just the concept of knowing.
+OK, I'll have you a challenge.
+Deduce this pen.
+So the idea is that in these systems of German idealism,
+we never get to concrete particulars,
+that somehow they've erased all particularity or singularity
+in these super abstract notions.
+So the other irony of such uncertainty
+is Hegel is arguing that this, the thing that Krug
+is demanding a deduction of, the thing that's
+supposed to be the most concrete particular thing possible,
+the German idealism could ever grasp
+is, in fact, the most abstract, purely.
+OK.
+Let me just think for a moment how much more I actually
+want to say.
+OK, questions.
+Yes.
+I still kind of wonder how those questions tell you something.
+It doesn't be like your perception itself
+has already information.
+It's not like three sides.
+Or is it that I have this perception,
+but what it says, what it tells, involves
+some sort of inner tone, some kind of conceptualization.
+So you're asking the question that's
+not the question of phenomenology.
+You're asking the question, what is perceptual experience?
+The question of the phenomenology
+is start with shapes of consciousness
+and then undermine them internally.
+So sensuous certainty, as I said before,
+is not as complex as the thing you're taking into it.
+It's a philosopher's construct.
+It's just immediate sensuous apprehension of intent.
+It means, in particular, what it says is a universal.
+There were questions for you, Isaac.
+Yeah, so is the pure being here, Mass Hegel poet,
+is that somewhat similar to Heidegger's being or not?
+So Tark and I taught a whole seminar about this.
+And I'm not sure what conclusion we came to.
+But there's no simple answer to that question.
+And insofar as there is one, the answer has to be no.
+Because being is what Dasein understands.
+And pure being for Hegel has no relationship
+to any particular being.
+It has to be more general than that.
+Yeah.
+So if subject is purely receptive,
+how do we know the object that we perceive for first time?
+Once again, for sensuous certainty,
+knowing an object just is apprehending it.
+So when you see it for the first time,
+you know it as well as you will ever know it,
+as well as you know anything.
+For the first time, for the second time,
+those are only relevant if knowledge is something more
+than just apprehending something.
+More than just, I mean, and sensuous certainty
+has a, when I say apprehension, has a superminable notion
+of apprehension.
+It's not even the Kantian thing where in apprehension,
+you have to combine some.
+It's just like, boom, it's before you.
+The assumption or the premise implicit in your question
+that we know something less well the first time than later,
+assume that knowledge is a matter
+of accumulating information about something
+through further acquaintance with it.
+But that is not sense certainty's conception
+of what knowledge is.
+Sense certainty's conception of knowledge
+is in some ways, the more unfamiliar the thing is,
+the better.
+Because if it's unfamiliar, you're
+just going to be like, what is this?
+The first time you see a pencil, you don't know it any better
+or any worse.
+So the subject comes through object?
+No.
+The subject is immediately sensibly aware of that.
+Yeah.
+So another question is that, is what conscience means
+identifiable to poor consciousness
+and what you says identify or is in a cell,
+is that identifiable or not really there
+to distinct separate, distinct distinct?
+I mean, insofar as there's a distinction emerges
+between what it says and what it means,
+that has to become for consciousness.
+Otherwise, it wouldn't be a problem.
+All the problems have to be problems that eventually
+become for consciousness.
+Even if when Hegel originally introduces them,
+they're not yet for consciousness but merely for us.
+But is what he says identifiable in the cell more like poor?
+But what it says, like I said, I don't think
+it should be identifiable with it.
+Yeah.
+Devanj?
+What does he mean when he says sublate?
+Oh, OK.
+I was hoping someone would not ask me that question.
+And the reason is, I think, so it's totally
+a central in Hegel.
+I just think it's easier to understand in the logic
+because he has a whole discussion of it in the logic.
+So the word in German is aufheben.
+Now, aufheben, which is a separable prefix for those of you
+who are taking German, has two totally different meanings
+in German.
+It means both to lift something up, you have this aufgehogen.
+It also means to cancel something.
+So if you suspend a law, you've heben this auf.
+So Hegel loves the fact that there's
+this word that means two completely different things.
+Now, what he means by it is something
+is sublated aufgehogen.
+The verb is aufgehben, but the past part is it's aufgehogen.
+It's to sublate.
+This is sublated.
+OK.
+So something is sublated when it is canceled but preserved
+at a higher logical level.
+Now, what does that mean?
+What that means, we'll give you some sort of folk examples.
+So Hegel likes to say that the British monarch is sublated
+in the British Constitution because there's
+no monarch, because Charles, whatever his name is,
+your king, not mine.
+I am a subject of no kings, has no power.
+His ancestors would despise his current predicament.
+But he's still there.
+He's there in a transformed role.
+So he's both there and not there.
+OK, what does that mean?
+I think the better, the way to really answer this
+is in the logic.
+I think it becomes much clearer in the logic.
+But yeah.
+So the idea of sublation is that when one shape of consciousness
+undermines itself and gives rise to the next,
+certain features of the first shape of consciousness
+are present in the second shape of consciousness.
+But they have a totally different meaning.
+They're like the British monarch.
+It's a monarch, but in nothing like the original sense.
+It's both canceled and lifted in the back.
+Yeah, sorry, sorry.
+I keep missing you.
+Sorry.
+Yeah, your name.
+Bowie.
+Bowie.
+OK.
+I want to ask about 103, 104, and 105.
+That's a lot.
+No, no, no.
+But just basically, what does Hegel mean
+when he says that the whole of the century's consciousness
+is its own essence?
+Because when he talks about I being its own essence,
+I mean, being the essence of the century,
+certainly he means that, oh, when I say now, it's my now.
+But what does it mean for the whole of the century?
+So essence is an essentially contrasted concept.
+It's like being special.
+If everyone is special, no one is special.
+So if both moments of such uncertainty are the essence,
+then there's certainly neither of them.
+So what that means is it's not that I determine
+what the object of knowledge is, or the object
+determines what knowledge is.
+We're not making these distinctions anymore.
+So the move of using the eye to anchor the reference of this
+is out, because we're not considering any other of this.
+So really, the difference is that sensuous certainty
+originally was sort of non-punctual or non- it
+was willing to acknowledge that something outside
+of a single knowing instance was knowledge.
+So you said, well, what about when you were perceiving
+the tree rather than the house?
+Oh, OK, the answer to that.
+Now it just says, I don't know what you're talking about.
+That means sensuous certainty, once both subject and object
+are equally the essence, which means certainly neither of them
+are, that I feel like some of you are still
+stuck at that point about everyone's special knowing
+is because you're like, but wait,
+my third grade teacher told us we were all like,
+was she lying to me?
+Sorry.
+So the idea is, sensuous certainty,
+now that we've gotten this revised version of sensuous certainty
+that's revised it so in order to resolve these problems,
+it knows this.
+Now it knows this.
+And it knows nothing about that, and doesn't want
+to hear anything about that.
+And now it knows this.
+It doesn't know anything about that, doesn't want to hear about that.
+That's the idea.
+So it's giving up on any particular privilege in having it.
+Yeah.
+I'm wondering how exactly is sensuous certainty
+is the only conception of knowledge available to itself,
+like separate from itself?
+Like sensuous certainty can't separate between particular pieces?
+Yeah, so good.
+So the very idea of a conception of knowledge requires concepts.
+Therefore, it has to be able to conceptualize
+it's not.
+It has to be able to sort of say about itself what knowledge is,
+even if that doesn't go in the object of knowledge.
+Now the worry here, so we don't want,
+so there's two extremes that we want to avoid.
+We want to avoid on the one hand what we've been calling caveman's.
+It's probably deep into a caveman, I apologize.
+Caveman consciousness, where it just knows an object,
+doesn't even have a conception of itself in it.
+It's probably more like animal consciousness.
+On the other hand, we want to avoid a consciousness,
+or shape of consciousness, that has a conceptually
+or articulate conception of knowledge,
+but then doesn't think that that conceptually
+or articulate conception of knowledge
+is one of the objects of its knowledge,
+and can make the following move.
+It can say, oh, look, I can explain why the object of my knowledge
+is the pencil, rather than the parts of the pencil,
+by using concepts.
+But the object of my consciousness, the object of my knowledge,
+is non-conception.
+You see what the problem is?
+Because then it could answer Hegel's critique,
+while remaining sensuous certainty
+in its conception of knowledge.
+So the worry is that sensuous certainty can answer Hegel's
+criticism by saying, oh, in my conceptually
+or articulate account of what knowledge is,
+I can explain why my consciousness is consciousness
+of this object rather than that object,
+even though none of the stuff that I just said
+can be among the objects of consciousness.
+And so we need a principled reason
+for locating sensuous certainty between the skill of caveman
+consciousness and the caribdis of overly conceptually
+sophisticated sensuous certainty.
+And it's possible.
+So I said before, one worry that people
+have had about sensuous certainty for a long time
+is Hegel is making sensuous certainty answer questions
+it doesn't have to answer or can't answer.
+That's sort of the worry about caveman consciousness.
+The worry about what I'm calling conceptually sophisticated
+sensuous certainty is it can answer Hegel's critique.
+But the material it uses to answer Hegel's critique
+doesn't go in the object of consciousness.
+It's not one of the things it knows,
+or one of the things it's conscious of.
+It's meta philosophical, or it's meta epistemological account
+of what the object of consciousness is.
+So fully defending Hegel would require explaining
+our principle way why that is not a legitimate move.
+Yes, so far.
+Sensuous search.
+So who is it fighting with?
+That's a phrase to use.
+It's some.
+OK.
+Yeah, it's some.
+Yes.
+Why can't universality or universality
+be known immediately?
+This is a sort of, so a universal can't be
+known as a universal immediately.
+Because to know something as a universal,
+you have to distinguish it from a predicament.
+So to be conscious of something as a universal,
+you have to be aware of it as a one over many.
+And that requires us distinct from the many.
+But why is it not the other way around?
+That you first understand this unity to things
+and then you can understand particulars.
+Why do we have to understand distinct particulars first
+in order to understand what a universal is?
+I mean, the same thing.
+I didn't say you have to understand the particulars
+first.
+To understand a particular is a particular.
+You also have to understand it as distinct from potentially
+other particulars and from universals that it realizes.
+So that's also media.
+So the immediate, the thing that you know immediately
+is this, which now, sensuous certainty doesn't say of it
+that it's a universal.
+Because it's not aware of it as a universal.
+We, the chronological observers, are aware of it as a universal.
+Let me ask, how many of you are totally lost?
+Raise your hand if you are totally lost.
+Someone, OK, there's 0% chance that only three of you
+are totally lost.
+Just be honest.
+OK.
+Someone who is totally lost, tell me
+the last place in which you were not lost.
+Where did you get lost?
+Someone we have not heard from yet.
+I saw some hands in the background.
+Anybody?
+OK, Krista.
+I'm not sure you're going to be like,
+I got lost at this place, which is way further along
+than where other people got lost.
+So how do we get to pure being and what
+sensory sense is pure being?
+So the way we get to pure being is, first of all,
+we just assume that the object of knowledge is what it is.
+You only know what it is.
+Now, sensuous certainty is immediate consciousness.
+That means what it is conscious of can't be determined.
+Because determinacy always involves idiomatic.
+That means it cannot be contrast of a particular being.
+That means it cannot be conscious of a determinate being,
+one being as opposed to another being.
+Because to be conscious of one being as opposed to another being,
+a determinate being, requires negation, which is a kind of mediation.
+That means because it's conscious of what is,
+because all knowledge is knowledge of what is,
+it's not knowledge of a determinate being,
+any determinate being, or even a very indeterminate being.
+It's conscious of indeterminate pure being without any determinacy.
+So pure being is not a very special being.
+It's not the universal being, because that
+would be determinate or universal rather than a particular.
+It's not God.
+It's not the so-called bear particular, because that's
+a particular rather than a universal.
+It's just being.
+It's what Parmenides is talking about.
+OK, I'm sorry, I don't know your name.
+Did you say you were lost?
+Eventually, I didn't get lost.
+Do you want to tell me the last place where you were not lost?
+Did you trace your steps?
+No, I wasn't around the being thing.
+OK, that's great.
+If you only got lost at being, you're doing very good.
+Being is a very respectable place to get lost at.
+I got lost the move of using the eye to anchor this.
+So the idea is Hegel says, look, here and now are universals,
+because that's a here, that's a here, that's a here.
+Every time is a now.
+Consciousness says, OK, this is a version
+of making the indexical move.
+It says, here is wherever I am, and now
+is whenever I am speaking.
+OK, good.
+But now notice, I is also a universal or an indexical.
+You can say I, I can say I, everyone here can.
+I'm assuming everyone here can say I.
+That means that for consciousness to use that move,
+it has to distinguish its eye from other eyes.
+That is just as to say, I, as uttered by any speaker,
+S, refers to X. But that requires
+the difference between a particular instance
+of the variable and the general term binding the variable.
+And that's a version of the distinction
+between particulars and traversals.
+That requires negations.
+That's a form of determinacy, and it can't do that.
+Is the order a matter of whether Hegel
+does time first or space first?
+I don't think so.
+That's a good question.
+But he does time in both cases first, and I'm not sure why.
+Yes?
+No, you.
+Just why can't determination or distinction be given immediately?
+Because I feel like I can immediately see differences.
+This is a really good question, and it's
+totally foundational in Hegel that he doesn't think
+that it can be.
+Now, for a really good argument, we have not seen one yet.
+But the basic idea, it's in a certain way,
+it's a version of the Kantian points
+that the combination of the manifold
+is not given by the senses.
+If any immediate form of awareness,
+not by means of anything else, does not
+acquaint you with anything that's determinate.
+Determinately one way rather than another.
+For it to be determinately one way rather than another,
+you have to be aware of it as determinately one way
+rather than the other.
+And that means your awareness of it
+is that way is mediated by your awareness of the ways
+it might otherwise be.
+This is so foundational for Hegel.
+I'm not even sure he ever argued sort of.
+An immediate relation is a relation
+to something indeterminate.
+And that means all of the immediate stuff.
+So people in this period love appealing
+to immediate awareness of things.
+And the Hegelian move repeated over and over
+is that makes the object of your awareness totally indeterminate.
+OK, now here's a challenging question.
+Is any of this in sensual certainty a criticism of Kant?
+Does Kant have to disagree with any of any in sensual certainty?
+You want to take a stab at it?
+There might be a way in which if you read Kant's definition
+of intuition at the beginning, that this is just
+an attack on that conception, that you can be immediately
+related to the object.
+OK, so on one way of thinking about this,
+this is a criticism of Kant's notion of intuition.
+Because intuition is an immediate relation.
+And Kant thinks it's an immediate relation
+to a determinate object.
+That's the intuition of this object rather than another.
+But you could also think Kant completely
+agrees that in order for you to be conscious of your intuition
+as being of one object rather than another,
+you have to conceptualize it.
+So it's not at all clear that Kant
+has to disagree with it like this.
+So let me just repeat that line of thought very briefly.
+So one reading of Kant, which I don't think
+is a right reading but simply upheld,
+is that intuitions, because they are immediate,
+are completely indeterminate.
+The object of intuition without concept is just totally indeterminate.
+I think that doesn't make any sense in Kant.
+But if that's what Kant's view, then Hegel's just making his point forward.
+I think it's much more plausible that Kant thinks that intuition
+is an intuition of a determinate object.
+It's a particular object.
+It's an intuition of this object.
+It's not just an intuition of objects that are indeterminate.
+But Kant can, I think, acknowledge the point here by saying, oh, that's right.
+But in order for you to be conscious of that object of intuition
+as the object of that intuition, you need to conceptualize it.
+Yes?
+Yeah.
+Just one question about that last comparison between the two
+that you made.
+It seems to me when you're talking about the object for Hegel,
+that seems much more broad than the object for Kant.
+I think we would grant that the object does need
+to fall under concepts for Kant.
+But it seems like there are things that when Kant wouldn't consider an object,
+but you suggest that Hegel maybe would.
+And that would seem to maybe.
+So object at this point is supposed to be totally general.
+It's the object of consciousness.
+The only more specific notion of object that we've seen
+is the object of sensuous certainty.
+And that's quite determinate.
+It's intended to be a very determinate conception of an object.
+Something you can be sensuously certain of.
+You can't be sensuously certain of God.
+You can't be sensuously certain of the laws of nature.
+You don't sense them.
+You can't be sensuously certain of propositions inside of it.
+So we can see the most general possible notion of object at all,
+and an attempt at a highly determinate one, where the highly
+determinate one has Hegel or he's fate.
+I'm tempted to think that Kant would just say everything even concepts
+are immediate because of self-consciousness.
+So then there's no real problem for him that, for example,
+to think that we can't immediately know what universal means.
+Because everything's kind of immediate.
+Sorry, did you say immediate or immediate?
+Immediate.
+But Kant's conceptual representation is immediate representation.
+To have a concept is to represent something
+by means of the marks of that concept.
+So conceptual representation, as such, is immediate.
+What about just unity of app perception, the baseline?
+Is that kind of immediate?
+And from there, you can just know how things are like?
+So I'm immediately conscious of myself as combining.
+But in order for me to be conscious of anything,
+something has to be given to me in tuition.
+And I have to conceptualize it.
+So you're right, I'm immediately conscious of myself as acting.
+But what Hegel would say is that I is totally indeterminate.
+That's kind of the point.
+It's totally empty.
+The I has no content.
+So Hegel would actually think that, on that point,
+Kant completely agrees with it.
+But I'm worried that we're kind of losing everybody with Kant.
+Yes, sorry.
+Just one more comment.
+Great.
+I think it was all met.
+Is there an issue with Hegel's specific case in time
+as you adrift with it or not?
+Yes.
+Depending on how strongly, it depends on what
+Hegel means by calling space and time universal.
+I think all he means by universal is a one over met.
+And in that very minimal sense, space and time
+are ones over many in Kant.
+They're not conceptual universals.
+But yeah, that's a good question.
+I guess you repeat your indexical formulation
+of the universality of the I.
+Oh, absolutely.
+I would love to do that.
+OK.
+Or any speaker S I has uttered by mass refers to S.
+Seems unarguable.
+What did you learn today in philosophy class?
+Well, we learned whenever anyone says I, I refers to them,
+the person who said it.
+How much is the tuition of the school is?
+So the idea is notice that this requires
+a difference between the universal speaker
+and individual values of this variable.
+If we wrote this out, it would start with the quantifiable
+clause for all S. If S is a speaker,
+and that just has contained within it
+the difference between a particular and a universal,
+that involves mediation, it involves determinacy.
+None of that can be in the content of what
+sensuous certainty is conscious of.
+Now, the question that I was talking about before
+is whether it could be something sensuous certainty could
+say in order to explain the reference of its consciousness
+to an object, even though it's not something it's conscious of.
+And that gets into the difficult question of,
+how conceptually sophisticated are we
+allowed to make sensuous certainty?
+Willow, you have your head up.
+No, he's got 109.
+OK.
+I understood.
+Or are you going to ask me the series of Vakas?
+I mean, if you want to add it to it.
+You have to ask me.
+Sure, sure.
+Well, what are they?
+I just read off the bad.
+Well, they're Roman gods.
+You know that.
+There you go.
+Yes, I do know that.
+OK.
+That's not what I would do.
+OK.
+What I was curious about, anyway, was the so I understood you
+as saying that sensuous sort of, you know,
+says it knows pure being, but really knows
+this specific thing, this pencil, whatever.
+And then it's an issue that you can't know pure being
+through your senses and whatnot.
+Where does that come from?
+You know, you can't know it through your senses.
+That does seem obvious to me, but would this have to be given?
+So it doesn't come up here, such as the series of Vakas passage.
+So it was a response to a worry that you might have.
+Hegel is assuming that by having demonstrated
+that what sensuous certainty can say of its object,
+namely that it's pure being, cannot be
+what it means to be its object.
+But then why couldn't sensuous certainty just
+say, this is a question that as far as I know,
+Hegel doesn't address, that, oh, no, no.
+That's both what I said and what I meant to be my object.
+The object of sensuous certainty is pure being.
+And he doesn't address this.
+Now then you might say, well, OK, how could sensibility,
+how could the senses acquaint you with pure being?
+But now I will talk about series in Vakas.
+So this is a great passage.
+With its appeal to universal experience,
+we may be participating to anticipate concerns
+in the practical sense.
+So the phenomenology is not just about theoretical knowledge,
+it's also about practical knowledge, knowledgeable is good.
+In this respect, what one can say
+to those who make assertions about the truth and reality
+of sensuous objects is that they should be sent back
+to the most elementary school of wisdom,
+namely to the old Ellucidian secrets of Ceres and Vakas.
+So the Ellucidian mysteries are this mystery cult
+in ancient Greece that you would be inducted into,
+and you would be taught various cosmic truths
+about the universe that we don't know that much about it.
+But Hegel knows as much as anyone in the 19th century
+other than Schelling about classical antiquity.
+And he has a view about what the esoteric doctrine, the insider
+teaching of the Ellucidian mystery cult was.
+And he's about to tell us what is.
+And they have yet to learn the secret of the eating of the bread
+and drinking of the wine.
+This is so because the person who has been initiated into these secrets
+not only comes to doubt the being of sensuous things,
+but rather it arrives at despair about them.
+In part, he brings about their nothingness.
+And in part, he seems them to seize them to do it to themselves.
+So what Hegel is referencing is the fact that on his view,
+what you learned in the Ellucidian mysteries
+was that no individual being has any reality.
+And you learned this by basically taking a lot of drugs.
+I'm totally serious.
+This is almost certainly true.
+Almost certainly true of all these ancient mystery
+cults were based on the heavy use of all this magic.
+That's like you can actually prove this archaeologically
+because you can get plant residue from these various bowls
+and you can figure out what psychedelics they use.
+You take a bunch of psychedelics, and then they would perform
+these little pageants for you.
+And then the point on Hegel's interpretation,
+the point of the pageant was to discover
+that no finite being has any reality.
+The only being that's real is pure being.
+So the point is the people who insist
+on the reality of individual things, the sensuous certainty
+person, needs to go do the Ellucidian mysteries.
+And what they'll see is that's the true result of their view,
+that the only thing that's real is pure being.
+Now what are the animals excluded from this wisdom?
+Instead, they prove themselves to be
+the most deeply initiated into it,
+for they do not stand still in the face of sensuous things
+as if those things existed in themselves.
+Despairing of the reality of those things
+and in the total certainty of the nullity of those things,
+they without any further ado simply
+help themselves to them and devour them.
+Just like the animals, all of nature
+celebrates these revealed mysteries,
+which teach the truth about sensuous things.
+So Hegel is saying, even the animals know better
+than the sensuous certainty person,
+they know that finite things don't have any reality
+because you can just eat them.
+So is that just a joke?
+It's not just a joke.
+Because Hegel's view, Hegel's true view,
+he's not someone who believes that the only thing that's
+real is pure being.
+That view is called a cosmose.
+It's the view that denies the existence of the cosmos,
+where we take the cosmos to mean determinate beings,
+determinate or find ideas.
+So if an atheist is someone who denies the existence of God,
+and a cosmist is someone who denies the existence of beings,
+there's only pure being.
+Now Hegel, I'm sort of obsessed with this.
+Some of you heard me talk about this many, many times.
+This is one of my great hobby horses.
+Hegel is obsessed with refuting a cosmose.
+In fact, the science of logic, in a less temperate moment,
+I would say Hegel's entire philosophical project
+consists in the reputation of a cosmose.
+That's a little bit of an exaggeration.
+But his view about the North, so Hegel
+does not think that the Eleusinian mysteries are
+getting you at the truth.
+Namely, all there is is pure being and finite things
+have no reality.
+He thinks that view is incoherent.
+Because if they have no finite reality,
+how could you have thought they had a finite reality?
+The illusory being is a kind of being.
+So they can't not exist at all.
+And furthermore, he thinks that the pressure to a cosmism
+is endemic or internal, more or less,
+to the entire Western philosophical tradition.
+In fact, Western philosophy begins with a cosmism.
+It begins with Parnedians.
+And it returns in the form of Spinoza,
+he thinks Spinoza, although he Spinoza denies it,
+Spinoza's view entails that no finite things exist.
+In fact, not just no finite things, no beings exist.
+God is not a being.
+God is just pure being.
+That's what Hegel thinks Western is.
+He's also read it.
+And he thinks that his entire philosophical tradition,
+fifth de Chale, all of his pals, also
+have this problem that their fundamental first principle,
+the I or the indifference point, actually
+eliminates the existence of all finite things.
+It eliminates all beings.
+It's just pure being.
+So what we have to do is maintain
+the existence of finite things, but not in this dumb way
+that sexual certainty wants to.
+Here's a being, here's another being,
+and they're unrelated to one another.
+In fact, the way we have to retain
+the being of finite things is the way the animals do,
+which is to say, they have a, finite things
+have a kind of being, which is then subrelated,
+but then retained at a higher level.
+So we'll talk about this in the logic,
+but the digestive model of the animal's relationship
+to finite things is, in fact, Hegel's
+view about the reality of finite things.
+So what he's saying is, you need to go
+to the L.O. studio of mysteries, or more properly,
+just to pay attention to animals.
+And what you'll see is, finite things do have a kind of being.
+Then we'll read some more.
+Actually, in the back, we have not heard from you.
+Yeah, sorry.
+So then, where does, I guess, Hegel's one time student,
+Sterner fall out?
+I have no idea.
+I've never read any Sterner, because it just
+sounds so insane.
+Generally, so after Hegel's death,
+or even during Hegel's life, people
+divide in their reactions to Hegel
+between so-called left Hegelians, who
+think that the true philosophical message of Hegel
+is revolutionary with respect to traditional religion
+in the Prussian state.
+Right Hegelians, who think Hegel is a defender
+of orthodox Lutheranism, and the Prussian monarchy,
+and the true view.
+Central Hegelianism, Hegel was a central Hegelian, namely
+that the true religious concept of Hegel
+is not very much like orthodox Lutheranism,
+but nor is it any kind of atheism,
+or this Freudian nonsense about how
+God is the projection of our inferiority complex,
+or whatever.
+And the political content of Hegelian philosophy
+is a constitutional reform of the Prussian monarchy,
+rather than it's in its absolutist form.
+But I have not gotten into this.
+Sterner is one of the big left Hegelians,
+but I have, to a large extent, not really gotten
+to the left Hegelianism, because they
+don't feel like I understand Hegel well enough to get
+into the left, right, and center Hegelianism.
+OK, but before we finish today, I
+want to talk about the end of 110, or actually 110.
+However, those who set up such assertions in lines
+with the previous remarks also immediately
+say the opposite of what they mean,
+a phenomenon that is perhaps best
+able to bring them to reflect on the nature
+of the century with certainty.
+They speak of the existence of external objects,
+which, to put it more precisely, can
+be turned into the actual, absolutely singular,
+individual, wholly personal, individual things, each of which
+is absolutely unlike the others.
+This existence is said to have absolute certainty and truth.
+They mean this piece of paper on which I am writing,
+or rather have written this.
+But they do not say what they mean.
+They intend to talk about concrete, sensible particulars,
+but what they really say is universals.
+However much they actually wanted to say what they
+knew about this piece of paper, and however much they wanted
+to say it, still it would be impossible
+because the sensuous this, which is what is meant,
+is inaccessible to the language which belongs to consciousness,
+or to what is in itself universal.
+In the actual attempt to say it, in itself
+would therefore rot away.
+So the singular, an individual, is inaccessible to the language
+of consciousness because, to refer to this,
+you need not just a universal, nor do you
+need just a singular indexical like this.
+You need both.
+You need to refer to this pencil.
+You need to have a conception of the object
+as an instance of a universal.
+So the idea is, if you just have this,
+there's no account of why you're referring to the pencil
+rather than the parts of the pencil, the eraser, the tip.
+The only way objects can be available for consciousness
+is if they are this such, an instance of a universal.
+Skipping a bit, if nothing is more said of a thing,
+that it is an actual thing, an external object,
+that it is only expressed as the most universal of all.
+And what is therefore expressed is the sameness with everything
+rather than its distinctiveness.
+If I say a singular thing, then instead I
+say something entirely universal about it,
+for everything is a singular thing.
+Likewise, this thing is anything one pleases.
+To characterize it more precisely as this piece of paper,
+every and each bit of paper is a this, a piece of paper,
+and I've only spoken, as usual, of the universal.
+That is to say, I need not just a universal, but something
+like a Kantian intuition.
+However, if I wish to lend a helping hand to speech,
+which itself has the defined nature of immediately inverting
+the meaning, that of making it to something else,
+and in that way of not letting the meaning get
+into words at all.
+So this is what Hegel loves these plays on language,
+because he thinks what language shows
+is this distinction between what consciousness means to say
+and what it says.
+Then by pointing out this piece of paper,
+I thus learn from experience what the truth of sensuous
+certainty, in fact, is.
+I point it out as a hearer, which
+is a hearer of other hearers, for which in its own self
+is a simple ensemble of many hearers, which is to say,
+is a universal.
+In that way, I receive it as it is in truth,
+and instead of noting what is immediate, I perceive.
+So now what Hegel is doing is transitioning
+to the transition from the first object to the second.
+So that is to say, from the first form of consciousness
+to the second form of consciousness.
+The second form of consciousness is the determinant negation
+of the first form of consciousness.
+We don't have a new beginning.
+We don't start from nothing.
+Nor is the second shape of consciousness just,
+you don't know it.
+The second object is the being of the first object
+for consciousness.
+So insofar as the first object knew something,
+the second object is what it knew.
+So insofar as the first shape of consciousness knew something
+or intended to know something, it was this.
+But the reason it couldn't know this
+is because it didn't put any universals in the shape,
+in the object of its knowledge.
+So the resolution of that problem
+is to recognize that the object of knowledge
+is a thing that instantiates universals,
+a thing with properties, of this such.
+Because once we have that, we have both of this,
+which is something like a spatio-temporal indexical.
+It indicates a direction in your environment.
+But then with the concept, it picks out
+in the fortunate case which thing in your environment
+you're referring to.
+If I say, this book, I'm screwed.
+If I say, this iPhone, now I'm good to go.
+And the reason that worked is because I
+didn't say the iPhone or iPhones.
+That will refer to all iPhones whatsoever.
+Nor did I say this, because this doesn't determinately
+refer to anything.
+I said, this iPhone.
+And that only picks out this if this is an iPhone,
+and not everything else is an iPhone, which
+means this has to have a universal,
+has to be an instance of something,
+and it has to be a universal that other things don't have,
+not everything else has.
+Otherwise, it wouldn't pick it up.
+Yeah?
+For instance, expressing it as an actual thing
+and its sameness with everything else,
+does this, when you speak to the students,
+be that Schelling position that you
+emphasize in the practice of managing the 12,000
+by a computer-socially-centered student?
+Yes.
+In an other way, if we want to bring Schelling into that,
+what he's saying is what sensuous certainty means
+to know, what it intends to know,
+is concrete particulars.
+What it actually says it knows is
+something as indeterminate as Schelling's note in which
+all cows are alive.
+Pure be.
+Now, that brings in Schelling, but many of you
+don't know who Schelling is.
+Don't worry about it.
+But the first principle of Schelling's philosophy,
+Hegel thinks is, actually Schelling explicitly says this,
+is as indeterminate as purity.
+That's to say, it has no differences or determinacies
+in it whatsoever.
+It's completely a cosmos starting point.
+So what Hegel is saying is that sensuous certainty thinks
+it's the most concrete empiricist position
+possible.
+But what it's actually saying is that what it's conscious of
+is the most insane Schellingian totally
+indifferent starting point of all philosophy.
+So that means that the second shape of consciousness
+is one in which objects are instances of universals, things
+with problems.
+Now, I just want to note that if we
+look at the table of contents of the phenomenology of spirit,
+I think this edition has a relatively informative one.
+We'll just note that the first form of consciousness
+is sensuous certainty.
+The second shape of consciousness is perceiving.
+And the third shape of consciousness
+is force and the understanding, appearance,
+and the super sensible world.
+So if we think of this in Kantian terms,
+and then the second one is self-consciousness,
+we're in a certain way building up
+the capacities of the Kantian mind.
+There's appearance, perception, and then understanding.
+Where understanding involves making a distinction
+between how things appear to you and the super sensible objects
+that are appearing to you.
+And then there's aperceptive self-consciousness.
+Now, that doesn't mean that this is supposed
+to correspond one-to-one with Kant's taxonomy
+of the human mind because Hegel thinks of Kant
+as he thinks of every other philosopher
+as insufficiently systematic.
+That's to say, we don't want a one-to-one correspondence
+with Kant's quote unquote system because Kant's system isn't
+really systematic.
+This is the systematic articulation
+of everything that has to be in spirit in order
+for spirit to be spirit.
+But even properly, it maybe isn't that
+because it's doing that by way of uncovering
+the internal dialectical failures of all
+of these other conceptions of what now it is.
+Yeah.
+Yeah.
+I have a question similar to Kantian's one.
+And it's just about concepts.
+I feel like in the Cartesian sense,
+the thoughts in itself themselves
+are kind of immediate to us.
+And then with perceptual input, we see new things.
+And we maybe we can modify all those concepts and so on.
+It's like backwards.
+So that is a remark in a different way
+of doing philosophy, a way of doing philosophy in which we
+start with what seems plausible to us,
+and then we reason from there.
+That's not what Hegel is doing.
+That's not how the phenomenology works.
+The phenomenology does not work with any.
+Our assumptions are supposed to be completely suspended.
+And it's supposed to unfold from the most immediate,
+that is to say, indeterminate shape of knowledge possible,
+everything that knowledge is.
+So what seems to us plausible isn't,
+so to speak, argumentatively relevant.
+And so likewise, what's phenomenologically available
+to us in Dufcerlian sense also isn't relevant,
+because that would assume a different conception
+of what knowledge is, which hasn't been dialectically
+unfolded yet in phenomenology.
+Yeah.
+In the previous lecture, you said
+that each shape of consciousness
+has to determine the next shape of consciousness.
+It seems like pure consciousness has options
+between sticking to its original claim.
+I know particulars.
+Or just going into pure being.
+How about an issue?
+It is an issue.
+The systematic structure of phenomenology
+requires that there be one and only one successor
+shape of consciousness.
+If there's forking paths, then the argument is real.
+So if we really want to take phenomenology seriously,
+we have to ask ourselves at every step,
+is there a potential forking path here?
+And the move towards pure being is one such forking path.
+Now, I think Hegel thinks he has a number of reasons
+to foreclose sensuous certainty of pure being
+as a possibility, one of which will be relevant when we talk
+about pure being and logic, is I think
+he thinks pure being is not a possible object of knowledge
+because it's so indeterminate.
+You can't know pure being.
+What would you know?
+What did you learn at school today, pure being?
+Oh, tell me about that.
+It is.
+It is just purely.
+Is there any particular way?
+Oh, no, no, no.
+It's not any particular way.
+It just did.
+Yes, fine.
+Each of the arguments Hegel makes,
+are those supposedly the only arguments that
+can be made to move from one argument to the next?
+Good question.
+I don't think Hegel wants to like,
+we don't want to read Hegel as having some like,
+implausible view or like, these words in exactly this order
+have to be written this way.
+So like, there has to be some flexibility or plasticity
+in the order of presentation.
+Like, did he have to do this whole thing of doing,
+now is night, and here's the tree, here's the house.
+I see the tree.
+I see the house as someone else.
+Couldn't he have just skipped immediately
+to the form of sensuous certainty
+in which there's no essential difference,
+no difference in essence between subject and object?
+Probably.
+But the problems arise from the shape of consciousness itself,
+and therefore, they cannot be Hegel's invention.
+So I'll just warn, I mean, one of the reasons
+I don't love teaching the phenomenology of spirit
+as the whole book, I actually love
+teaching sensuous certainty because people get the point.
+And you can actually kind of philosophically engage with it,
+pretty straightforwardly.
+One of the reasons I don't love teaching the whole book is,
+the further you go in the book, the harder it is to believe
+all of the transitions are principled.
+So famously, as a friend of mine, I put it this way,
+it's more or less impossible to predict
+what the next shape of consciousness is going to be,
+which is a sign that there is not, in fact,
+a principal function that takes you from shape of consciousness
+n to n plus 1, because then we would just learn the function.
+Every time I read the phenomenology,
+I'm a little surprised by what comes next.
+I'm like, really?
+Why that?
+Likewise, it's hard by the end of the book
+to feel like all of these problems are purely interned.
+My general sense is, I kind of feel
+like I have a line on what's going on everything up
+through reason.
+And then the transition, once we transition
+to spirit in the middle of the book,
+the feeling of arbitrariness in the successor
+shapes of consciousness and the problems that arise
+starts to just kind of grow exponentially.
+So after we get to reason, we get to spirit.
+And the first shape of spirit is this shape of spirit
+in which somehow your family is in touch
+with the gods of the underworld.
+But then in your public life, you're
+like a good patriotic Greek citizen.
+So it's just like, what?
+Why are we talking about antigone?
+It's just very hard for me to really be convinced
+about every transition.
+I'm not a super phenomenology optimist.
+Just to make sure I got this, however,
+the paradox of sense certainty is not
+being able to say what it means or the contradiction to what
+it means when it says, are the rocks on which sense certainty
+as a shape of knowing, for example.
+And that's what causes the despair, is it,
+that lifts us up to the next?
+Exactly.
+Up to the next state.
+And that's an example of an internal self-contradiction.
+Or imminent, yeah.
+Could not the advocate of sense certainty
+say that contradiction is not part of its bag
+and that therefore what's being advanced against it
+is actually an external criteria?
+Good.
+Gets to a fundamental issue in Hegel's philosophy.
+Why do we have to care about contradictions?
+Foundational, if we just read the way the book works,
+it seems absolutely foundational that contradictions are death.
+That means you get a contradiction,
+you have to overcome it.
+Sense to a certainty cannot just rest content.
+Just be like, yep, I know this object.
+That object is not knowable.
+What's the problem?
+Now, this will be more relevant in the science of logic.
+But Hegel's, both the phenomenology and the science
+of logic, mostly explicitly, I kind of think actually
+the entire encyclopedia, the entire system,
+depends on uncovering and reconciling contradictions.
+Now, that's true, as you just brought out,
+from the word one of the phenomenology.
+It will also be true from word one of the science of logic.
+Now, no justification is given to us.
+So that means it's internal, it's foundational for Hegel,
+that you cannot just rest content with a contradiction.
+You have to move beyond.
+Now, that means that a certain kind of attitude
+towards the principle of contradiction
+is built into the way the whole philosophical system works.
+One view about contradictions is that contradictions cannot even
+be thought.
+You can say P and not P, but you haven't thought anything.
+Kant can be read as saying that.
+Another view is that you just shouldn't
+believe contradictions, you shouldn't think of them.
+You can, but you shouldn't give them.
+Kant can also be read that way.
+The problem with the don't do it is, OK,
+I do a lot of things I shouldn't do.
+What's so bad about contradicting myself?
+What I say won't be true, but I also
+say a lot of things aren't true.
+The problem with that you can't think it is, well,
+it does seem like we think contradictions all the time.
+You can reason with them.
+So now Hegel definitely is not a you cannot think a contradiction
+person, because the logic is just full of contradictions.
+And it's all thinking.
+But nor is he merely a don't do it, because that's too weak.
+And the logic is not built on, oh, you should keep doing this.
+The forward movement of the phenomenology and the logic
+are not a normative one.
+You're a bad person if you don't keep reading.
+So he seems to have a third view, which is contradictions
+are thinkable, but thought as such must strive to resolve.
+It cannot rest content with a contradiction.
+It has to try to go beyond the contradiction.
+And the reason this is relevant is because there
+are people who read, so we'll talk about this when we get
+to the logic, there are people who
+think there are true contradictions.
+They're called dialytheists, because they
+think something can be both true and false.
+That can be true, that p is both true and false.
+And Hegel is one of their main historical supports.
+You can read Hegel as a dialytheist,
+because he says dialytheist friendly things all the time.
+The problem is if Hegel thinks that contradictions are true,
+when we get to contradictions, why do we have to move beyond them?
+The problem with the dialytheist is
+they don't have a sufficient, for Hegel,
+a sufficiently strong justification of why we,
+when we get to a contradiction, we don't just go, oh,
+interesting fact, contradiction.
+What they will say is you want to minimize contradictions,
+because the more contradictions you have,
+the more messed up your logic is.
+So the basic idea of dialytheist logic
+is you can have a non-trivial logic that
+has true contradictions in it.
+You just have various logical methods
+of constraining, localizing the contradictions.
+So there's a contradictory subject matter here,
+but as long as you're sufficiently far away
+from that subject matter, you don't have to contradict yourself.
+But the problem is that involves a basically pragmatic approach
+to logic, which is totally acceptable in contemporary
+philosophy, but it's totally an alphabet of Hegel's whole way
+of doing philosophy.
+What we're trying to do in hand-making philosophy
+is not like, find the best overall plausible view
+compatible with our starting positions.
+No.
+We're trying to totally systematically
+from a completely indeterminate presuppositionless starting
+point unfold all the philosophy.
+So we need a more systematic explanation
+of why, when we get to a contradiction,
+we're not just happy with that.
+And I mean, this is a very huge topic in Hegel.
+It will occupy us at various points
+over the course of the semester.
+I think it's just internal that Hegel's conception
+is that thinking strives to overcome a contradiction,
+and thinking is not in agreement with itself.
+It's not fully thinking, except insofar as it
+overcomes contradiction.
+OK.
+I think that is going to be it for today.
+I'll set some reading notes for next week.
+There's a lot of reading on the syllabus for next week.
+It'll take me two weeks to get through all of it,
+try to read absolute knowing, and then experience gratitude.
+We're not reading the whole phenomenology.
+Yeah.
+We'll go back.
+We'll go back.
+We'll read the whole phenomenology.
+Yeah.
+I think it's good.
+Yeah.
+Yeah.
+I think it's good.
+Yeah.
+It's good.
+Yeah.
+It's good.
+It's good.
+It's good.
+It's good.
+Yeah, yeah, yeah.
+Yeah.
+Yeah.
+Yeah.
+Yeah.
+Yes.
+Thank you.
+Thank you for showing questions.
+Oh, OK.
+One, two, three.
+OK.
+Mr. Brown said that it's OK.
+OK.
+Thank you.
+It's not that it's OK.
+It's OK.
+Yeah.
+It's OK.
+Yes.
+It's not really about politics anymore.
+It's about transformation.
+It's about transformation.
+Yeah.
+Yeah.
+We'll just do it on the conference.
+There you go.
+There you go.
+Yeah.
+Good.
+Thank you.
+Thank you.
+Thank you.
+We have your photos of it.
+OK.
+Thank you.
+Thank you.
+Thank you.
+Thank you.
+OK.
+You're out of the park.
+No, we're not in the park.
+Oh, my family's not here.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
+Hello.
