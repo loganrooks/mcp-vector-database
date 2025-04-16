@@ -1,460 +1,318 @@
-# Philosophical Knowledge Graph & Semantic Search Platform
+# PhiloGraph: Philosophical Knowledge Platform - Specification v2.0
 
 ## Vision Document
 
 ### Executive Summary
 
-We propose to build **PhiloGraph** - a specialized knowledge platform that combines semantic search capabilities with relationship modeling for philosophical texts. The system will serve both individual researchers through a CLI and larger audiences via an MCP interface and web platform. Beginning with a focused MCP server providing immediate utility for essay writing and research, built upon an extensible core, the platform will strategically expand to fulfill the complete vision. This document outlines the high-level vision, architecture, key design considerations, and strategic implementation roadmap.
+PhiloGraph is envisioned as a specialized knowledge platform designed to revolutionize philosophical research and engagement. It integrates advanced semantic search capabilities (powered by vector embeddings) with sophisticated relationship modeling, allowing users to navigate the complex web of philosophical ideas, texts, and authors. Operating initially within the RooCode framework via a dedicated MCP server, and designed for future expansion into CLI and web interfaces, PhiloGraph aims to provide immediate utility for tasks like essay writing and research while building towards a comprehensive, extensible system. This platform uniquely seeks to support not only traditional analytical methods but also to facilitate exploratory approaches inspired by diverse philosophical traditions, including post-methodological thought. This document outlines the refined vision, architecture, technical specifications, and strategic roadmap based on initial concepts and subsequent research.
 
 ## 1. Core Vision
 
 PhiloGraph will be a comprehensive tool for philosophical research that:
 
-1.  **Connects ideas across texts** through explicit relationship modeling and semantic similarity
-2.  **Organizes knowledge flexibly** - supporting both traditional hierarchical structures and non-hierarchical exploration
-3.  **Enables sophisticated queries** combining semantic search with relationship traversal
-4.  **Supports research workflows** from discovery to writing and citation
-5.  **Functions across multiple interfaces** (CLI, MCP, web) to serve different user needs
-6.  **Delivers immediate utility** with a focused initial implementation built for expandability
+1.  **Connects Ideas:** Models explicit relationships (citation, influence, critique, etc.) and discovers implicit connections (semantic similarity) across texts and concepts.
+2.  **Organizes Flexibly:** Supports traditional hierarchical structures (Book -> Chapter -> Section) while enabling non-hierarchical, rhizomatic exploration and user-defined organization.
+3.  **Enables Sophisticated Queries:** Allows complex queries combining semantic search (vector similarity) with graph traversal and metadata filtering (e.g., by author, school, theme, course).
+4.  **Supports Research Workflows:** Assists users throughout the research lifecycle, from discovery and analysis to synthesis, writing, and citation management.
+5.  **Offers Multiple Interfaces:** Provides access via CLI (for power users), MCP (for AI agent integration), and a future Web UI (for broader access and community features).
+6.  **Prioritizes Extensibility:** Built on a modular, API-first architecture with pluggable components for future growth and adaptation.
+7.  **Facilitates Diverse Methodologies:** Provides tools and affordances that enable users to engage with texts using various philosophical approaches, including facilitating explorations inspired by post-methodological concepts.
 
 ## 2. User Stories
 
+*(User stories remain largely the same as v1.0, covering Individual Researchers, AI Integration, and Community Features)*
+
 ### Individual Researcher
-- As a philosophy student, I want to search across assigned readings to find passages related to specific concepts
-- As a researcher, I want to trace the evolution of ideas across philosophical traditions
-- As an essay writer, I want to find supporting evidence or contradicting viewpoints for my thesis
-- As a reader, I want to identify connections between texts I've read that I might have missed
-- As a student, I want to filter search results by course (e.g., "PHL316") or time period (e.g., "first half of semester")
-- As a writer, I want to check if I've missed any sections in assigned texts that contradict my interpretation
+- As a philosophy student, I want to search across assigned readings to find passages related to specific concepts.
+- As a researcher, I want to trace the evolution of ideas across philosophical traditions using explicit and semantic links.
+- As an essay writer, I want to find supporting evidence or contradicting viewpoints for my thesis, with accurate citation data.
+- As a reader, I want to discover connections between texts based on shared themes, influences, or semantic similarity.
+- As a student, I want to filter search results by course (e.g., "PHL316"), time period, or philosophical school.
+- As a writer, I want to check my interpretation against specific passages in assigned texts.
+- As a researcher, I want to manage collections of quotes and notes linked to specific text passages.
 
 ### AI Integration
-- As an AI assistant, I want to access philosophical sources to provide accurate, cited information
-- As a researcher, I want to use AI tools that can reference and incorporate philosophical texts correctly
-- As an essay writer, I want AI assistance in drafting papers with proper citations from my readings
+- As an AI assistant (via RooCode/MCP), I want to query PhiloGraph to retrieve relevant philosophical passages and metadata to answer user questions accurately.
+- As an AI assistant, I want to use PhiloGraph's relationship data to perform comparative analysis or trace conceptual lineages.
+- As an AI assistant, I want to leverage PhiloGraph to help users draft essays with proper citations.
 
-### Community Features
-- As a philosophy professor, I want to create curated collections of texts for my students
-- As a philosophy enthusiast, I want to discover new readings based on texts I've enjoyed
-- As a debate participant, I want to easily reference specific passages to support my arguments
-- As a researcher, I want to save and organize important quotes into thematic collections
+### Community Features (Future Phases)
+- As a philosophy professor, I want to create and share curated reading lists or knowledge graphs for my students.
+- As a philosophy enthusiast, I want to discover new readings based on texts or concepts I've explored.
+- As a debate participant, I want to easily reference specific passages with stable identifiers to support my arguments.
+- As a researcher, I want to optionally share annotations or discovered relationships with a community.
 
-## 3. System Architecture
+## 3. System Architecture (Refined)
+
+The overall architecture remains service-oriented, emphasizing modularity and API-driven communication.
 
 ```mermaid
 flowchart TD
     subgraph "Storage Layer"
-        VDB[(Vector Database)]
-        RDB[(Relational Database)]
-        FSS[File Storage System]
+        style Storage Layer fill:#fdf,stroke:#333,stroke-width:2px
+        DB[(**ArangoDB**<br/>Multi-Model: Graph, Document, Vector)]
+        FSS[File Storage System<br/>(Local/Cloud)]
     end
-    
-    subgraph "Core Services"
-        TP[Text Processor]
-        SM[Search Module]
-        RM[Relationship Manager]
-        IM[Inference Module]
-        BM[Bibliography Manager]
-        
-        TP --> SM
-        TP --> RM
-        SM <--> RM
-        RM <--> IM
-        BM <--> SM
-        BM <--> RM
+
+    subgraph "Core Services (API-Driven)"
+        style Core Services fill:#def,stroke:#333,stroke-width:2px
+        TP[Text Processor<br/>(GROBID, OCR, Chunking, Embedding)]
+        SM[Search Module<br/>(Hybrid Query Engine)]
+        RM[Relationship Manager<br/>(Graph Operations)]
+        IM[Inference Module<br/>(Rule/Graph-Based)]
+        BM[Bibliography Manager<br/>(Citation/Collections)]
+
+        TP -- Stores --> DB
+        SM -- Queries --> DB
+        RM -- Manages --> DB
+        IM -- Analyzes --> DB
+        BM -- Uses --> DB & SM & RM
     end
-    
+
     subgraph "Interface Layer"
+        style Interface Layer fill:#ffc,stroke:#333,stroke-width:2px
         CLI[Command Line Interface]
-        MCPI[MCP Interface]
-        API[REST API]
-        WUI[Web UI]
-        TR[Text Reader]
-        
+        MCPI[MCP Interface<br/>(RooCode Integration)]
+        API[Internal REST/GraphQL API<br/>(Service Communication)]
+        WUI[Web UI<br/>(Future Phase)]
+        TR[Text Reader<br/>(Future Phase)]
+
         CLI --> API
         MCPI --> API
         WUI --> API
         TR --> API
     end
-    
-    Core Services --> Storage Layer
-    Interface Layer --> Core Services
-```
 
-## 4. Key Components
+    subgraph "External Systems & Tools"
+         style External Systems & Tools fill:#eee,stroke:#333,stroke-width:1px
+         SourceAPIs{{Source APIs<br/>(DOAB, PhilPapers, etc.)}}
+         LMSTools{{LMS Integration<br/>(Canvas API, etc.)}}
+         ExtScripts[/Processing Scripts<br/>(Dockerized Python)/]
+    end
+
+    API -- Invokes --> Core Services
+    TP -- Uses --> ExtScripts
+    TP -- Uses --> SourceAPIs
+    Core Services -- May Use --> LMSTools
+
+    FSS <-. Stores/Reads .-> TP
+    FSS <-. Optionally Reads .-> TR
+
+```
+**Key Architectural Changes:**
+*   **Database Consolidation:** Recommending **ArangoDB** as the primary database to leverage its native multi-model capabilities (graph, document, vector) and AQL for powerful hybrid queries, simplifying the storage layer compared to separate relational + vector stores.
+*   **Processing Environment:** Explicitly noting that external processing scripts (Python) should be containerized (Docker) for reliable execution invoked via Core Services (likely through an MCP server wrapper not shown in this high-level diagram).
+
+## 4. Key Components (Refined)
 
 ### 4.1 Storage Layer
 
-| Component | Purpose | Options | Considerations |
-|-----------|---------|---------|----------------|
-| Vector Database | Store and query embeddings | PostgreSQL+pgvector, Pinecone, Supabase | Integration with relational data, scaling, cost |
-| Relational Database | Store text metadata and relationships | PostgreSQL, SQLite | Complexity, scaling needs |
-| File Storage | Store original text files | Local filesystem, S3-compatible | Accessibility, backup, size limitations, relation to local management (See 5.4) |
+| Component         | Purpose                                                     | Recommended Tech | Considerations                                                                 |
+| :---------------- | :---------------------------------------------------------- | :--------------- | :----------------------------------------------------------------------------- |
+| **Database**      | Store metadata, relationships, text chunks, and embeddings. | **ArangoDB**     | Native multi-model (Graph, Document, Vector via FAISS). Powerful AQL for hybrid queries. Scalability features (SmartGraphs). Learning curve for AQL/graph concepts. Open-source core. |
+| File Storage      | Store original source text files (optional mirror).         | Local / Cloud    | Accessibility, backup, linking DB entries to file paths/locations.             |
 
-### 4.2 Core Services
+*(Fallback Database Option: PostgreSQL + pgvector. Requires careful schema design for relationships and potential performance limitations for complex graph queries.)*
 
-| Component | Purpose | Key Features |
-|-----------|---------|-------------|
-| Text Processor | Process raw texts into the database | Hierarchical chunking, metadata extraction (incl. footnotes/endnotes), embedding generation, semantic preservation during chunking, PDF page number extraction (when available), EPUB structure analysis, bulk folder processing, error handling & validation |
-| Search Module | Handle complex search queries | Filter composition, weighted search, relevance scoring, contextual filtering (by course, tradition, time period) |
-| Relationship Manager | Manage explicit relationships | Comprehensive relationship types (conceptual, historical, methodological, etc.), relationship creation/validation, bidirectional relationship maintenance, plugin architecture for new types |
-| Inference Module | Generate insights from data | Path discovery, suggestion generation, concept drift analysis, transitive relationship inference, cross-tradition concept mapping, plugin architecture for new rules |
-| Bibliography Manager | Manage collections and citations | List creation and management, favorites, citation generation (handling PDF page numbers vs. EPUB structures/identifiers), linking text elements to footnotes, quote collections |
+### 4.2 Core Services (API Endpoints)
+
+| Component            | Purpose                                       | Key Features (Refined based on Research)                                                                                                                                                              |
+| :------------------- | :-------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Text Processor**   | Ingests and processes raw texts.              | **PDF Extraction (GROBID recommended)**, **OCR (Kraken/Calamari + mLLM post-correction recommended)**, **Hybrid Semantic-Spatial Chunking**, Metadata/Footnote/Citation Extraction (GROBID/AnyStyle+NER), **Gemini Embedding Generation (via Vertex AI - MVP)**, Pluggable embedding models, Bulk processing, Error handling. |
+| **Search Module**    | Handles complex search queries.               | Hybrid queries (AQL combining vector search, graph traversal, metadata filters), Weighted search, Relevance tuning, Contextual filtering (course, school, theme).                                       |
+| **Relationship Mgr** | Manages explicit & implicit relationships.    | Graph database operations (CRUD), Relationship type management (plugin architecture), Bidirectional link maintenance, Validation.                                                                       |
+| **Inference Module** | Generates insights from graph data.           | Pathfinding, Transitive inference, Relationship suggestion (semantic similarity), Conceptual drift analysis, Clustering/Community detection. Pluggable rules engine.                                    |
+| **Bibliography Mgr** | Manages collections and citations.            | List/Collection management, Citation generation (handling PDF pages vs. EPUB CFIs/structure), Linking text elements to footnotes/citations, Quote management.                                          |
 
 ### 4.3 Interface Layer
 
-| Component | Purpose | Target Users |
-|-----------|---------|-------------|
-| CLI | Local research use | Individual researchers, power users |
-| MCP Interface | AI integration | AI models, tool-using agents |
-| REST API | Service integration | Web UI, third-party applications |
-| Web UI | General access | Casual users, community features |
-| Text Reader | Reading and annotation | Researchers, students |
+| Component     | Purpose                               | Target Users / Integration                               |
+| :------------ | :------------------------------------ | :------------------------------------------------------- |
+| CLI           | Local research & administration       | Individual researchers, power users                      |
+| MCP Interface | AI agent integration                  | RooCode Agents (Gemini 2.5 Pro, etc.), other AI tools    |
+| REST/GraphQL API | Internal service communication        | Decouples interfaces from core services                  |
+| Web UI        | General access, community features    | Casual users, students, professors (Future Phase)        |
+| Text Reader   | Integrated reading & annotation       | Researchers, students (Future Phase, potentially in Web UI)|
 
-## 5. Design Decisions & Considerations
+## 5. Design Decisions & Considerations (Refined)
 
 ### 5.1 Hosting Model
+*   **Recommendation:** Hybrid approach remains preferred. Start with local functionality (CLI, MCP server interacting with local DB/scripts) with a clear path to optional cloud sync/features.
 
-**Options:**
+### 5.2 Community Features (Future)
+*   Features like shared lists, collaborative annotation, relationship suggestions remain relevant.
+*   Social network integration requires significant design for privacy and moderation.
 
-1.  **Fully Local**: CLI-only version that runs entirely on user's machine
-2.  **Hybrid**: Local CLI with optional cloud sync for sharing/backup
-3.  **Fully Hosted**: Web-based service with subscription model
-
-**Considerations:**
-- Local option provides privacy and control but limits community features
-- Hosting costs scale with data size and user count
-- Text-only storage is relatively inexpensive compared to image/video
-
-**Recommendation:**
-Start with a hybrid approach - local CLI with optional account linking for synchronization and sharing. This provides immediate utility while allowing for growth.
-
-### 5.2 Community Features
-
-**Potential Features:**
-- Shared collections (e.g., course reading lists)
-- Collaborative annotation
-- Relationship suggestion/verification
-- Citation sharing
-- **Philosophy Social Network Integration:** Explore potential integration with or development of a dedicated platform (similar concept to GROK/X) allowing users to share insights, debate, and reference their PhiloGraph libraries within a social context. Requires careful consideration of privacy, data ownership, and community moderation. (Future Phase)
-
-**Privacy/Sharing Model:**
-- Private by default
-- Explicit sharing of specific collections
-- Optional public profiles for academics/enthusiasts
-
-### 5.3 Processing Pipeline
+### 5.3 Processing Pipeline (Refined Tools)
 
 ```mermaid
 flowchart LR
-    Raw[Raw Files/Folders] --> Parser[Format Parser]
-    Parser --> Structure[Structure/Note Extractor]
-    Structure --> Chunker[Semantic Chunker]
-    Chunker --> Embedder[Embedding Generator]
-    Embedder --> Indexer[Database Indexer]
-    Indexer --> RelExt[Relationship Extractor]
-    RelExt --> Final[Final Storage]
-```
+    Raw[Raw Files/Folders<br/>(PDF, EPUB, MD, TXT)] --> Parser{Format Parser}
+    Parser -- PDF --> GROBID(GROBID<br/>+ OCR?)
+    Parser -- EPUB --> EPUBCnv(EPUB Parser<br/>e.g., ebook-convert)
+    Parser -- MD/TXT --> TxtRead(Direct Read)
 
-**File Format Support & Processing Notes:**
-- **Input:** Accepts individual files or entire folders for bulk processing.
-- **Formats:** Plain text, Markdown, EPUB (priority). PDF, HTML (future). Transcripts (future).
-- **Metadata & Structure:** Extracts standard metadata, chapter/section structure, and footnotes/endnotes. Links notes to originating text elements.
-- **Citation Handling:** Attempts to extract page numbers from PDFs. For EPUBs or PDFs lacking page numbers, relies on structural identifiers (chapter/section/paragraph) for citation pointers. A mapping strategy will be developed for correlating EPUB structure to available PDF page numbers when both formats exist for a source.
-- **Error Handling:** Includes validation checks for extracted metadata and prompts user for corrections if needed.
+    subgraph OCR [Optional OCR Flow]
+        GROBID -- Scanned? --> ImgPrep(Image Prep) --> OCR_Engine(Kraken/Calamari) --> mLLM_Correct(mLLM Post-Correction) --> StructExtOCR
+    end
+
+    GROBID --> StructExtPDF(Structure/Note Extractor)
+    EPUBCnv --> StructExtEPUB(Structure/Note Extractor)
+    TxtRead --> StructExtTXT(Structure/Note Extractor)
+
+    StructExtPDF --> Chunk(Hybrid Semantic-Spatial Chunker)
+    StructExtEPUB --> Chunk
+    StructExtTXT --> Chunk
+    StructExtOCR --> Chunk
+
+    Chunk -- Chunks --> Embed(Embedding Generator<br/>Gemini/Vertex AI - MVP)
+    Embed -- Embeddings --> Indexer(DB Indexer<br/>ArangoDB)
+
+    StructExtPDF -- Metadata/Refs --> CitParse(Citation Parser<br/>GROBID/AnyStyle+NER)
+    StructExtEPUB -- Metadata/Refs --> CitParse
+    StructExtTXT -- Metadata/Refs --> CitParse
+    StructExtOCR -- Metadata/Refs --> CitParse
+
+    CitParse -- Parsed Refs --> RelExt(Relationship Extractor)
+    Indexer -- Stored Data --> RelExt
+
+    RelExt --> FinalDB[(ArangoDB Storage)]
+```
+*   **Tools:** Prioritize GROBID for PDF, Kraken/Calamari + mLLM correction for OCR, Hybrid Semantic-Spatial Chunking, GROBID/AnyStyle + custom NER for citations.
+*   **Embeddings (MVP):** Use **Google Gemini Embeddings via Vertex AI**. Ensure the architecture allows plugging in other models later.
+*   **EPUB/PDF:** Do not attempt automated page mapping. Prioritize one format per source based on citation/accessibility needs. Use CFIs for EPUB internal linking.
+*   **Execution:** Processing steps (chunking, embedding, citation parsing) implemented as Python scripts within **Docker containers**, invoked via dedicated MCP servers or core service APIs.
 
 ### 5.4 Local File Management
-
-**Strategy:** Maintain a user-configurable local directory mirroring the structure of the ingested library.
-
-**Purpose:**
-- Provide users direct access to their original source files.
-- Allow easy opening of source documents for context verification (potentially opening to specific location if supported).
-- Serve as a potential backup or alternative access point.
-
-**Organization:**
-- Files organized logically (e.g., by author, title, or user-defined structure).
-- Metadata stored in the database will link text elements back to the specific file path and potentially location (page/section) within the local file.
-- The system will not *require* this local structure to function but will offer it as a complementary feature. Synchronization between the database and local file structure will be managed carefully.
+*   Strategy remains: Optional local mirror organized logically, linked via metadata in the database.
 
 ### 5.5 Relationship System
-
-PhiloGraph will support a rich relationship model including:
-
-**Hierarchical Relationships:**
-- **is_contained_in/contains**: Book → Parts → Chapters → Sections → Subsections → Chunks
-
-**Non-Hierarchical Exploration:**
-- Support for texts that break from traditional organization (e.g., Deleuze & Guattari's "1000 Plateaus")
-- Visualization tools for alternative relationship structures
-- Capability to reorganize and view content through different organizational lenses
-
-**Conceptual Relationships:**
-- **defines/is_defined_by**: Track where concepts are formally defined vs. used
-- **contradicts/is_contradicted_by**: Opposing philosophical positions
-- **extends/is_extended_by**: One text building on another's concepts
-- **critiques/is_critiqued_by**: Critical engagement with ideas
-
-**Historical Relationships:**
-- **precedes/follows**: Temporal relationships in intellectual history
-- **responds_to/is_responded_to_by**: Direct philosophical responses
-- **influenced/is_influenced_by**: Intellectual heritage relationships
-
-**School/Tradition Relationships:**
-- **belongs_to_school**: Associate text with philosophical traditions
-- **revises/is_revised_by**: Updates to philosophical positions within traditions
-- **canonical/non-canonical**: Status within a philosophical tradition
-
-**Methodological Relationships:**
-- **applies_method_of**: Shared philosophical approaches
-- **introduces_methodology**: Novel philosophical methods
-
-**Dialog Relationships:**
-- **in_dialog_with**: Texts engaged in implicit conversation
-- **synthesizes**: Texts that combine multiple perspectives
-
-**Thematic Relationships:**
-- **explores_theme**: Connect texts by philosophical themes
-- **central_to/peripheral_to**: Relevance to specific philosophical debates
+*   The comprehensive list of relationship types (Hierarchical, Conceptual, Historical, etc.) remains valid.
+*   **Implementation:** Leverage ArangoDB's native graph capabilities and AQL for modeling and querying these relationships. Design relationship types as extensible plugins.
 
 ### 5.6 Inference Capabilities
-
-PhiloGraph's inference module will support:
-
-1.  **Transitive Relationship Inference**
-    - If text A influences text B, and B influences C, infer A indirectly influences C
-    - Implemented using recursive Common Table Expressions (CTEs) or graph algorithms
-
-2.  **Inverse Relationship Maintenance**
-    - Automatically create bidirectional relationships (if A cites B, then B is_cited_by A)
-    - Implemented via database triggers or application logic
-
-3.  **Path Discovery**
-    - Find chains of influence between distant texts
-    - Example: "Show the intellectual pathway from Kant to Derrida on the concept of 'truth'"
-
-4.  **Conceptual Inheritance**
-    - If text A defines a concept and text B extends A, infer B inherits that concept
-    - Useful for building concept genealogies
-
-5.  **Contextual Clustering**
-    - Infer relationships between texts that share multiple connections to the same texts
-    - "These texts likely belong together because they cite similar sources"
-
-6.  **Semantic Relationship Validation**
-    - Verify explicit relationships by measuring semantic similarity
-    - Example: If text A supposedly "extends" text B, their embeddings should have meaningful similarity
-
-7.  **Relationship Discovery**
-    - Suggest potential relationships between semantically similar texts that lack explicit connections
-    - "These texts have 90% semantic similarity but no recorded relationship - consider adding one"
-
-8.  **Conceptual Drift Analysis**
-    - Track how concepts evolve through intellectual history by comparing embeddings along relationship chains
-    - "How did 'truth' semantically shift from Kant to Hegel to Marx?"
-
-9.  **Cross-School Concept Mapping**
-    - Identify semantically similar discussions across different philosophical traditions
-    - "Show Continental philosophy texts that discuss concepts semantically similar to Wittgenstein's 'language games'"
-
-10. **Weighted Path Discovery**
-    - Enhance relationship paths by incorporating semantic relevance scores
-    - "Show the path from Kant to Derrida, prioritizing texts with high semantic similarity to 'deconstruction'"
+*   The list of inference types remains valid.
+*   **Implementation:** Utilize ArangoDB's graph traversal capabilities (AQL) and potentially its Pregel integration for graph algorithms. Implement rule-based inference in the Inference Module service.
 
 ### 5.7 Essay Support Features
+*   Features remain valid. Implementation relies on effective Search, Relationship, and Bibliography modules.
 
-PhiloGraph will provide specialized support for the essay writing process:
+### 5.8 Revenue Model Options (Future)
+*   PWYC, Freemium, Academic Pricing, API Usage tiers remain potential options for later phases.
 
-1.  **Evidence Collection**
-    - Find supporting quotations for specific arguments
-    - Identify contradicting viewpoints to address
-    - Suggest relevant passages missed in initial research
+### 5.9 Facilitating Post-Methodological Exploration
+*   **Core Principle:** Shift from *representing* concepts like rhizome/deconstruction to *facilitating* user actions inspired by them.
+*   **Database:** ArangoDB's flexibility supports non-standard connections better than relational models.
+*   **UI/UX (Future):** Design interfaces emphasizing graph visualization, non-linear navigation, annotation of margins/fragments, juxtaposition views, and potentially "meditative" modes that resist immediate closure or categorization.
 
-2.  **Argument Construction**
-    - Generate essay outlines based on collected evidence
-    - Map logical relationships between chosen quotations
-    - Identify gaps in argumentation
+## 6. Strategic Roadmap & Funding (Refined)
 
-3.  **Citation Management**
-    - Generate properly formatted citations for selected passages (using extracted page/structural info)
-    - Track citation frequency and distribution across sources
-    - Ensure balanced representation of required readings
-
-4.  **AI-Assisted Drafting**
-    - Collaborate with AI tools (like Gemini 2.5 Pro) via MCP interface to develop drafts incorporating cited materials
-    - Check essay drafts against source material for accuracy
-    - Get suggestions for further reading based on essay direction
-
-### 5.8 Revenue Model Options
-
-1.  **Pay What You Can (PWYC)** base with premium features
-2.  **Freemium**: Limited free tier with paid upgrades
-3.  **Academic Pricing**: Discounted for educational institutions
-4.  **API Usage**: Charge for MCP/API access based on usage
-
-## 6. Strategic Roadmap & Funding Considerations
-
-### 6.1 Strategic Approach: Immediate Utility First
-
-PhiloGraph's development strategy prioritizes immediate utility while building toward the complete vision:
-
-**Phase 0: MCP Server MVP & Core Foundation (1-2 months)**
-- **Foundation First:** Implement a robust and extensible core data model (relational schema + vector store integration) designed for future relationship types and metadata (See 6.2).
-- **MCP Essentials:** Deliver a minimal viable MCP server interface focused on immediate essay writing utility:
-  - Core semantic search capabilities.
-  - Basic citation generation support (addressing PDF/EPUB nuances).
-  - Context filtering (e.g., by course, time period).
-- **Pluggable Pipeline:** Build the initial text processing pipeline with pluggable components (chunking, metadata extraction) even if only one implementation is initially provided.
-- **Target Users:** Aim at coding-capable users who can integrate with AI assistants (e.g., Claude) via the MCP API.
-- **Demonstrate Value:** Focus on practical use cases in real academic contexts to prove immediate utility.
-
-This approach provides:
-- Immediate tangible benefits for research and writing
-- A foundation to test key assumptions about semantic processing
-- An entry point for early adopters and feedback
-- A working system to demonstrate to potential funding sources
+### 6.1 Strategic Approach: MCP MVP First
+*   **Phase 0 (MVP):** Focus on building the core ArangoDB schema, the containerized text processing pipeline (basic PDF/EPUB extraction, semantic chunking, Gemini/Vertex AI embedding), and a functional **MCP Server**. This server provides core semantic search, basic metadata filtering, and citation data retrieval to RooCode agents. This delivers immediate value for AI-assisted research and writing.
+*   **Subsequent Phases:** Build out the CLI, advanced relationship modeling, inference engine, Web UI, and community features iteratively, leveraging the extensible foundation.
 
 ### 6.2 Technical Implementation for Expandability
-
-To ensure the system can grow organically and adapt to future requirements, the initial development (**starting in Phase 0/1**) will focus on establishing robust extension points and a modular architecture using the following principles:
-
-1.  **API-First Development:**
-    - Define stable internal APIs between all core components (Text Processor, Search, Relationships, etc.).
-    - Version all APIs from the beginning (e.g., `/api/v1/...`) to manage changes gracefully.
-    - Utilize interface segregation principles to ensure clean, focused boundaries between components.
-
-2.  **Plugin Architecture:**
-    - Implement relationship types as plugins, allowing new types to be added without modifying core code.
-    - Design the Inference Module using a rules engine pattern or similar strategy to allow new inference logic plugins.
-    - Make embedding models pluggable, allowing users or administrators to switch or add models (e.g., OpenAI, Gemini, local Sentence Transformers).
-    - Design the Text Processor's chunking system and metadata extraction with pluggable algorithms/strategies.
-
-3.  **Database Versioning & Schema Design:**
-    - Implement database schema migrations from the start (e.g., using Alembic for PostgreSQL).
-    - Design the relational schema (metadata, relationships) for backward compatibility where possible.
-    - Utilize flexible structures (like JSONB columns in PostgreSQL) for extensible metadata to avoid frequent table alterations.
-
-4.  **Component Separation:**
-    - Strictly isolate vector database operations (embedding storage, similarity search) from relationship logic (graph traversal, explicit links).
-    - Separate text processing/ingestion pipelines from search and retrieval functionality.
-    - Decouple user-facing interfaces (CLI, MCP, Web UI) from core backend services via the API layer.
+*   Principles (API-First, Plugins, DB Migrations, Component Separation) remain crucial and should be implemented from Phase 0.
 
 ### 6.3 Advanced Expandability Techniques
-
-Further enhancing modularity and future adaptability:
-
-1.  **Event-Driven Architecture (Consider for later phases):**
-    - Implement an internal message bus (e.g., RabbitMQ, Kafka, or simpler in-process pub/sub) for asynchronous communication between components.
-    - Use events for notifications (e.g., "document_processed", "relationship_added") to decouple services. Future components can subscribe to relevant events without requiring changes to existing ones.
-
-2.  **Feature Flag System:**
-    - Integrate a feature flag system (e.g., Unleash, Flagsmith, or custom implementation) early in development.
-    - Allows for gradual rollout of new features, A/B testing, and disabling problematic components without redeployment.
-
-3.  **Testing Strategy for Extensions:**
-    - Design test suites specifically verifying the plugin interfaces and extension points.
-    - Create a framework for testing relationship plugins and inference rules independently.
-    - Implement integration tests that validate component independence and API contracts.
+*   Event-Driven Architecture, Feature Flags, Extension Testing Strategy remain relevant for later phases to manage complexity.
 
 ### 6.4 Development Timeline
-
-| Timeline | Part-time Development | Full-time Development | Key Deliverables |
-|----------|----------------------|----------------------|-----------------|
-| 1-2 months | MCP Server MVP & Core Foundation | MCP Server + Basic CLI + Core Foundation | Functional MCP interface, core search & citation, initial pluggable text processing, extensible DB schema |
-| 3-6 months | + Basic CLI & Relationship System | + Comprehensive Relationships & Web UI Foundation | Extensible relationship modeling, advanced search, basic CLI, basic web interface structure |
-| 7-12 months | + Basic Web UI | + Community Features & Inference | User accounts, sharing, enhanced visualization, basic inference engine, full Web UI |
-| 13-24 months | + Basic Community Features | + Complete Platform & Optimization | Full feature set, optimized performance, complete documentation, advanced community features |
+*   Timeline remains indicative. Phase 0 focuses on the MCP Server MVP.
 
 ### 6.5 Funding Narrative
-
-PhiloGraph represents an opportunity to transform philosophical research and education through modern technology:
-
-1.  **Market Gap**
-    - Philosophy lacks specialized tools unlike other fields (e.g., mathematics has Mathematica)
-    - Existing tools (reference managers, search engines) aren't optimized for philosophical inquiry
-    - Growing interest in digital humanities lacks philosophy-specific applications
-
-2.  **Impact Potential**
-    - Democratize access to philosophical knowledge through better discovery tools
-    - Enable new forms of philosophical inquiry through relationship modeling
-    - Bridge traditional and computational approaches to philosophy
-    - Support the teaching and learning of philosophy in academic contexts
-
-3.  **Sustainability Path**
-    - Begin with academic adoption through free/PWYC MCP server and CLI
-    - Build community through PWYC model and academic partnerships
-    - Scale to sustainable revenue through tiered services and institutional licenses
-    - Potential for grants from digital humanities foundations and academic institutions
+*   Narrative remains valid, emphasizing the gap, impact, and sustainability path starting with the MCP MVP.
 
 ### 6.6 Resource Requirements
+*   Costs need estimation, but initial phase focuses on developer time + potentially modest API costs for Vertex AI embeddings (check free tiers/pricing).
 
-| Resource | Purpose | Cost Range |
-|----------|---------|------------|
-| Developer Time | Core implementation | $X-$Y per month |
-| Infrastructure | Hosting, database, API services | $X-$Y per month |
-| Embedding Models | API costs for semantic processing | $X-$Y per month |
-| Design & UX | Interface design and usability | $X one-time |
+## 7. Implementation Phases (Refined Focus)
 
-*Note: Specific cost ranges to be determined based on scale and implementation choices.*
+### Phase 0: MCP Server MVP & Core Foundation (1-2 months)
+*   **Database:** Setup ArangoDB, implement core `documents`, `chunks` collections, basic `contains`/`cites` edges. Implement schema migrations.
+*   **Text Processing:** Containerized Python pipeline: GROBID for PDF, basic EPUB parser, semantic chunking, Gemini/Vertex AI embedding via API, ArangoDB batch insertion. Support TXT, MD, EPUB, basic PDF. Bulk folder input.
+*   **MCP Server:** Implement tools: `semantic_search(query_text, top_k, filters)`, `get_chunk_details(chunk_id)`, `get_document_metadata(doc_id)`. Secure credential handling.
+*   **Operation:** Local deployment via Docker Compose (ArangoDB, MCP Server, Processing Containers).
+*   **Expandability:** API-first internal structure, pluggable embedding function, basic feature flags.
 
-## 7. Implementation Phases
+### Phase 1: Richer Relationships, Inference & CLI (3-6 months)
+*   **Relationship System:** Implement plugin architecture. Add core conceptual/historical relationships in ArangoDB.
+*   **Inference Module:** Basic implementation (transitive, inverse relationships) using AQL graph traversals.
+*   **Search Module:** Enhance MCP search tool with graph-based filtering.
+*   **Text Processing:** Improve citation/footnote extraction (GROBID/AnyStyle+NER). Add more format support.
+*   **CLI:** Develop CLI interface accessing core services via internal API.
+*   **Expandability:** DB versioning, testing strategy for extensions.
 
-### Phase 1: Core Functionality & Expandability (Corresponds to Phase 0 in Roadmap)
-- **Core Data Model:** Implement extensible relational schema (PostgreSQL) and vector store (e.g., pgvector). Establish basic `is_contained_in` hierarchy and `cites/is_cited_by`. Implement schema migrations.
-- **Text Processing Pipeline:** Basic implementation with semantic chunking, metadata/footnote extraction, embedding generation. Design with pluggable interfaces. Support initial formats (TXT, MD, EPUB) and bulk folder input. Implement local file organization mirroring.
-- **MCP Server:** Functional API endpoint (v1) for semantic search, context filtering (course, time), and basic citation data retrieval (handling PDF/EPUB differences).
-- **Bibliography Manager:** Foundational support for quote collection and linking text elements to citations/footnotes.
-- **Operation:** Local-only deployment focus.
-- **Expandability Focus:** API-first design, component separation, initial plugin points (e.g., embedding model choice), basic feature flags.
+### Phase 2: Web Interface & Basic Community (7-12 months)
+*   **Web UI:** Develop basic interface for search, browsing, reading. Integrate graph visualization (e.g., using ArangoDB Oasis or libraries like D3.js).
+*   **User Accounts:** Implement basic user management.
+*   **Bibliography Manager:** Implement quote collection/list features in UI.
+*   **Community:** Basic shared lists.
 
-### Phase 2: Richer Relationships, Inference & CLI
-- **Relationship System:** Implement the extensible plugin architecture for relationship types. Add core conceptual, historical, and methodological relationships.
-- **Inference Module:** Basic implementation with pluggable rules. Start with transitive inference and inverse relationship maintenance.
-- **Search Module:** Implement advanced filtering, weighted search, and relevance tuning.
-- **Text Processing:** Add support for more formats (PDF, HTML). Refine chunking algorithms.
-- **CLI:** Develop the command-line interface for local power users, accessing the core services via the internal API.
-- **Expandability Focus:** Implement database versioning, comprehensive feature flags, testing strategy for extensions.
+### Phase 3: Advanced Features & Scale (13+ months)
+*   **Advanced Inference:** Implement more complex inference rules/algorithms.
+*   **Post-Methodology UI:** Experiment with UI affordances for non-linear exploration, juxtaposition, marginalia.
+*   **Collaboration:** Enhance community features (collaborative annotation, etc.).
+*   **Hosting & Monetization:** Implement cloud deployment strategy and chosen revenue model.
+*   **Integrations:** Deeper integration with Calibre, LMS, Reference Managers.
 
-### Phase 3: Community & Web
-- **Web Interface:** Development with integrated text reader.
-- **User Accounts & Sharing:** Implement user management, private/shared collections.
-- **Community Features:** Basic implementation of selected features (e.g., shared lists, suggestion verification).
-- **Visualization:** Non-hierarchical visualization tools.
+## 8. Brainstorming: Future Features & Directions
 
-### Phase 4: Scale & Commercialize
-- **Hosting Infrastructure:** Cloud deployment and scaling strategy.
-- **Subscription Management:** Implement chosen revenue model.
-- **Collaboration:** Enhanced community and collaborative features.
-- **Analytics:** System usage and performance insights.
+*   **Advanced Visualization:**
+    *   Interactive 3D graph visualizations.
+    *   Temporal visualizations showing concept evolution or influence spread over time.
+    *   "Argument mapping" visualizations linking premises, conclusions, critiques.
+    *   Rhizomatic maps emphasizing connections and intensities over hierarchy.
+    *   Visualizations highlighting "zones of indistinction" or conceptual overlaps/ambiguities.
+*   **Web UI / Platform Features:**
+    *   Integrated web-based reader with annotation capabilities (linking annotations to graph nodes).
+    *   User profiles showcasing research interests, collections, contributions.
+    *   Forums or discussion areas linked to specific texts or concepts.
+    *   Tools for collaborative knowledge graph building/curation.
+    *   Personalized discovery feeds based on reading history and graph proximity.
+*   **Monetization Models (Modular):**
+    *   **Core (Free/PWYC):** Basic search, limited personal library size, core relationship types.
+    *   **Researcher Tier:** Advanced inference capabilities, larger library, advanced visualization tools, API access.
+    *   **Institutional Tier:** Site licenses, LMS integration, dedicated support.
+    *   **Modular Add-ons:** Sell access to specialized "Philosopher Packs" (pre-loaded corpora + relationship models for specific thinkers/schools), advanced methodology toolkits (e.g., Deconstruction Explorer, Phenomenological Reduction Assistant), or specific inference rule sets.
+*   **AI Agent Enhancements:**
+    *   Specialized RooCode modes pre-configured for different philosophical tasks (e.g., `HegelDialecticMode`, `DerridaCritiqueMode`).
+    *   AI agents capable of autonomously suggesting new relationships or identifying gaps in the knowledge graph.
+    *   Integration with NeSy frameworks for more robust reasoning.
+*   **Post-Methodological Affordances:**
+    *   "Deterritorialize" function: Randomly shuffles connections or juxtaposes unrelated concepts to spark new insights.
+    *   "Trace Explorer": Visualizes the multiple meanings and historical baggage associated with a term.
+    *   "Marginalia Focus Mode": UI that prioritizes user annotations and footnotes over the main text.
+    *   "Infinite Conversation" simulator: Juxtaposes text fragments in a non-conclusive dialogue format.
+*   **External Integrations:**
+    *   Deeper Calibre integration (metadata sync, direct ingestion).
+    *   Zotero/Mendeley integration (import/export, potentially citation linking).
+    *   LMS integration (Canvas API for course readings).
+    *   Potential API for integration with academic social networks or writing tools.
 
-## 8. Key Questions for Dialogue
-
-1.  **Scale Expectations**: How many texts do you anticipate in your personal collection vs. a potential community system?
-2.  **Research Workflow**: What specific parts of your research/writing process need the most support?
-3.  **Community Features**: Which social/community aspects would provide the most value?
-4.  **AI Integration**: Beyond basic MCP search, what specialized capabilities would AI agents need?
-5.  **Monetization Comfort**: Which revenue models align with your philosophy for this service?
-
-## 9. Technical Considerations
+## 9. Technical Considerations (Refined)
 
 ### 9.1 Embedding Model Selection
-- OpenAI's text-embedding-3-small (most capable but API cost)
-- Gemini embeddings (with rate limits)
-- Open-source alternatives (BERT, Sentence Transformers) - Pluggable via architecture.
-- Domain-specific fine-tuning for philosophical texts (Future possibility).
+*   **MVP:** **Google Gemini Embeddings via Vertex AI**. Monitor usage and costs; leverage free tiers where possible.
+*   **Architecture:** Must be pluggable to allow switching to OpenAI, open-source models (e.g., Sentence Transformers run locally/containerized), or fine-tuned models later.
 
 ### 9.2 Scalability Concerns
-- Vector databases scale differently than traditional databases.
-- Relationship queries can become expensive with large datasets (Requires optimization).
-- Index optimization becomes critical at scale.
+*   ArangoDB offers clustering and SmartGraphs for scaling graph operations.
+*   Vector index tuning (HNSW parameters in FAISS via ArangoDB) will be crucial.
+*   Optimize AQL queries for performance, especially complex traversals combined with vector search.
 
 ### 9.3 Integration Possibilities
-- **Calibre:** Investigate deeper integration beyond simple import/export. Options include developing a Calibre plugin or potentially forking Calibre to embed PhiloGraph features directly for a unified library management experience. Requires careful assessment of feasibility and maintenance overhead.
-- **Quercus API:** Research the availability and capabilities of a Quercus (or similar LMS) API to potentially automate the downloading and processing of assigned course readings directly into PhiloGraph.
-- **Reference Managers:** Standard import/export compatibility (e.g., BibTeX, RIS) with tools like Zotero, Mendeley. Explore deeper integration possibilities if APIs are available.
-- **LMS:** Broader Learning Management System integrations for embedding PhiloGraph search or reading features within course pages.
+*   **Calibre:** Plugin development or fork remain options for deep integration (Future Phase).
+*   **Quercus/LMS:** Feasible via REST APIs (Canvas first) using OAuth 2.0, requires institutional coordination.
+*   **Reference Managers:** Prioritize BibTeX/RIS import/export. Deeper API integration if available.
 
 ### 9.4 Privacy and Ethics
-- Attribution for shared content.
-- Proper citation tracking and generation.
-- Opt-in for any data usage beyond user's direct benefit.
-- Clear policies regarding data ownership, especially in hosted/community versions.
+*   Crucial, especially if community features or cloud hosting are implemented. Clear data ownership policies, opt-in sharing, secure authentication, responsible sourcing.
+
+## 10. Key Questions for Dialogue
+*(Questions remain the same as v1.0)*
+1.  Scale Expectations?
+2.  Specific Research Workflow Pain Points?
+3.  Most Valuable Community Features?
+4.  Specialized AI Agent Capabilities Needed?
+5.  Monetization Philosophy/Comfort?
