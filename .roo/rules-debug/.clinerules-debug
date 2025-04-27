@@ -12,24 +12,87 @@ memory_bank_strategy:
       1. Inform User: "No Memory Bank found..."
       2. Conditional Actions: Offer switch to Architect or proceed inactive.
   if_memory_bank_exists: |
-      1. Read Global & Active Files: `memory-bank/activeContext.md`, `memory-bank/globalContext.md` (WAIT after each)
-      2. Read Mode-Specific & Feedback: `memory-bank/mode-specific/debug.md`, `memory-bank/feedback/debug-feedback.md` (WAIT after each, if exists)
-      3. Activation: Set status '[MEMORY BANK: ACTIVE]', inform user, apply feedback. **Verify reverse chronological order of logs.**
+      1. **READ GLOBAL & ACTIVE MEMORY BANK FILES**
+          <thinking> I'll read the active and global memory bank files in sequence, waiting for confirmation after each. **If a read fails, I must log the error, inform the user, and consider proceeding in INACTIVE state.** </thinking>
+          <read_file> <path>memory-bank/activeContext.md</path> </read_file> # WAIT
+          <read_file> <path>memory-bank/globalContext.md</path> </read_file> # WAIT
+
+      2. **READ MODE-SPECIFIC & FEEDBACK FILES**
+          <thinking> I'll read the single mode-specific file and the feedback file for debug. **If a read fails, log error, inform user, proceed with caution.** </thinking>
+          <read_file> <path>memory-bank/mode-specific/debug.md</path> </read_file> # WAIT (if exists)
+          <read_file> <path>memory-bank/feedback/debug-feedback.md</path> </read_file> # WAIT (if exists)
+          
+      3. **REVIEW FEEDBACK**
+          <thinking>
+          * Briefly review recent entries in the loaded feedback file
+          * Identify if any recent feedback is relevant to the current task
+          * Plan how to apply relevant learnings
+          </thinking>
+          - Review recent feedback entries in `memory-bank/feedback/debug-feedback.md`
+          - In initial planning, explicitly state if any recent feedback applies to current task and how you will apply learnings
+
+      4. **ACTIVATION**
+          - Set status to '[MEMORY BANK: ACTIVE]'
+          - Inform user that Memory Bank has been loaded
+          - Apply any feedback learnings to current task
+          - **Verify reverse chronological order of logs.**
   general:
     status_prefix: "Begin EVERY response with either '[MEMORY BANK: ACTIVE]' or '[MEMORY BANK: INACTIVE]', according to the current state of the Memory Bank."
+    context_management: |
+        **Proactive Context Management:** During complex or long-running tasks, be mindful of context window limitations. If you notice degraded performance, repeated errors, or difficulty recalling previous steps, **proactively suggest using `new_task` to delegate the remaining work with a clear handover**, rather than waiting for critical failure or user intervention. Explicitly state context concerns as the reason for suggesting delegation.
+    error_handling_protocol: |
+        # --- EARLY RETURN CLAUSE (Placeholder - Specific modes might override) ---
+        # If intractable issues arise OR context limits (~40-50%) are approached, STOP IMMEDIATELY.
+        # 1. Document Thoroughly in `memory-bank/feedback/[mode]-feedback.md` (Blocker, Progress, Attempts, Analysis, Self-Correction, Context %, Recommendations).
+        # 2. Use `attempt_completion`: Summarize blocker, state Early Return invoked, reference feedback log.
+        # 3. Return Control: Await instructions.
+
+        **Structured Error Handling:** If a tool use fails or an unexpected error occurs:
+        1. **Log:** Clearly state the error encountered.
+        2. **Analyze:** Briefly analyze the potential cause (e.g., incorrect parameters, file access issue, API error, context mismatch). Check tool documentation/schema if applicable.
+            *   **For `read_file`:** Explicitly check the result for the truncation notice (`Showing only X of Y lines...`). If found, and if the task might require full context (e.g., applying diffs, comprehensive analysis), mandate either re-reading with specific line ranges covering the needed area or asking the user for confirmation before proceeding with potentially incomplete data.
+            *   **For `apply_diff` failures:** Mandate checking for context mismatch (due to truncation/prior edits) or "identical content" errors *first*. Suggest specific actions like re-reading the section or using `search_files` to verify context before retrying.
+        3. **Consult MB:** Check `activeContext.md` and relevant mode-specific logs (e.g., `debug.md`) for recent similar errors or known issues.
+        4. **Propose Solution:** Based on analysis, propose a *specific* next step:
+            - Retry the tool with corrected parameters (if analysis suggests parameter error).
+            - Use a different tool to gather more info (e.g., `read_file`, `list_files`).
+            - Ask the user a *targeted* question via `ask_followup_question` if specific information is missing.
+            - Suggest delegating to `debug` mode if the cause is unclear.
+        5. **"Three Strikes" Rule:** After 2-3 *consecutive* failures of the *same tool* on the *same target*, mandate a strategy change. Choose one: attempt an alternative tool (`insert_content`, `search_and_replace`, cautious `write_to_file`), use MCPs (`fetcher`, `brave-search`) for research, ask the user a targeted question, delegate to `debug`, or invoke Early Return. Explicitly forbid further simple retries.
+        6. **Intervention Handling:** If an error leads to user intervention, ensure the intervention is logged according to the updated `feedback_handling` rule *before* proceeding with the user's correction or the next step.
+        **Avoid generic retries or immediately asking the user "What should I do?" without performing this analysis.**
+    error_handling: |
+        **Memory Bank Error Handling:** If any Memory Bank operation (`list_files`, `read_file`, `insert_content`, `apply_diff`) fails:
+        1. Log the error clearly in the chat.
+        2. Inform the user about the failure and potential impact on context.
+        3. Consider switching to `[MEMORY BANK: INACTIVE]` if context is severely compromised.
+        4. Suggest running `memory-bank-doctor` if corruption is suspected.
+        5. If corruption is confirmed, delegate repair to `memory-bank-doctor` mode using `new_task`.
+    api_efficiency: |
+        **API Efficiency:** Prioritize minimizing API calls. Use batch operations (`apply_diff` with multiple blocks, `insert_content` with multiple operations) whenever possible. **Prefer partial reads (`read_file` with `start_line`/`end_line`) for large files (>500 lines) unless full context is explicitly justified in `<thinking>`. Justification should explain why partial reads are insufficient (e.g., needing global context, searching entire file).** If line numbers shift after edits, consider using `search_files` to relocate context or re-reading a slightly larger, stable section instead of multiple small reads.
+    task_reception: |\n        **Task Reception:** When receiving a task via \`new_task\`, carefully review the objective, provided context (check MB links), and expected deliverables. If anything is unclear, use \`ask_followup_question\` to clarify with SPARC *before* starting significant work.\n
+    structured_diagnosis: |
+        **Structured Diagnosis:**
+        1. **Reproduce:** Ensure you can reliably reproduce the issue.
+        2. **Isolate:** Narrow down the location (file, function, line) using logs, `read_file`, `search_files`.
+        3. **Hypothesize:** Formulate specific hypotheses about the root cause. **Prioritize internal code/integration issues before assuming external library bugs.**
+        4. **Verify:** Test hypotheses using targeted checks (`read_file`, small code changes, specific tool calls). Document alternative hypotheses considered.
+    critical_evaluation: |
+        **Rule: Critical Evaluation.** When encountering contradictory evidence or persistent failures, *critically evaluate prior diagnoses or assumptions*, especially those made under high context (>40%). State this evaluation explicitly in `<thinking>` before proceeding.
+        5. **Incorporate Feedback:** Explicitly acknowledge and integrate user feedback, corrections, and domain expertise into your analysis. If user feedback contradicts your findings, re-evaluate your assumptions carefully.
 
 memory_bank_updates:
   frequency: |
       UPDATE MEMORY BANK AT THESE POINTS:
       1. At the beginning of each task (read - use partial reads for logs)
-      2. **Before calling attempt_completion (perform pre-completion checks, then write using batch operations)**
+      2. **Before calling attempt_completion (perform MANDATORY pre-completion checks: Verification: Ensure the `attempt_completion` message provides a *detailed* summary including: 1) Specific actions taken, 2) Files/resources affected (with paths), 3) Verification steps performed (Debug: Verify bug is fully resolved with manual testing, Problem symptoms no longer present), 4) Clear status/next steps. The summary must be sufficient for SPARC/user validation without needing to re-read extensive logs. Then write MB updates using batch operations)**
       3. When significant new information is discovered or decisions are made (e.g., root cause found, fix applied)
       4. On explicit "Update Memory Bank" or "UMB" command
   update_process: |
-      1. For all updates: Include timestamp, descriptive titles, maintain structure. **ALWAYS add new entries to the TOP (reverse chronological order).** Use insert_content/apply_diff appropriately (prefer batching). Avoid overwriting logs, keep concise. Minimize API calls. **Actively cross-reference related entries (e.g., link fixes to issue history, link patterns to specific issues).**
+      1. For all updates: Include timestamp, descriptive titles, maintain structure. **ALWAYS add new entries to the TOP (reverse chronological order).** Use insert_content/apply_diff appropriately (prefer batching). Avoid overwriting logs, keep concise. Minimize API calls. **MANDATORY: Actively cross-reference related Memory Bank entries. Use timestamps (e.g., "[See Finding YYYY-MM-DD HH:MM:SS]") or unique IDs (e.g., "[Related to Issue-ID]") to link proposals to findings, fixes to issues, implementations to specs, etc.**
       2. File-Specific Updates: Update `activeContext.md` (using standard format). Update relevant sections in `globalContext.md` (Decision Log, System Patterns, Progress - **newest first**). **If fixes change imports/exports or component interactions, update the Dependency Map in `globalContext.md`'s `# System Patterns` section.** Update `memory-bank/mode-specific/debug.md` under appropriate headers (**newest first**). Cross-reference if needed.
   feedback_handling: |
-      Save feedback to `memory-bank/feedback/debug-feedback.md` (**newest first**), document source/issue/action, apply learnings. **Explicitly log user interventions and significant deviations during debugging.**
+      Save feedback to `memory-bank/feedback/debug-feedback.md` (**newest first**), document source/issue/action, apply learnings. **MANDATORY: IMMEDIATELY log ALL user interventions**, explicit corrections, or significant deviations from instructions in `memory-bank/feedback/debug-feedback.md` using the specified format (Trigger, Context, Action, Rationale, Outcome, Follow-up). Also log in the mode-specific Intervention Log if defined.
 
   # Debug-specific update details
   primary_responsibilities: |
@@ -44,7 +107,7 @@ memory_bank_updates:
     - After implementing and verifying a fix
     - When detecting a new pattern of issues
     - When discovering security implications during debugging
-    - **Before calling attempt_completion (perform pre-completion checks: fix verification, MB update, SPARC adherence; recommend TDD run if code changed)**
+    - **Before calling `attempt_completion` (perform MANDATORY pre-completion checks: Debug: Verify bug is fully resolved with manual testing, Problem symptoms no longer present, Rule Adherence Self-Check, MB update, SPARC adherence; recommend TDD run if code changed)**
   core_file_updates:
     activeContext.md: |
       - **Add entries to the TOP.** Format: `[YYYY-MM-DD HH:MM:SS] - Debug - [Action/Status] - [Details, e.g., tracking current debugging focus]`

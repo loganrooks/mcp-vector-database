@@ -47,13 +47,38 @@ memory_bank_strategy:
           <read_file> <path>memory-bank/mode-specific/sparc.md</path> </read_file> # WAIT (if exists)
           <read_file> <path>memory-bank/feedback/sparc-feedback.md</path> </read_file> # WAIT (if exists)
 
-      3. **ACTIVATION**
+      3. **REVIEW FEEDBACK**
+          <thinking>
+          * Briefly review recent entries in the loaded feedback file
+          * Identify if any recent feedback is relevant to the current task
+          * Plan how to apply relevant learnings
+          </thinking>
+          - Review recent feedback entries in `memory-bank/feedback/sparc-feedback.md`
+          - In initial planning, explicitly state if any recent feedback applies to current task and how you will apply learnings
+
+      4. **ACTIVATION**
           - Set status to '[MEMORY BANK: ACTIVE]'
           - Inform user that Memory Bank has been loaded
           - Apply any feedback learnings to current task
           - **Verify reverse chronological order of logs.**
   general:
     status_prefix: "Begin EVERY response with either '[MEMORY BANK: ACTIVE]' or '[MEMORY BANK: INACTIVE]', according to the current state of the Memory Bank."
+    context_management: |
+      # --- DELEGATE CLAUSE (Handover Trigger - For SPARC Mode Self-Monitoring) ---
+      Monitor **your own** context window size and performance. If **your** context consistently exceeds 40-50%, or **you** notice repeated errors or difficulty recalling steps, **you** must proactively initiate handover to a *new SPARC instance* using the `new_task` tool. Log the context concern, ensure the Memory Bank is updated, and provide a comprehensive handover message like this one. Do not wait for critical failure.
+    error_handling_protocol: |
+      # --- EARLY RETURN CLAUSE (Enhanced Detail - V6) ---
+      If intractable issues arise (e.g., specific test 'X' fails assertion 'Y' despite state 'Z', tool 'A' fails with error 'B', logic conflict between file 'C' and spec 'D') OR context limits (~40-50%) are approached, **STOP IMMEDIATELY**.
+      1.  **Document Thoroughly in `memory-bank/feedback/[mode]-feedback.md`:**
+          *   **Blocker:** Exact test name(s) / file / function. Exact error message(s). Relevant code snippet(s) (mock setup, implementation logic, assertion).
+          *   **Progress:** Last successful commit hash? Current test status (if applicable)? List specific implementation steps completed or tests fixed/rewritten in *this session*. Which step was being worked on?
+          *   **Attempts:** Detail specific code changes tried, mock states/contexts used, events simulated, assertions attempted, tool commands used and their *exact* outcomes (including failure messages). "Tried changing line X to Y in file Z using `apply_diff`. Diff failed: 'Could not find match'. Verified file content with `read_file` lines A-B."
+          *   **Analysis:** Detailed hypothesis for the failure. "Hypothesis: The Supabase `upsert` call in `saveAnswerService` fails because the `answers` JSONB structure doesn't match the expected input for `jsonb_set`." OR "Hypothesis: The XState machine guard 'canProceed' incorrectly evaluates context property 'P'." Reference specific lines/logic in code/specs/ADRs.
+          *   **Self-Correction/Questioning:** What was verified? Assumptions made? Alternatives considered? "Verified Supabase function definition matches DAL call." "Assumed `context.currentQuestionIndex` was sufficient for guard, but maybe `context.answers` length is also needed?" "Considered using `insert_content` + `search_and_replace` instead of `apply_diff` but didn't attempt due to..."
+          *   **Context:** Report current context window percentage.
+          *   **Detailed Recommendations:** Specific, actionable steps for the next agent. "Recommend next agent debug the `saveAnswerService` invocation in the machine, focusing on the `answers` payload structure." OR "Advise adding `context.answers` to the 'canProceed' guard condition in the machine definition." OR "Suggest manually applying the change for the `review` command test setup in `RegistrationDialog.test.tsx` as tools failed."
+      2.  **Use `attempt_completion`:** Summarize the blocker, state Early Return invoked, and explicitly reference the detailed feedback log entry.
+      3.  **Return Control:** Await instructions from SPARC.
     error_handling: |
         **Memory Bank Error Handling:** If any Memory Bank operation (`list_files`, `read_file`, `insert_content`, `apply_diff`) fails:
         1. Log the error clearly in the chat.
@@ -65,14 +90,14 @@ memory_bank_updates:
   frequency: |
       UPDATE MEMORY BANK AT THESE POINTS:
       1. At the beginning of each task (read - use partial reads for logs)
-      2. **Before calling attempt_completion (perform pre-completion checks, then write using batch operations)**
+      2. **Before calling attempt_completion (perform MANDATORY pre-completion checks: Task completion verification, Rule Adherence Self-Check, MB update, SPARC adherence)**
       3. When significant new information, decisions, or interventions occur
       4. On explicit "Update Memory Bank" or "UMB" command
   update_process: |
-      1. For all updates: Include timestamp, descriptive titles, maintain structure. **ALWAYS add new entries to the TOP (reverse chronological order).** Use insert_content to append under correct headers (prefer batching multiple inserts). Use apply_diff sparingly. Avoid overwriting logs, keep concise. Minimize API calls.
+      1. For all updates: Include timestamp, descriptive titles, maintain structure. **ALWAYS add new entries to the TOP (reverse chronological order).** Use insert_content to append under correct headers (prefer batching multiple inserts). Use apply_diff sparingly. Avoid overwriting logs, keep concise. Minimize API calls. **MANDATORY: Actively cross-reference related Memory Bank entries. Use timestamps (e.g., "[See Finding YYYY-MM-DD HH:MM:SS]") or unique IDs (e.g., "[Related to Issue-ID]") to link proposals to findings, fixes to issues, implementations to specs, etc.**
       2. File-Specific Updates: Update `activeContext.md` (using standard format) and relevant sections in `globalContext.md`. Update `memory-bank/mode-specific/sparc.md` under appropriate headers (**newest first**). Cross-reference if needed.
   feedback_handling: |
-      Save feedback to `memory-bank/feedback/sparc-feedback.md` (**newest first**), document source/issue/action, apply learnings. **Explicitly log user interventions and system adjustments.**
+      Save feedback to `memory-bank/feedback/sparc-feedback.md` (**newest first**), document source/issue/action, apply learnings. **IMMEDIATELY log user interventions, explicit corrections, or significant deviations from instructions using the format in the mode-specific Intervention Log (if applicable) or within the feedback file. Include: Trigger, Context, Action Taken, Rationale, Outcome, Follow-up.**
 
   # SPARC-specific update details
   primary_responsibilities: |
@@ -83,6 +108,7 @@ memory_bank_updates:
     - **Log user interventions and system adjustments**
     - **Orchestrate TDD regression checks after relevant code changes**
     - **Trigger `memory-bank-doctor` periodically or upon detecting inconsistencies**
+    - **Ensure `new_task` messages include: 1. Clear, specific objective. 2. Links/references to relevant Memory Bank context (specs, decisions, prior attempts, findings). 3. Explicitly state expected deliverables (e.g., file path, report format, verification steps).**
   update_triggers: |
     - After task delegation via new_task
     - When receiving attempt_completion from modes
@@ -90,8 +116,12 @@ memory_bank_updates:
     - **When a user intervention occurs**
     - **When orchestrating TDD checks**
     - **When triggering `memory-bank-doctor`**
+    - **Periodically (e.g., every N tasks, or daily) to trigger `memory-bank-doctor` for a proactive health check**
     - Before ending a session
-    - **Before calling attempt_completion (perform pre-completion checks: task completion verification, MB update).**
+    - **Before calling `attempt_completion` (perform MANDATORY pre-completion checks: Task completion verification, Rule Adherence Self-Check, MB update, SPARC adherence)**
+
+    # Detail for Rule Adherence Self-Check (Proposal 12):
+    # Before completing, briefly review key mode-specific rules (e.g., file limits, env safety, intervention logging, output format) and confirm adherence in the completed task within your thinking process. If deviations occurred, document them.
   core_file_updates:
     activeContext.md: |
       - **Add entries to the TOP.** Format: `[YYYY-MM-DD HH:MM:SS] - SPARC - [Action/Status] - [Details, e.g., Current focus, active delegations, blockers, intervention occurred]`

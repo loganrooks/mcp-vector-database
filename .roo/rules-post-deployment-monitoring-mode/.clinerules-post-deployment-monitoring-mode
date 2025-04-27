@@ -17,6 +17,36 @@ memory_bank_strategy:
       3. Activation: Set status '[MEMORY BANK: ACTIVE]', inform user, apply feedback. **Verify reverse chronological order of logs.**
   general:
     status_prefix: "Begin EVERY response with either '[MEMORY BANK: ACTIVE]' or '[MEMORY BANK: INACTIVE]', according to the current state of the Memory Bank."
+    context_management: |
+        **Proactive Context Management:** During complex or long-running tasks, be mindful of context window limitations. If you notice degraded performance, repeated errors, or difficulty recalling previous steps, **proactively suggest using `new_task` to delegate the remaining work with a clear handover**, rather than waiting for critical failure or user intervention. Explicitly state context concerns as the reason for suggesting delegation.
+    error_handling_protocol: |
+        # --- EARLY RETURN CLAUSE (Placeholder - Specific modes might override) ---
+        # If intractable issues arise OR context limits (~40-50%) are approached, STOP IMMEDIATELY.
+        # 1. Document Thoroughly in `memory-bank/feedback/[mode]-feedback.md` (Blocker, Progress, Attempts, Analysis, Self-Correction, Context %, Recommendations).
+        # 2. Use `attempt_completion`: Summarize blocker, state Early Return invoked, reference feedback log.
+        # 3. Return Control: Await instructions.
+
+        **Structured Error Handling:** If a tool use fails or an unexpected error occurs:
+        1. **Log:** Clearly state the error encountered.
+        2. **Analyze:** Briefly analyze the potential cause (e.g., incorrect parameters, file access issue, API error, context mismatch). Check tool documentation/schema if applicable.
+            *   **For `read_file`:** Explicitly check the result for the truncation notice (`Showing only X of Y lines...`). If found, and if the task might require full context (e.g., applying diffs, comprehensive analysis), mandate either re-reading with specific line ranges covering the needed area or asking the user for confirmation before proceeding with potentially incomplete data.
+            *   **For `apply_diff` failures:** Mandate checking for context mismatch (due to truncation/prior edits) or "identical content" errors *first*. Suggest specific actions like re-reading the section or using `search_files` to verify context before retrying.
+        3. **Consult MB:** Check `activeContext.md` and relevant mode-specific logs (e.g., `debug.md`) for recent similar errors or known issues.
+        4. **Propose Solution:** Based on analysis, propose a *specific* next step:
+            - Retry the tool with corrected parameters (if analysis suggests parameter error).
+            - Use a different tool to gather more info (e.g., `read_file`, `list_files`).
+            - Ask the user a *targeted* question via `ask_followup_question` if specific information is missing.
+            - Suggest delegating to `debug` mode if the cause is unclear.
+        5. **"Three Strikes" Rule:** After 2-3 *consecutive* failures of the *same tool* on the *same target*, mandate a strategy change. Choose one: attempt an alternative tool (`insert_content`, `search_and_replace`, cautious `write_to_file`), use MCPs (`fetcher`, `brave-search`) for research, ask the user a targeted question, delegate to `debug`, or invoke Early Return. Explicitly forbid further simple retries.
+        6. **Intervention Handling:** If an error leads to user intervention, ensure the intervention is logged according to the updated `feedback_handling` rule *before* proceeding with the user's correction or the next step.
+        **Avoid generic retries or immediately asking the user "What should I do?" without performing this analysis.**
+    error_handling: |
+        **Memory Bank Error Handling:** If any Memory Bank operation (`list_files`, `read_file`, `insert_content`, `apply_diff`) fails:
+        1. Log the error clearly in the chat.
+        2. Inform the user about the failure and potential impact on context.
+        3. Consider switching to `[MEMORY BANK: INACTIVE]' if context is severely compromised.
+        4. Suggest running `memory-bank-doctor` if corruption is suspected.
+        5. If corruption is confirmed, delegate repair to `memory-bank-doctor` mode using `new_task`.
 
 memory_bank_updates:
   frequency: |
@@ -29,7 +59,7 @@ memory_bank_updates:
       1. For all updates: Include timestamp, descriptive titles, maintain structure. **ALWAYS add new entries to the TOP (reverse chronological order).** Use insert_content/apply_diff appropriately (prefer batching). Avoid overwriting logs, keep concise. Minimize API calls.
       2. File-Specific Updates: Update `activeContext.md` (using standard format) and relevant sections in `globalContext.md`. Update `memory-bank/mode-specific/post-deployment-monitoring-mode.md` under appropriate headers (**newest first**). Cross-reference if needed.
   feedback_handling: |
-      Save feedback to `memory-bank/feedback/post-deployment-monitoring-mode-feedback.md` (**newest first**), document source/issue/action, apply learnings. **Explicitly log user interventions and significant deviations during monitoring.**
+      Save feedback to `memory-bank/feedback/post-deployment-monitoring-mode-feedback.md` (**newest first**), document source/issue/action, apply learnings. **IMMEDIATELY log user interventions, explicit corrections, or significant deviations from instructions using the format in the mode-specific Intervention Log (if applicable) or within the feedback file. Include: Trigger, Context, Action Taken, Rationale, Outcome, Follow-up.**
 
   # Monitoring-specific update details
   primary_responsibilities: |
