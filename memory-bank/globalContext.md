@@ -16,6 +16,14 @@
 - **Key Components:** Text Processor, Search Module, Relationship Manager, Inference Module, Bibliography Manager, Interfaces (CLI, MCP, API, Web UI, Reader).
 
 ## Decision Log
+- **[2025-04-27 17:49:10] - Tier 0 DB Migration Analysis:** Evaluated local DB options (SQLite, Postgres, ArangoDB) for Tier 0 deployability vs. migration effort. Recommended Postgres+pgvector locally as best balance for Tier 1 (Cloud Postgres) migration, while ArangoDB is best for Tier 2 (Cloud ArangoDB) migration but harder to move to Tier 1. SQLite is simplest locally but hardest to migrate.
+- **[2025-04-16 09:38:26] - MVP Strategy Recommendation:** Cloud-first MVP strongly recommended (Tier 1 ~$50/mo or Tier 2 ~$150/mo) using serverless components and cost-effective embedding APIs (OpenAI Small/Voyage Lite) to mitigate local hardware (1080 Ti) limitations.
+- **[2025-04-16 09:38:26] - MVP Database Recommendation:** ArangoDB recommended for MVP due to multi-model flexibility and simpler initial architecture via ArangoSearch for vectors. TigerGraph considered for post-MVP scalability.
+- **[2025-04-16 09:38:26] - MVP Embedding Recommendation:** Avoid experimental Gemini models. Use cost-effective APIs (OpenAI Small, Voyage Lite) for bulk embedding. Local inference of quantized OS models feasible for queries only.
+- **[2025-04-16 09:38:26] - MVP Note Processing Recommendation:** Defer complex automated footnote/endnote linking. Implement robust personal note linking via external DB (ArangoDB) storing coordinates/text snippets.
+- **[2025-04-16 09:38:26] - Development Methodology Recommendation:** Adopt Hybrid Agile + CRISP-KG methodology, integrating philosophical validation and rigorous cost control.
+
+
 - **[2025-04-16 01:36:42] - Database Selection:** Recommended ArangoDB based on research report findings regarding multi-model capabilities and hybrid query performance for graph + vector data.
 - **[2025-04-16 01:36:42] - Text Processing:** Updated recommendations based on research: GROBID for PDF, Kraken/Calamari+mLLM for OCR, Hybrid Semantic-Spatial Chunking, GROBID/AnyStyle+NER for citations.
 - **[2025-04-16 01:36:42] - Source Access:** Revised strategy: Prioritize DOAB/PhilPapers/OpenLibrary APIs, cautiously evaluate Anna's Archive member API, avoid Z-Lib/LibGen programmatic reliance.
