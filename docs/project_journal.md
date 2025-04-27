@@ -1227,4 +1227,4 @@ Or we can give options, but that will be a later feature, we'll start with using
 
 Perhaps have some graphical flow to manage / visualize the input flow, and to also visualize the "library". 
 
-And I forget if I've already said this but we need to have some criteria to determine which 
+And I forget if I've already said this but we need to have some criteria to determine which books to actually download and embed which will need to take in a variety of global factors including rate limits and the cost of embedding (if there is one).  And then we would need other metrics to determine in general how important relative to other texts in our database (which can again, for tracking purposes, have empty placeholder entries to track references to it), 
