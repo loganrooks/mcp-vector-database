@@ -160,8 +160,10 @@ async def get_document_by_id(conn: psycopg.AsyncConnection, doc_id: int) -> Opti
         await cur.execute(sql, (doc_id,))
         result = await cur.fetchone()
         if result:
-            # Pydantic automatically parses metadata_jsonb if it's a dict/None
-            return Document(**result)
+            # Explicitly map metadata_jsonb to metadata field for Pydantic model
+            doc_data = dict(result) # Copy the dict_row result
+            doc_data['metadata'] = doc_data.pop('metadata_jsonb', {}) or {} # Pop 'metadata_jsonb', provide default {} if None/missing
+            return Document(**doc_data)
         else:
             return None
 
