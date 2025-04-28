@@ -147,8 +147,9 @@ flowchart TD
          SourceAPIs{{Source APIs<br/>(DOAB, PhilPapers, etc. - Manual/Scripted Access)}}
          %% LMSTools{{LMS Integration<br/>(Future Phase)}}
          ExtScripts[/Processing Scripts<br/>(Local Python/Docker)/]
-         Middleware[Middleware Proxy<br/>(LiteLLM Docker)]
+         Middleware[API Gateway<br/>(LiteLLM Docker)]
          CloudEmbedAPI{{Cloud Embedding API<br/>(Vertex AI Free Tier)}}
+         ZLibMCP[Z-Library MCP Server<br/>(Local Node.js/Python)]
     end
 
     API -- Invokes --> Core Services
@@ -156,6 +157,8 @@ flowchart TD
     TP -- Requests Embeddings --> Middleware
     Middleware -- Calls --> CloudEmbedAPI
     TP -- May Use --> SourceAPIs
+    Core Services -- Calls --> ZLibMCP
+    ZLibMCP -- Provides Processed Text --> TP
     %% Core Services -- May Use --> LMSTools
 
     FSS <-. Stores/Reads .-> TP
@@ -167,7 +170,8 @@ flowchart TD
 *   **API Gateway (Middleware):** Employs the **LiteLLM Proxy** (Docker) as the **single, unified gateway** for *all* external LLM/embedding API calls (currently Vertex AI for embeddings). This provides centralized management, cost control, and provider flexibility from the outset.
 *   **Embeddings:** Embedding generation relies on calls made *through* the LiteLLM Proxy to the configured cloud provider (Vertex AI Free Tier).
 *   **Processing:** Core services (Text Processor, Search Module) and processing scripts run locally via **Docker containers** (CPU-bound). They interact with the LiteLLM Proxy for any required embeddings.
-*   **Backend:** A simple Python backend (Flask/FastAPI) provides the internal API, running in Docker. It coordinates calls to the DB and invokes Core Services (which in turn call the LiteLLM Proxy). **No LangChain components are used in Tier 0.**
+*   **Text Acquisition:** Missing texts identified via citation analysis can be acquired using the external **Z-Library MCP Server (`zlibrary-mcp`)**. This server handles searching, downloading, and initial RAG processing (EPUB/PDF/TXT -> Text), providing a path to the processed text file for ingestion by the PhiloGraph Text Processor.
+*   **Backend:** A simple Python backend (Flask/FastAPI) provides the internal API, running in Docker. It coordinates calls to the DB and invokes Core Services (which in turn call the LiteLLM Proxy and potentially the `zlibrary-mcp` server). **No LangChain components are used in Tier 0.**
 *   **Interfaces:** Focus on local CLI and MCP server integration, interacting with the Backend API.
 *   **Future Evolution:** This architecture establishes the LiteLLM gateway pattern early. LangChain will be introduced in later tiers (Tier 1+) within the Backend/Core Services layer for orchestration and advanced features, making its external API calls *through* the established LiteLLM Proxy.
 
@@ -190,14 +194,15 @@ flowchart TD
 | **Inference Module** | Generates insights from graph data.           | **Tier 0 Scope:** Very limited. May include simple SQL queries to identify frequently cited works or authors within a specific context (e.g., a course reading list). No complex graph algorithms or ML-based inference planned for Tier 0. *(Tier 3+ will leverage LangChain chains/agents, calling the LiteLLM proxy for LLM reasoning, to perform tasks like automated relationship inference or summarization based on graph context).* |
 | **Bibliography Mgr** | Manages user collections, notes, and citations. | **Collections:** Allows users (via CLI/MCP) to create named collections of document IDs or chunk IDs. **Notes:** (Tier 0 Strategy TBD - likely external linking) Placeholder for linking external notes (e.g., Obsidian URIs) to specific document/chunk IDs stored in a dedicated table. **Citation Generation:** Retrieves metadata associated with a chunk/document and formats it into a standard citation style (e.g., Chicago, MLA - basic implementation). Handles page number retrieval where available (PDFs). **Quote Management:** Stores user-selected text snippets (quotes) linked to their source chunk ID. *(Tier 2+ may use LangChain for more advanced citation formatting or integration with external reference managers, with any necessary LLM calls routed via LiteLLM proxy).* |
 | **API Gateway** <br/> *(Middleware Proxy)* | **Unified Gateway** for all external LLM/Embedding API calls. Abstracts providers, manages keys, costs, limits, retries, fallbacks. | **LiteLLM Proxy (Docker):** Configured via `config.yaml` (`{{LITELLM_CONFIG_PATH}}`) and environment variables. **Key Features:** Maps internal model names (e.g., `{{EMBEDDING_MODEL_NAME}}`, future LLM names) to specific provider models (e.g., `vertex_ai/text-embedding-004`, `openai/gpt-4o`) potentially with specific parameters (e.g., `output_dimensionality`). Manages provider API keys securely. Provides **Virtual Keys** for internal services/users. Implements **cost tracking/budgeting**, **rate limiting (TPM/RPM)**, configurable **retries**, and **fallbacks**. Provides an OpenAI-compatible endpoint (`{{LITELLM_PROXY_URL}}`) for all internal PhiloGraph components (including any future LangChain components) to call. *(Tier 1+ involves deploying this proxy serverlessly and potentially configuring a persistent DB for state).* |
+| **Text Acquisition Service** | Acquires missing texts identified via citation analysis and prepares them for ingestion. | **Z-Library MCP Server (`zlibrary-mcp`):** External, locally running MCP server (Node.js/TypeScript with Python bridge). **Key Features:** Provides tools (`search_books`, `download_book_to_file`, `process_document_for_rag`) callable by PhiloGraph's backend/core services. Searches Z-Library for books based on metadata (e.g., from unresolved citations). Downloads specified books (PDF, EPUB, TXT) to a local directory (`./downloads/` by default). Processes downloaded files into plain text suitable for RAG/ingestion, saving output to a separate directory (`./processed_rag_output/` by default) and returning the path to the processed file. **Integration:** PhiloGraph backend identifies needed texts (e.g., documents referenced frequently but lacking text content), calls `zlibrary-mcp` tools via `use_mcp_tool`, receives the path to the processed text file, and triggers the PhiloGraph Text Processor to ingest it. **Note:** Requires separate setup, configuration (credentials), and running process. May require modification for better integration (e.g., configurable output paths). |
 
 ### 5.3 Interface Layer
 
 | Component     | Purpose                               | Tier 0 Target Users / Integration                               |
 | :------------ | :------------------------------------ | :-------------------------------------------------------------- |
-| CLI           | Local research & administration       | **Tier 0:** Python CLI (e.g., Typer/Click) interacting with the backend API. Commands for: `ingest <path>`, `search <query> [--filter author="..."] [--limit N]`, `show document <id>`, `list collections`, `add-to-collection <name> <item_id>`. Output formatted for terminal readability. |
-| MCP Interface | AI agent integration                  | **Tier 0:** Local MCP Server (part of Backend container or separate). Exposes tools like `philograph_ingest(path: string)`, `philograph_search(query: string, filters: dict = None)`. Tools interact with the backend API. Allows RooCode agents to leverage PhiloGraph data. |
-| REST/GraphQL API | Internal service communication        | **Tier 0:** Simple REST API via Flask/FastAPI (Docker). Endpoints like `/ingest`, `/search`, `/documents`, `/chunks`, `/collections`. Primarily for CLI/MCP interaction. Not publicly exposed. Authentication minimal/absent for local Tier 0. |
+| CLI           | Local research & administration       | **Tier 0:** Python CLI (e.g., Typer/Click) interacting with the backend API. Commands for: `ingest <path>`, `search <query> [--filter author="..."] [--limit N]`, `show document <id>`, `list collections`, `add-to-collection <name> <item_id>`, `acquire-missing-texts [--threshold N]`. Output formatted for terminal readability. |
+| MCP Interface | AI agent integration                  | **Tier 0:** Local MCP Server (part of Backend container or separate). Exposes tools like `philograph_ingest(path: string)`, `philograph_search(query: string, filters: dict = None)`, `philograph_acquire_missing(threshold: int = 5)`. Tools interact with the backend API (which may call `zlibrary-mcp`). Allows RooCode agents to leverage PhiloGraph data and trigger acquisition. |
+| REST/GraphQL API | Internal service communication        | **Tier 0:** Simple REST API via Flask/FastAPI (Docker). Endpoints like `/ingest`, `/search`, `/documents`, `/chunks`, `/collections`, `/acquire`. Primarily for CLI/MCP interaction. Not publicly exposed. Authentication minimal/absent for local Tier 0. |
 | ~~Web UI~~    | General access, community features    | *(Future Phase)*                                                |
 | ~~Text Reader~~ | Integrated reading & annotation       | *(Future Phase)*                                                |
 
@@ -367,15 +372,22 @@ flowchart LR
         *   `POST /ingest`: Triggers the Python text processing script.
         *   `POST /search`: Accepts query, sends query text **via HTTP request to LiteLLM proxy** for embedding, performs search using SQL/pgvector with the returned embedding, returns results.
         *   Basic CRUD endpoints.
-    *   Implement MCP server tools calling the backend API.
+    *   Implement MCP server tools calling the backend API (e.g., `philograph_ingest`, `philograph_search`, `philograph_acquire_missing`).
 *   **CLI:**
-    *   Develop simple CLI interacting with the Backend API.
+    *   Develop simple CLI interacting with the Backend API (e.g., `ingest`, `search`, `acquire-missing-texts`).
+*   **Text Acquisition Service Integration:**
+    *   Implement logic in the Backend API (`/acquire`) to identify missing texts (e.g., query DB for documents with high citation counts but no associated chunks).
+    *   For each missing text, call the `zlibrary-mcp` server's `search_books` tool via `use_mcp_tool` to find potential matches.
+    *   (Manual/Semi-Automated Step for Tier 0): Present potential matches to the user via CLI/log for confirmation.
+    *   Upon confirmation, call `zlibrary-mcp`'s `download_book_to_file` tool (with `process_for_rag=true`) via `use_mcp_tool`, passing the confirmed `bookDetails`.
+    *   Receive the path to the processed text file from `zlibrary-mcp`.
+    *   Trigger the PhiloGraph `/ingest` endpoint with the path to the processed text file.
 *   **Operations & Deployment:**
-    *   Create `docker-compose.yml` orchestrating Postgres, LiteLLM Proxy, Backend/MCP, Text Processing Tools.
-    *   Use `.env` file for configuration.
-    *   Write detailed `README.md` covering setup (including LiteLLM config and GCP setup).
-*   **Expandability Focus:** Establish the LiteLLM gateway pattern. Keep backend logic simple and modular, preparing for potential future refactoring with LangChain.
-*   **Testing:** Unit tests for core Python logic. Integration tests for API endpoints, ensuring correct interaction with the LiteLLM proxy.
+    *   Create `docker-compose.yml` orchestrating Postgres, LiteLLM Proxy, Backend/MCP, Text Processing Tools. **Note:** `zlibrary-mcp` runs as a separate process, requiring its own setup as per its README.
+    *   Use `.env` file for PhiloGraph configuration. Ensure `zlibrary-mcp` is configured separately (e.g., via its own environment variables for credentials).
+    *   Write detailed `README.md` covering setup for PhiloGraph (including LiteLLM config and GCP setup) **and** instructions/link for setting up the required `zlibrary-mcp` server.
+*   **Expandability Focus:** Establish the LiteLLM gateway pattern. Define clear API/MCP interactions for text acquisition. Keep backend logic simple and modular.
+*   **Testing:** Unit tests for core Python logic. Integration tests for API endpoints, ensuring correct interaction with the LiteLLM proxy **and basic interaction patterns with `zlibrary-mcp` (potentially using mocks for the external MCP server)**.
 
 ### Phase 1: Migration to Tier 1 (Cloud Serverless) & Optional LangChain Introduction (3-6 months)
 *   **Migration:**
@@ -437,9 +449,15 @@ flowchart LR
     *   **Database:** Scalability depends on the chosen Serverless Postgres or managed ArangoDB tier.
     *   **Overall:** Requires managing scalability across multiple components: the LiteLLM proxy infrastructure, the serverless functions executing backend/LangChain logic, and the database. Cost management involves tracking usage across cloud functions, databases, *and* external API calls (monitored via LiteLLM).
 
-### 10.3 Integration Possibilities (Explicit Deferrals)
+### 10.3 Integration Possibilities
 
-*   **Tier 0 Focus:** The Tier 0 MVP prioritizes establishing the core local ingestion, storage (Postgres+pgvector), high-quality cloud embedding generation (via LiteLLM proxy), and basic search/retrieval via CLI and MCP interfaces. Integrations with external tools are explicitly deferred to later phases to maintain focus on this core functionality. The only planned integration for Tier 0 is the local MCP server, enabling interaction with AI agents like RooCode.
+*   **Tier 0 Planned Integrations:**
+    *   **PhiloGraph MCP Server:** The core integration for Tier 0, enabling interaction with AI agents like RooCode via defined tools (`philograph_ingest`, `philograph_search`, `philograph_acquire_missing`).
+    *   **Z-Library MCP Server (`zlibrary-mcp`):** An external, locally run MCP server used by PhiloGraph's backend to acquire missing texts.
+        *   *What:* Provides tools (`search_books`, `download_book_to_file`, `process_document_for_rag`) to find, download, and pre-process texts from Z-Library.
+        *   *Why Included (Tier 0):* Directly addresses the requirement to populate the database with texts identified through citation analysis but not yet available locally. Leverages an existing, specialized tool for this acquisition task.
+        *   *Integration Workflow:* PhiloGraph backend identifies needed texts -> Calls `zlibrary-mcp` tools via `use_mcp_tool` -> Receives path to processed text -> Triggers PhiloGraph ingestion.
+        *   *Considerations:* Requires separate setup/configuration of `zlibrary-mcp`. Potential need to modify `zlibrary-mcp` for better integration (e.g., configurable output paths). Reliability depends on Z-Library website stability and the server's scraping logic. User must provide Z-Library credentials.
 
 *   **Deferred Integrations (Targeted for Tier 1+):** The following integrations are deferred beyond Tier 0 due to added complexity, reliance on external APIs, or focus on features beyond the core MVP scope:
     *   **Zotero/Reference Managers:**
@@ -452,7 +470,7 @@ flowchart LR
         *   *Target Phase:* Tier 1 or Tier 2, potentially driven by user demand.
     *   **External Philosophical Databases (e.g., PhilPapers):**
         *   *What:* Connecting to APIs (if available and accessible) of databases like PhilPapers to automatically enrich document metadata (e.g., publication details, abstracts, keywords) or find related works not yet in the local corpus.
-        *   *Why Deferred:* Relies on the availability, stability, and usage terms of external APIs. Adds complexity in data mapping, API call management, and potential cost/rate limits. Tier 0 focuses on processing user-provided documents.
+        *   *Why Deferred:* Relies on the availability, stability, and usage terms of external APIs. Adds complexity in data mapping, API call management, and potential cost/rate limits. Tier 0 focuses on processing user-provided documents and acquiring missing ones via `zlibrary-mcp`.
         *   *Target Phase:* Tier 2 or later, once the core system is stable and scalable.
     *   **Learning Management Systems (LMS):**
         *   *What:* Integrating PhiloGraph as a resource within platforms like Moodle, Canvas, etc., allowing instructors to link course readings or students to access research tools.
