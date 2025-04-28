@@ -31,7 +31,8 @@ PhiloGraph's core functionality relies on high-quality semantic search, which re
 
 **Chosen Option:** 4. Cloud Embeddings via LiteLLM Proxy.
 *   **Provider:** Google Cloud Vertex AI
-*   **Model:** `text-embedding-large-exp-03-07` (as specified by user feedback, acknowledging its experimental status). Dimensionality TBD via research (ADR pending).
+*   **Model:** `text-embedding-large-exp-03-07` (as specified by user feedback, acknowledging its experimental status).
+*   **Target Dimension (MRL):** **768** (Recommended based on research report `docs/reports/optimal_embedding_dimension_for_philograph.md`, pending empirical validation; 1024 fallback).
 *   **Access:** Via local LiteLLM Proxy instance.
 
 **Rationale:**
@@ -63,9 +64,38 @@ PhiloGraph's core functionality relies on high-quality semantic search, which re
     *   Requires GCP project setup, billing enablement (for quotas), and credential management (`{{GOOGLE_APPLICATION_CREDENTIALS}}`).
     *   Introduces cloud dependency into the otherwise local Tier 0 setup.
     *   Chosen model `text-embedding-large-exp-03-07` is experimental; stability and future availability need monitoring. Consider fallback to `text-embedding-004` in LiteLLM config.
-    *   Decision on optimal embedding dimensionality (via MRL truncation in LiteLLM) is pending further research (see Research Prompt).
+    *   Optimal embedding dimensionality (via MRL truncation in LiteLLM) recommended as **768** based on research balancing quality and Tier 0 resource constraints (Ref: `docs/reports/optimal_embedding_dimension_for_philograph.md`). Requires empirical validation.
 
 ## Validation
+
+### Proposed Empirical Validation Procedure (Tier 0)
+
+To confirm the optimal dimensionality (768 vs. 1024) on target Tier 0 hardware, the following procedure is recommended:
+
+1.  **Prepare Test Corpus:** Select a representative subset of the target philosophical texts (e.g., key works from different authors/periods, diverse formats like PDF/EPUB). Aim for a size that is large enough to be meaningful but manageable for local testing (e.g., 100-500 documents).
+2.  **Define Evaluation Queries:** Create a set of realistic search queries (~20-50) reflecting expected use cases (e.g., "Define Hegel's concept of Geist", "Find passages where Deleuze discusses Riemann", "Compare Kant and Hume on causality", "Passages related to 'aporia' in Derrida").
+3.  **Establish Ground Truth:** Manually identify and annotate the most relevant text chunks within the test corpus for each evaluation query. This is labor-intensive but crucial for objective recall measurement.
+4.  **Ingest & Index (768d):**
+    *   Configure LiteLLM Proxy to truncate `text-embedding-large-exp-03-07` to **768** dimensions (`output_dimensionality: 768`).
+    *   Run the full ingestion pipeline (parsing, chunking, embedding via proxy, indexing in pgvector) for the test corpus.
+    *   Measure: Total ingestion time, HNSW index build time, final index size (disk), peak RAM usage during indexing.
+5.  **Ingest & Index (1024d):**
+    *   Reconfigure LiteLLM Proxy for **1024** dimensions (`output_dimensionality: 1024`).
+    *   Clear the database/index.
+    *   Repeat the full ingestion pipeline for the same test corpus.
+    *   Measure: Total ingestion time, HNSW index build time, final index size (disk), peak RAM usage during indexing.
+6.  **Query & Evaluate (Both Dimensions):**
+    *   For each dimension (768d and 1024d):
+        *   Iterate through the evaluation queries.
+        *   For each query, perform the search against the corresponding pgvector index.
+        *   Measure: Query latency (e.g., average, p50, p95, p99 over multiple runs).
+        *   Measure: Recall@k (e.g., k=5, 10) - the proportion of ground truth relevant chunks found within the top k results.
+        *   Measure: Peak RAM usage during querying.
+        *   *(Optional Tuning):* Experiment with different `ef_search` values in pgvector for each dimension to find the best balance between recall and latency. Record results for each `ef_search` value tested.
+7.  **Analyze Results:** Compare the measured metrics (ingestion time, index size, build time, query latency, recall@k, RAM usage) between 768d and 1024d.
+8.  **Decision:** Based on the analysis, confirm if 768d provides sufficient quality (recall) with acceptable performance (latency, resource usage). If 768d is insufficient and 1024d performance is acceptable within Tier 0 constraints, select 1024d. Update this ADR and related documents with the final decision and supporting data.
+
+### Initial Checks
 
 *   LiteLLM Proxy successfully configured to use `vertex_ai/text-embedding-large-exp-03-07`.
 *   Ingestion and search workflows successfully generate/use embeddings via the proxy.
