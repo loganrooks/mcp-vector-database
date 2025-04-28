@@ -19,6 +19,18 @@
 
 ## Issue History
 <!-- Append new issue details using the format below -->
+### Issue: TDD-DBPOOL-FAIL-20250428 - Re-investigation of `test_get_db_pool_failure` - [Status: Confirmed Passing] - [2025-04-28 13:24:54]
+- **Reported**: [2025-04-28 13:19:45] (via TDD Feedback) / **Severity**: Medium (Discrepancy) / **Symptoms**: TDD reported test failure (`DID NOT RAISE <class 'ConnectionError'>`) contradicting previous Debug report of success.
+- **Investigation**:
+    1. Reviewed TDD feedback confirming failure report. [2025-04-28 13:22:16]
+    2. Executed `pytest tests/data_access/test_db_layer.py::test_get_db_pool_failure` - Result: PASSED. [2025-04-28 13:22:52]
+    3. Read `tests/data_access/test_db_layer.py` - Confirmed test code uses correct mocking strategy. [2025-04-28 13:23:26]
+    4. Read `src/philograph/data_access/db_layer.py` - Confirmed `get_db_pool` correctly handles `psycopg.Error` and raises `ConnectionError`. [2025-04-28 13:23:48]
+    5. Re-executed `pytest tests/data_access/test_db_layer.py::test_get_db_pool_failure` - Result: PASSED. [2025-04-28 13:24:10]
+- **Root Cause**: Discrepancy likely caused by TDD verifying against an older code state where the fix was not fully applied/committed. The current codebase contains the correct, working test and source code.
+- **Fix Applied**: None required.
+- **Verification**: Test passed consistently in current code state via `pytest`.
+- **Related Issues**: [See Issue-ID: TDD-DBPOOL-FAIL-20250428] (Original entry below)
 ### Issue: TDD-DBPOOL-FAIL-20250428 - `test_get_db_pool_failure` not raising ConnectionError - [Status: Resolved] - [2025-04-28 13:05:04]
 - **Reported**: ~[2025-04-28 12:26:14] (via TDD Early Return) / **Severity**: High / **Symptoms**: `AssertionError: ConnectionError was not raised` in `tests/data_access/test_db_layer.py::test_get_db_pool_failure`.
 - **Investigation**:

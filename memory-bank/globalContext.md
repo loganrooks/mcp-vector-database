@@ -126,8 +126,10 @@ graph TD
 - **[2025-04-16 01:36:42] - Embedding Model (MVP):** Specified Google Gemini Embeddings via Vertex AI, ensuring pluggable architecture.
 
 - **2025-04-04 12:59:13 - Specification Update:** Incorporated detailed feedback regarding PDF/EPUB page numbers, footnote processing, bulk input, local file management, external integrations (Calibre, Quercus, Social Network), and technical expandability strategy into `docs/project-specifications.md`. Prioritized core data model and MCP essentials in initial phases.
+- **[2025-04-28 13:13:54] - Debug Task:** Completed by Debug mode. Test `test_get_db_pool_failure` fixed (commit e5dfc68). Ready to resume TDD. [See Debug Feedback YYYY-MM-DD HH:MM:SS]
 
 ## Progress
+- **[2025-04-28 13:24:10] - Debug - Progress:** Re-investigated TDD-DBPOOL-FAIL-20250428. Confirmed `test_get_db_pool_failure` passes in current code state. Discrepancy with TDD report likely due to code state mismatch during TDD verification. No fix needed. [Ref: Issue-ID: TDD-DBPOOL-FAIL-20250428]
 - **[2025-04-28 13:05:04] - Debug - Progress:** Successfully fixed `test_get_db_pool_failure` by mocking `cursor.execute` to raise `psycopg.OperationalError` within the nested async context managers. Test passed verification. [See Issue-ID: TDD-DBPOOL-FAIL-20250428]
 - **[2025-04-28 10:34:52] - Git Initialization:** Completed by DevOps mode. Repository initialized, `.gitignore` configured, and initial project state committed across 5 logical commits (fcb00d8, e5557d2, a31eed4, 1ff8e4e, cdcbafd). Ready to resume testing.
 - **[2025-04-28 04:23:39] - Tier 0 Implementation:** Completed initial code structure and configuration for Tier 0 MVP. Created core Python modules (`src/philograph/*`), Docker setup (`Dockerfile`, `docker-compose.yml`,

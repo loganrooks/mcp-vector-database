@@ -1,6 +1,13 @@
 # TDD Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Test Execution: Regression (Verification) - [2025-04-28 13:19:30]
+- **Trigger**: Manual verification run of `tests/data_access/test_db_layer.py` after reported fix by debug mode (commit e5dfc68).
+- **Outcome**: FAIL / **Summary**: 11 tests passed, 1 failed
+- **Failed Tests**:
+    - `tests/data_access/test_db_layer.py::test_get_db_pool_failure`: `Failed: DID NOT RAISE <class 'ConnectionError'>`
+- **Coverage Change**: N/A
+- **Notes**: Verification of fix for `test_get_db_pool_failure` failed. Contradicts previous reports from debug mode. The mocking issue persists. [Ref: Issue-ID: TDD-DBPOOL-FAIL-20250428]
 ### Test Execution: Unit - [2025-04-28 09:54:06]
 - **Trigger**: Manual run after adding tests for `mcp_utils`
 - **Outcome**: PASS / **Summary**: 6 tests passed
