@@ -16,6 +16,7 @@
 - **Key Components:** Text Processor, Search Module, Relationship Manager, Inference Module, Bibliography Manager, Interfaces (CLI, MCP, API, Web UI, Reader).
 
 ## Decision Log
+- **[2025-04-27 18:21:09] - Tier 0 MVP Definition:** Defined Tier 0 MVP in `docs/project-specifications.md` (v2.1) based on synthesis report. Stack: Local Docker deployment using PostgreSQL+pgvector, Ollama (CPU) with OS quantized model, CPU-based text processing (GROBID, PyMuPDF, semchunk), Python backend (Flask/FastAPI), CLI/MCP interfaces. Chosen for minimal software cost and best migration path to Tier 1 (Cloud Serverless Postgres).
 - **[2025-04-27 17:49:10] - Tier 0 DB Migration Analysis:** Evaluated local DB options (SQLite, Postgres, ArangoDB) for Tier 0 deployability vs. migration effort. Recommended Postgres+pgvector locally as best balance for Tier 1 (Cloud Postgres) migration, while ArangoDB is best for Tier 2 (Cloud ArangoDB) migration but harder to move to Tier 1. SQLite is simplest locally but hardest to migrate.
 - **[2025-04-16 09:38:26] - MVP Strategy Recommendation:** Cloud-first MVP strongly recommended (Tier 1 ~$50/mo or Tier 2 ~$150/mo) using serverless components and cost-effective embedding APIs (OpenAI Small/Voyage Lite) to mitigate local hardware (1080 Ti) limitations.
 - **[2025-04-16 09:38:26] - MVP Database Recommendation:** ArangoDB recommended for MVP due to multi-model flexibility and simpler initial architecture via ArangoSearch for vectors. TigerGraph considered for post-MVP scalability.

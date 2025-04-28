@@ -1,6 +1,12 @@
 # Specification Writer Specific Memory
 
 ## Functional Requirements
+### Feature: Tier 0 MVP Definition (Local Laptop)
+- Added: 2025-04-27 18:21:09
+- Description: Defined the Tier 0 Minimum Viable Product focused on local laptop deployment (Intel i7-1260P, 16GB RAM, Integrated Graphics via WSL2) with minimal software cost (~$0). This specification is detailed in `docs/project-specifications.md` v2.1.
+- Acceptance criteria: 1. Tier 0 is clearly defined in the specification document. 2. Tier 0 stack aligns with synthesis report recommendations (PostgreSQL+pgvector, Ollama CPU, CPU Text Proc, Python Backend, CLI/MCP). 3. Tier 0 acknowledges performance limitations and sacrifices. 4. Tier 0 emphasizes the migration path to Tier 1 (Cloud Serverless Postgres).
+- Dependencies: `docs/reports/philograph_synthesis_and_recommendations.md`, `memory-bank/globalContext.md` Decision Log, Task Request.
+- Status: Implemented
 
 ### Feature: Synthesis Report Generation
 - Added: 2025-04-16 09:38:26
@@ -32,6 +38,11 @@
 - Impact: All ML tasks (embeddings, layout analysis) must run on CPU. 16GB RAM limits concurrent services. Overall performance, especially bulk processing, will be significantly slower than systems with dedicated GPUs or cloud resources.
 - Mitigation strategy: Prioritize CPU-optimized tools and workflows. Use small, quantized embedding models (e.g., `all-MiniLM-L6-v2`) via Ollama CPU. Consider SQLite+VSS to save RAM if ArangoDB/Postgres prove too heavy. Manage user expectations regarding processing speed. Defer computationally expensive features.
 
+### Constraint: Tier 0 MVP Stack & Performance
+- Added: 2025-04-27 18:21:09
+- Description: Tier 0 MVP is constrained to local laptop hardware (e.g., Intel i7-1260P, 16GB RAM, Integrated Graphics via WSL2) and uses a specific stack for ~$0 software cost: PostgreSQL+pgvector (Docker), Ollama CPU (Docker) w/ OS Quantized Model, CPU-based text processing (GROBID CPU, PyMuPDF, semchunk, AnyStyle), Python Backend (Docker), CLI/MCP interfaces.
+- Impact: Significant performance limitations, especially for bulk ingestion and concurrent ML tasks (CPU/RAM bottleneck). No GPU acceleration possible. Scalability requires hardware upgrades. High maintenance burden. Advanced text processing (footnote linking, layout analysis) is deferred.
+- Mitigation strategy: Manage user expectations regarding speed. Optimize local configurations (Docker resource limits). Prioritize core features achievable on CPU. Ensure modular design facilitates migration to higher tiers (Tier 1 Cloud Serverless Postgres). Use placeholders for all configuration. (Ref: `docs/project-specifications.md` v2.1, `docs/reports/philograph_synthesis_and_recommendations.md` lines 30-56, 107-116).
 ### Constraint: Local Hardware (1080 Ti) VRAM Limitation
 - Added: 2025-04-16 09:38:26
 - Description: The 11GB VRAM on the specified NVIDIA 1080 Ti is insufficient for concurrent execution of required ML models (embeddings, layout analysis, GPU-accelerated OCR/GROBID) for the full MVP pipeline.

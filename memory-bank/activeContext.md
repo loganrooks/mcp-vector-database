@@ -1,3 +1,4 @@
+[2025-04-27 18:21:09] - SpecPseudo - Task Complete - Updated docs/project-specifications.md (v2.1) to define Tier 0 MVP (Local Laptop: Postgres+pgvector, Ollama CPU Embeddings, CPU Text Proc, Python Backend, CLI/MCP) based on synthesis report and task requirements. Emphasized migration path to Tier 1.
 [2025-04-27 17:49:30] - SpecPseudo - Report Update - Added section analyzing migration paths and scalability between deployment tiers based on user feedback.
 [2025-04-16 09:38:26] - SpecPseudo - Task Complete - Synthesized research findings into final report (docs/reports/philograph_synthesis_and_recommendations.md), covering MVP tiers, Gemini embeddings, cost optimization, note processing, UofT resources, DB migration, and other findings.
 
