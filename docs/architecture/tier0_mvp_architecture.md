@@ -169,7 +169,7 @@ sequenceDiagram
 *   **Embedding Requests:** Backend services (Ingestion, Search) make HTTP POST requests to the **LiteLLM Proxy's OpenAI-compatible endpoint** (`http://{{LITELLM_HOST}}:{{LITELLM_PORT}}/embeddings`), specifying the internal model name (`philo-embed`) which LiteLLM maps to `vertex_ai/text-embedding-large-exp-03-07`.
 *   **External API Calls:** The **LiteLLM Proxy** is the *only* component making direct calls to external cloud services (Vertex AI API) via HTTPS.
 *   **Database Interaction:** Backend services interact with PostgreSQL using standard SQL queries via a Python DB driver (e.g., `psycopg2`). Vector searches utilize `pgvector`'s specific operators (e.g., `<=>` for L2 distance, `<#>` for negative inner product, `<->` for cosine distance).
-*   **Data Format:** JSON is the primary format for API request/response bodies. Text data is processed as UTF-8 strings. Embeddings are stored as `vector` types in PostgreSQL (dimensionality TBD, e.g., `vector({{TARGET_EMBEDDING_DIMENSION}})`).
+*   **Data Format:** JSON is the primary format for API request/response bodies. Text data is processed as UTF-8 strings. Embeddings are stored as `vector` types in PostgreSQL (Recommended dimension: **768**, pending validation, e.g., `vector(768)`).
 
 ## 5. Modularity & Tier 1 Migration Considerations
 
