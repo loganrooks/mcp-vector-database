@@ -137,10 +137,13 @@ cython_debug/
 # macOS
 .DS_Store
 # PhiloGraph Specific
-data/ # Assuming source data isn't committed
-*.db # If any local SQLite DBs are used temporarily
-*.log # General logs
-downloads/ # Raw downloads from zlibrary-mcp
-processed_rag_output/ # Processed text from zlibrary-mcp
-gcp-key.json # Service account key
-litellm_config.yaml # Potentially contains keys if not using env vars properly
+data/ 
+*.db 
+*.log 
+downloads/ 
+processed_rag_output/ 
+gcp-key.json 
+litellm_config.yaml 
+deconstruction/
+docs/philosophy/
+docs/classes/
