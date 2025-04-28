@@ -208,7 +208,7 @@
         [
           "edit",
           {
-            "fileRegex": ".*sparc.*\\.md$",
+            "fileRegex": "memory-bank\\*\\.md$",
             "description": "Feedback files only"
           }
         ]
