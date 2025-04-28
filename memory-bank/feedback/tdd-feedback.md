@@ -1,3 +1,15 @@
+### Blocker & Early Return - [2025-04-28 16:53:10]
+- **Trigger**: Persistent failure of `test_call_grobid_extractor_api_request_error` and context approaching limit (was 50% before task resumption, currently 34% after).
+- **Context**: Attempting Green phase for `call_grobid_extractor` API error handling. Test mocks `http_client.make_async_request` to raise `httpx.RequestError`.
+- **Issue**: The test fails with `AssertionError: assert {'metadata': ...} is None`. The function does not return `None` as expected when the `RequestError` is raised; instead, it proceeds and returns placeholder data.
+- **Attempts**:
+    1. Added specific `except httpx.RequestError` block returning `None`. (Failed)
+    2. Restructured `try...except` blocks to isolate network call. (Failed)
+    3. Ensured general `except Exception` block returns `None`. (Failed)
+- **Analysis**: The exception raised by the mock's `side_effect` doesn't seem to be caught correctly by the `except` block in the `async` function `call_grobid_extractor`. The exact reason is unclear - potentially an issue with async exception handling, the mocking strategy, or the `try...except` structure interaction.
+- **Self-Correction**: Multiple attempts to fix the code logic based on the test failure were unsuccessful.
+- **Context %**: 34% (previously 50%)
+- **Recommendation**: Invoke Early Return. Suggest `debug` mode investigate the exception handling discrepancy in `call_grobid_extractor` or refine the mocking strategy for `test_call_grobid_extractor_api_request_error`.
 ### [2025-04-28 14:30:10] - User Intervention: Clarification on Test Scope Discrepancy
 - **Trigger:** User message following Early Return invocation.
 - **Context:** Early Return was invoked due to `test_get_db_pool_failure` failing during verification, contradicting `debug` mode's report.

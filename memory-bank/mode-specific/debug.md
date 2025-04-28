@@ -1,6 +1,10 @@
 # Debug Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Tool/Technique: Mocking Async Exception Side Effects - [2025-04-28 17:04:30]
+- **Context**: Testing `try...except` blocks around `await` calls where the awaited async function needs to raise an exception.
+- **Usage**: Use `@patch('path.to.async_func', new_callable=AsyncMock)` or ensure the mock is async. Set the `side_effect` directly to the exception instance: `mock_async_func.side_effect = MyException("Error message")`. The `AsyncMock` handles raising the exception when the mock is awaited. Avoid complex wrappers like `AsyncMock(side_effect=MyException(...))` unless needed for more advanced scenarios. Ensure test assertions only check behavior relevant to the error path (e.g., return value, logs), not steps that are skipped due to the exception.
+- **Effectiveness**: High (Resolved `test_call_grobid_extractor_api_request_error` failure).
 ## Debugging Tools & Techniques
 <!-- Append tool notes using the format below -->
 ### Tool/Technique: Nested Async Mocking for Exception - [2025-04-28 13:05:04]
@@ -15,6 +19,23 @@
 <!-- Append environment notes using the format below -->
 
 ## Recurring Bug Patterns
+### Issue: TDD-GROBID-REQ-ERR-20250428 - `test_call_grobid_extractor_api_request_error` failed assertion - [Status: Resolved] - [2025-04-28 17:04:30]
+- **Reported**: [2025-04-28 16:57:29] (via TDD Early Return / activeContext) / **Severity**: Medium / **Symptoms**: Test failed `assert result is None`. Mocked `httpx.RequestError` not caught by `call_grobid_extractor`.
+- **Investigation**:
+    1. Reviewed TDD feedback log (`memory-bank/feedback/tdd-feedback.md`). [2025-04-28 17:01:08]
+    2. Read test code (`tests/utils/test_text_processing.py`). [2025-04-28 17:01:26]
+    3. Read source code (`src/philograph/utils/text_processing.py`). [2025-04-28 17:01:39]
+    4. Hypothesized incorrect async mock `side_effect` setup. [2025-04-28 17:01:39]
+    5. Applied fix to mock setup (`side_effect = Exception(...)` directly on `AsyncMock`). [2025-04-28 17:02:05]
+    6. Verified test - Failed (`NameError: call_kwargs`). [2025-04-28 17:02:19]
+    7. Removed irrelevant assertion (`call_kwargs`). [2025-04-28 17:02:40]
+    8. Verified test - Failed (`NameError: mock_parse_tei`). [2025-04-28 17:02:58]
+    9. Removed irrelevant assertion (`mock_parse_tei`). [2025-04-28 17:03:19]
+   10. Verified test - Passed. [2025-04-28 17:03:34]
+- **Root Cause**: Incorrect async mock setup (`side_effect` assignment) and presence of irrelevant assertions copied from the success test case (`test_call_grobid_extractor_api_success`) which caused `NameError`s after the primary mocking issue was fixed. [2025-04-28 17:04:30]
+- **Fix Applied**: Corrected `mock_make_request.side_effect` assignment in `test_call_grobid_extractor_api_request_error` to directly use the exception instance with an `AsyncMock`. Removed unnecessary `@patch` for `httpx`. Removed irrelevant assertions checking `call_kwargs` and `mock_parse_tei`. Commit: d07e7f4. [2025-04-28 17:04:30]
+- **Verification**: `pytest tests/utils/test_text_processing.py::test_call_grobid_extractor_api_request_error` passed. [2025-04-28 17:03:34]
+- **Related Issues**: [See TDD Feedback 2025-04-28 16:53:10]
 <!-- Append new patterns using the format below -->
 
 ## Issue History

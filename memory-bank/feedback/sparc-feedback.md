@@ -1,3 +1,10 @@
+### [2025-04-28 17:14:13] Intervention: Incorrect Context Percentage Calculation
+- **Trigger**: User Feedback denying handover `new_task`.
+- **Context**: SPARC initiated handover due to reported context size exceeding threshold (e.g., 181%).
+- **Action Taken**: User clarified that the percentage in `environment_details` is incorrect. Correct calculation is `(Reported Tokens / 1,000,000) * 100`. SPARC recalculated (e.g., 21%) and aborted handover.
+- **Rationale**: Avoid unnecessary handover based on faulty system reporting. Follow user guidance for accurate context monitoring.
+- **Outcome**: Handover aborted. Workflow continues.
+- **Follow-up**: SPARC and delegated modes must manually calculate context percentage until the reporting bug is fixed. Include this instruction in future delegations. Logged as system issue.
 # SPARC Mode Feedback Log
 <!-- Entries below should be added reverse chronologically (newest first) -->
 

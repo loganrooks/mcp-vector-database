@@ -1,6 +1,13 @@
 # TDD Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 16:54:00]
+- **Trigger**: Manual run after attempting fix for `call_grobid_extractor` API error handling.
+- **Outcome**: FAIL / **Summary**: 8 passed, 1 skipped, 1 failed
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_call_grobid_extractor_api_request_error`: `AssertionError: assert {'metadata': ...} is None`
+- **Coverage Change**: N/A
+- **Notes**: The attempted fix for the `httpx.RequestError` handling in `call_grobid_extractor` was unsuccessful. The test continues to fail, indicating the exception is not being caught as expected. Invoking Early Return. Context: 36%.
 ### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 14:42:10]
 - **Trigger**: Manual run after adding `test_call_grobid_extractor_api_success`.
 - **Outcome**: PASS / **Summary**: 8 passed, 1 skipped
