@@ -49,7 +49,7 @@ graph TD
 
     subgraph "External Cloud Services"
         style External Cloud Services fill:#eee,stroke:#666,stroke-width:1px
-        VertexAI{{Vertex AI Embeddings API}}
+        VertexAI{{Cloud Embedding API<br/>(Vertex AI - text-embedding-large-exp-03-07)}}
     end
 
     subgraph "Local Filesystem"
@@ -100,11 +100,11 @@ graph TD
     *   **semchunk (CPU):** Performs semantic chunking of extracted text.
     *   **AnyStyle (Optional):** Parses citation strings if GROBID output needs refinement. Runs as a separate container or integrated library.
 *   **Middleware (Docker):**
-    *   **LiteLLM Proxy:** Acts as the **sole gateway** for all external embedding API calls. Manages API keys (via Virtual Keys), routes requests to Vertex AI, handles retries, rate limits, and potentially cost tracking. Provides an OpenAI-compatible endpoint for internal services.
+    *   **LiteLLM Proxy:** Acts as the **sole gateway** for all external embedding API calls. Manages API keys (via Virtual Keys), routes requests to Vertex AI (`text-embedding-large-exp-03-07`), handles retries, rate limits, and potentially cost tracking. Provides an OpenAI-compatible endpoint for internal services.
 *   **Storage (Docker):**
     *   **PostgreSQL + pgvector:** Stores all structured data: document metadata, sections, text chunks, embeddings, relationships, collections. Provides relational querying and vector search capabilities.
 *   **External Cloud Services:**
-    *   **Vertex AI Embeddings API:** Google Cloud service providing text embedding models (e.g., `text-embedding-004`). Accessed exclusively via the LiteLLM Proxy.
+    *   **Vertex AI Embeddings API:** Google Cloud service providing the `text-embedding-large-exp-03-07` model. Accessed exclusively via the LiteLLM Proxy.
 *   **Local Filesystem:**
     *   **Source Documents:** Location of the original PDF, EPUB, MD, TXT files provided by the user for ingestion.
 
@@ -131,7 +131,7 @@ sequenceDiagram
     IngestSvc->>TPUtils: Chunk Text(extracted text)
     TPUtils-->>IngestSvc: Text Chunks
     IngestSvc->>LiteProxy: POST /embeddings (chunks, model='philo-embed')
-    LiteProxy->>VertexAI: Call Embeddings API(chunks)
+    LiteProxy->>VertexAI: Call Embeddings API(chunks, model='text-embedding-large-exp-03-07')
     VertexAI-->>LiteProxy: Embeddings
     LiteProxy-->>IngestSvc: Embeddings
     IngestSvc->>DB: Store Document, Sections, Chunks, Embeddings, Metadata, Refs
@@ -154,7 +154,7 @@ sequenceDiagram
     CLI->>API: POST /search (query="...", filters={...})
     API->>SearchSvc: Perform Search(query, filters)
     SearchSvc->>LiteProxy: POST /embeddings (query, model='philo-embed')
-    LiteProxy->>VertexAI: Call Embeddings API(query)
+    LiteProxy->>VertexAI: Call Embeddings API(query, model='text-embedding-large-exp-03-07')
     VertexAI-->>LiteProxy: Query Embedding
     LiteProxy-->>SearchSvc: Query Embedding
     SearchSvc->>DB: SELECT ... WHERE metadata=? ORDER BY embedding <=> query_embedding LIMIT k
@@ -166,10 +166,10 @@ sequenceDiagram
 ## 4. Data Flow & Communication Protocols
 
 *   **Internal Communication:** Primarily RESTful HTTP calls between the UI/MCP layer and the Backend API, and between Backend services (if split into separate containers, though likely monolithic initially) or between the Backend and dedicated Text Processing containers (e.g., GROBID).
-*   **Embedding Requests:** Backend services (Ingestion, Search) make HTTP POST requests to the **LiteLLM Proxy's OpenAI-compatible endpoint** (`http://{{LITELLM_HOST}}:{{LITELLM_PORT}}/embeddings`) for generating embeddings.
+*   **Embedding Requests:** Backend services (Ingestion, Search) make HTTP POST requests to the **LiteLLM Proxy's OpenAI-compatible endpoint** (`http://{{LITELLM_HOST}}:{{LITELLM_PORT}}/embeddings`), specifying the internal model name (`philo-embed`) which LiteLLM maps to `vertex_ai/text-embedding-large-exp-03-07`.
 *   **External API Calls:** The **LiteLLM Proxy** is the *only* component making direct calls to external cloud services (Vertex AI API) via HTTPS.
 *   **Database Interaction:** Backend services interact with PostgreSQL using standard SQL queries via a Python DB driver (e.g., `psycopg2`). Vector searches utilize `pgvector`'s specific operators (e.g., `<=>` for L2 distance, `<#>` for negative inner product, `<->` for cosine distance).
-*   **Data Format:** JSON is the primary format for API request/response bodies. Text data is processed as UTF-8 strings. Embeddings are stored as `vector` types in PostgreSQL.
+*   **Data Format:** JSON is the primary format for API request/response bodies. Text data is processed as UTF-8 strings. Embeddings are stored as `vector` types in PostgreSQL (dimensionality TBD, e.g., `vector({{TARGET_EMBEDDING_DIMENSION}})`).
 
 ## 5. Modularity & Tier 1 Migration Considerations
 
