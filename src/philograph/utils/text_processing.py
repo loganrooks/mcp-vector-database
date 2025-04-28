@@ -389,8 +389,8 @@ async def call_anystyle_parser(reference_string: str) -> Optional[Dict[str, Any]
 
     try:
         response = await http_client.make_async_request("POST", endpoint, json_data=payload, timeout=30.0)
-        response.raise_for_status()
-        parsed_list = response.json()
+        await response.raise_for_status()
+        parsed_list = await response.json()
         if parsed_list and isinstance(parsed_list, list):
             # TODO: Adapt based on actual AnyStyle API response structure
             # Assuming it returns a list with one parsed item containing fields like 'author', 'title', 'date', etc.
