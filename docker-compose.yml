@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  db:
+    image: pgvector/pgvector:pg16 # Use official pgvector image for PostgreSQL 16
+    container_name: philograph_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-philograph_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?err} # Require DB_PASSWORD to be set in .env
+      POSTGRES_DB: ${DB_NAME:-philograph_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Optional: Add init scripts if needed for schema creation
+      # - ./scripts/db_init:/docker-entrypoint-initdb.d
+    ports:
+      - "${DB_PORT:-5432}:5432" # Expose DB port locally if needed for direct access/debugging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  litellm-proxy:
+    image: ghcr.io/berriai/litellm:main-latest # Use official LiteLLM image
+    container_name: philograph_litellm_proxy
+    ports:
+      - "${LITELLM_PORT:-4000}:4000"
+    environment:
+      # Pass GCP credentials and config details needed by LiteLLM
+      GOOGLE_APPLICATION_CREDENTIALS: /app/gcp-key.json # Path inside the container
+      VERTEX_PROJECT: ${VERTEX_AI_PROJECT_ID:?err} # Require GCP Project ID
+      VERTEX_LOCATION: ${VERTEX_AI_LOCATION:?err} # Require GCP Location
+      # LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-} # Optional: Secure the proxy itself
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml # Mount the config file
+      # Mount the GCP service account key file (replace source path in .env or here)
+      - ${GOOGLE_APPLICATION_CREDENTIALS:?err}:/app/gcp-key.json:ro # Mount key read-only
+    command: ["--config", "/app/config.yaml", "--port", "4000", "--host", "0.0.0.0"] # Run proxy with config
+    restart: unless-stopped
+    depends_on:
+      db: # Optional: Wait for DB if LiteLLM needs it for logging/state (not default)
+        condition: service_healthy
+
+  philograph-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: philograph_backend
+    env_file:
+      - .env # Load environment variables from .env file
+    environment:
+      # Ensure API URL uses service discovery name if needed, though config.py uses LITELLM_HOST env var
+      LITELLM_HOST: litellm-proxy # Override host for service discovery
+      # Ensure DB connection uses service discovery name
+      DB_HOST: db
+    volumes:
+      # Mount source code for development hot-reloading (if using uvicorn --reload)
+      - ./src:/app/src
+      # Mount data directory if needed by ingestion service (adjust path as needed)
+      - ${SOURCE_FILE_DIR:-./data/source_documents}:/app/data/source_documents:ro # Mount read-only
+      # Mount potential output dirs if needed (e.g., for logs, temp files)
+      # - ./logs:/app/logs
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      litellm-proxy:
+        condition: service_started # Wait for proxy to start, healthcheck might be better if available
+    restart: unless-stopped
+    # Optional: Override command to run MCP server instead of API
+    # command: ["python", "-m", "src.philograph.mcp.main"]
+
+  # --- Optional Placeholder Services (Uncomment and configure if needed) ---
+  # grobid:
+  #   image: lfoppiano/grobid:0.8.0 # Or latest stable version
+  #   container_name: philograph_grobid
+  #   ports:
+  #     - "8070:8070" # GROBID service port
+  #     - "8071:8071" # Admin port
+  #   restart: unless-stopped
+
+  # anystyle:
+  #   image: ... # Find or build an AnyStyle service image
+  #   container_name: philograph_anystyle
+  #   ports:
+  #     - "4567:4567" # Default AnyStyle service port
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local

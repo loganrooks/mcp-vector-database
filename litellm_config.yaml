@@ -1,0 +1,29 @@
+# Basic LiteLLM Proxy Configuration for PhiloGraph Tier 0
+
+model_list:
+  - model_name: philo-embed # Internal name used by PhiloGraph services
+    litellm_params:
+      model: vertex_ai/text-embedding-large-exp-03-07 # Target Vertex AI model
+      # Optional: Specify output dimension using MRL if needed and supported by model/LiteLLM
+      # output_dimensionality: 768 # As recommended in ADR 004
+
+litellm_settings:
+  # Set the path to your GCP credentials JSON file via environment variable GOOGLE_APPLICATION_CREDENTIALS
+  # Set your GCP project ID via environment variable VERTEX_AI_PROJECT_ID
+  # Set your GCP location via environment variable VERTEX_AI_LOCATION
+  # Example: vertex_project: "your-gcp-project-id" # Can be set via env var instead
+  # Example: vertex_location: "us-central1" # Can be set via env var instead
+  set_verbose: True # Enable verbose logging for debugging
+  # Optional: Define virtual keys for internal services to use
+  # virtual_keys:
+  #   - api_key: your_litellm_virtual_key # Match LITELLM_API_KEY in .env
+  #     models: ["philo-embed"]
+  #     # Add budget/rate limits if desired
+
+general_settings:
+    # Port and host are typically set via command line or docker-compose, not here.
+    # master_key: "sk-1234" # Optional: Secure the proxy itself if exposed
+    pass
+
+# Add other LiteLLM settings as needed (e.g., cost tracking DB, alerts)
+# See LiteLLM documentation for more options: https://docs.litellm.ai/docs/proxy/configs
