@@ -1,6 +1,79 @@
 # TDD Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 19:00:00]
+- **Trigger**: Final run after completing TDD cycles for `parse_references` and `call_anystyle_parser`.
+- **Outcome**: PASS / **Summary**: 22 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Completed testing for `parse_references` logic and `call_anystyle_parser` success/error paths for this session.
+
+### TDD Cycle: `call_anystyle_parser` (HTTPStatusError Case) - [2025-04-28 19:00:00]
+- **Refactor**: Reviewed code after Green phase. No immediate refactoring needed based on current tests.
+### TDD Cycle: `call_anystyle_parser` (HTTPStatusError Case) - [2025-04-28 18:59:40]
+- **Green**: Added `await` to `response.raise_for_status()` call. Fixed mock in `test_call_anystyle_parser_success` to use `AsyncMock` for `raise_for_status`. / Code File: `src/philograph/utils/text_processing.py`, Test File: `tests/utils/test_text_processing.py`
+- **Outcome**: `test_call_anystyle_parser_http_status_error` and `test_call_anystyle_parser_success` now pass. Cycle complete.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 18:59:40]
+- **Trigger**: Manual run after fixing `call_anystyle_parser` and `test_call_anystyle_parser_success`.
+- **Outcome**: PASS / **Summary**: 22 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: All tests passing after Green phase for `test_call_anystyle_parser_http_status_error`.
+### TDD Cycle: `call_anystyle_parser` (HTTPStatusError Case) - [2025-04-28 18:57:21]
+- **Red**: Wrote `test_call_anystyle_parser_http_status_error` mocking `raise_for_status` to raise `HTTPStatusError`. / Test File: `tests/utils/test_text_processing.py`
+- **Outcome**: Test failed unexpectedly (`Failed: DID NOT RAISE <class 'httpx.HTTPStatusError'>`). Analysis indicates `response.raise_for_status()` needs to be awaited in `call_anystyle_parser`.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 18:57:21]
+- **Trigger**: Manual run after adding `test_call_anystyle_parser_http_status_error`.
+- **Outcome**: FAIL / **Summary**: 1 failed, 21 passed, 1 skipped
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_call_anystyle_parser_http_status_error`: Failed: DID NOT RAISE <class 'httpx.HTTPStatusError'> (plus RuntimeWarning: coroutine not awaited)
+- **Coverage Change**: N/A
+- **Notes**: Failure indicates missing `await` in source code.
+### TDD Cycle: `call_anystyle_parser` (RequestError Case) - [2025-04-28 18:56:19]
+- **Red**: Wrote `test_call_anystyle_parser_request_error` mocking `make_async_request` to raise `RequestError`. / Test File: `tests/utils/test_text_processing.py`
+- **Outcome**: Test passed unexpectedly. Existing code correctly handles and re-raises `RequestError`. No Green/Refactor needed for this case.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 18:56:19]
+- **Trigger**: Manual run after adding `test_call_anystyle_parser_request_error`.
+- **Outcome**: PASS / **Summary**: 21 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: All tests passing. `test_call_anystyle_parser_request_error` passed without code changes.
+### TDD Cycle: `call_anystyle_parser` (Success Case) - [2025-04-28 18:55:18]
+- **Green**: Added `await` to `response.json()` call. / Code File: `src/philograph/utils/text_processing.py`
+- **Outcome**: `test_call_anystyle_parser_success` now passes. Cycle complete.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 18:55:18]
+- **Trigger**: Manual run after fixing `call_anystyle_parser`.
+- **Outcome**: PASS / **Summary**: 20 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: All tests passing after Green phase for `test_call_anystyle_parser_success`.
+### TDD Cycle: `call_anystyle_parser` (Success Case) - [2025-04-28 18:54:07]
+- **Red**: Wrote `test_call_anystyle_parser_success` mocking `make_async_request`. / Test File: `tests/utils/test_text_processing.py`
+- **Outcome**: Test failed as expected (`AssertionError: assert None == {...}`). Logs indicate missing `await` for `response.json()` in `call_anystyle_parser`.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 18:54:07]
+- **Trigger**: Manual run after adding `test_call_anystyle_parser_success`.
+- **Outcome**: FAIL / **Summary**: 1 failed, 19 passed, 1 skipped
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_call_anystyle_parser_success`: AssertionError: assert None == {...} (plus RuntimeWarning: coroutine not awaited)
+- **Coverage Change**: N/A
+- **Notes**: Failure expected (Red phase).
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 18:51:14]
+- **Trigger**: Manual run after adding `test_parse_references_uses_anystyle_when_api_set`.
+- **Outcome**: PASS / **Summary**: 19 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test `test_parse_references_uses_anystyle_when_api_set` passed unexpectedly (Red phase). Existing implementation correctly attempts to call `call_anystyle_parser` when API URL is set.
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 18:49:54]
+- **Trigger**: Manual run after adding `test_parse_references_uses_basic_parser_when_no_api`.
+- **Outcome**: PASS / **Summary**: 18 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test `test_parse_references_uses_basic_parser_when_no_api` passed unexpectedly (Red phase). Existing implementation correctly handles fallback to basic parser.
 ### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:32:53]
 - **Trigger**: Manual run after fixing `basic_reference_parser` for no-year case.
 - **Outcome**: PASS / **Summary**: 17 passed, 1 skipped

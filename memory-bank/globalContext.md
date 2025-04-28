@@ -132,6 +132,7 @@ graph TD
 
 - **[2025-04-28 17:04:30] - Debug - Progress:** Successfully fixed `test_call_grobid_extractor_api_request_error` in `tests/utils/test_text_processing.py`. Root cause was incorrect async mock `side_effect` setup and leftover assertions from success case. Test passed verification. Commit: d07e7f4. [Ref: Issue-ID: TDD-GROBID-REQ-ERR-20250428]
 ## Progress
+- **[2025-04-28 18:44:28] - TDD Progress:** TDD mode partially tested `src/philograph/utils/text_processing.py`, adding tests for `basic_reference_parser` (commit `4f03a2d`). Invoked Early Return due to context limit before testing `parse_references` and `call_anystyle_parser`. [See TDD Feedback 2025-04-28 17:33:38]
 - **[2025-04-28 17:06:27] - Debug Task:** Completed by Debug mode. Test `test_call_grobid_extractor_api_request_error` fixed (commit d07e7f4). Ready to resume TDD. [See Debug Feedback YYYY-MM-DD HH:MM:SS]
 - **[2025-04-28 13:24:10] - Debug - Progress:** Re-investigated TDD-DBPOOL-FAIL-20250428. Confirmed `test_get_db_pool_failure` passes in current code state. Discrepancy with TDD report likely due to code state mismatch during TDD verification. No fix needed. [Ref: Issue-ID: TDD-DBPOOL-FAIL-20250428]
 - **[2025-04-28 13:05:04] - Debug - Progress:** Successfully fixed `test_get_db_pool_failure` by mocking `cursor.execute` to raise `psycopg.OperationalError` within the nested async context managers. Test passed verification. [See Issue-ID: TDD-DBPOOL-FAIL-20250428]

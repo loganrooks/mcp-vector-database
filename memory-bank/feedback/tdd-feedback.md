@@ -1,3 +1,10 @@
+### User Intervention - Insufficient Detail in Early Return Completion - [2025-04-28 18:43:12]
+- **Trigger**: User denied `attempt_completion` for Early Return.
+- **Context**: Invoked Early Return due to context limit (53%) after committing code and memory bank changes. The `attempt_completion` message lacked detail.
+- **Action**: User requested more details about code changes and tests in the completion message.
+- **Rationale**: Completion messages, even for Early Returns, should provide enough detail for validation and handover.
+- **Outcome**: Will revise the `attempt_completion` message with more specifics.
+- **Follow-up**: Ensure future `attempt_completion` messages are sufficiently detailed.
 ### User Intervention - Commit Before Early Return - [2025-04-28 18:40:57]
 - **Trigger**: User denied `attempt_completion` for Early Return.
 - **Context**: Invoked Early Return due to context limit (53%) after successful TDD cycles for `basic_reference_parser`. Attempted completion without committing changes.
