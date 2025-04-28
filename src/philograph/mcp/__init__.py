@@ -1,0 +1,1 @@
+# src/philograph/mcp/__init__.py
