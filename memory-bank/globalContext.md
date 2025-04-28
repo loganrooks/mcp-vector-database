@@ -17,7 +17,7 @@
 graph TD
     subgraph "User Interfaces (Local)"
         CLI[CLI Client]
-        MCPServer[MCP Server (Local)]
+        MCPServer[PhiloGraph MCP Server (Local)]
     end
 
     subgraph "Backend Service (Docker)"
@@ -27,6 +27,7 @@ graph TD
         SearchService[Search Service]
         RelationService[Relationship Service (Basic)]
         BiblioService[Bibliography Service (Basic)]
+        AcquisitionService[Text Acquisition Service]
     end
 
     subgraph "Text Processing Utilities (Docker / within Backend)"
@@ -39,7 +40,7 @@ graph TD
 
     subgraph "Middleware (Docker)"
         style Middleware fill:#cfc,stroke:#333,stroke-width:2px
-        LiteLLMProxy[LiteLLM Proxy]
+        LiteLLMProxy[LiteLLM Proxy (Embeddings)]
     end
 
     subgraph "Storage (Docker)"
@@ -49,12 +50,19 @@ graph TD
 
     subgraph "External Cloud Services"
         style External Cloud Services fill:#eee,stroke:#666,stroke-width:1px
-        VertexAI{{Vertex AI Embeddings API}}
+        VertexAI{{Cloud Embedding API<br/>(Vertex AI - text-embedding-large-exp-03-07)}}
+    end
+
+    subgraph "External MCP Servers (Local)"
+        style External MCP Servers fill:#e9e,stroke:#666,stroke-width:1px
+        ZLibMCP[zlibrary-mcp Server]
     end
 
     subgraph "Local Filesystem"
         style Local Filesystem fill:#ddd,stroke:#666,stroke-width:1px
         SourceFiles[/Source Documents/]
+        ZLibDownloads[/zlibrary Downloads/]
+        ZLibProcessed[/zlibrary Processed RAG/]
     end
 
     %% Connections
@@ -65,12 +73,14 @@ graph TD
     API -- Orchestrates --> SearchService
     API -- Orchestrates --> RelationService
     API -- Orchestrates --> BiblioService
+    API -- Orchestrates --> AcquisitionService
 
     IngestionService -- Uses --> GROBID
     IngestionService -- Uses --> PyMuPDF
     IngestionService -- Uses --> SemChunk
     IngestionService -- Uses --> AnyStyle
     IngestionService -- Reads --> SourceFiles
+    IngestionService -- Reads --> ZLibProcessed
     IngestionService -- Requests Embeddings --> LiteLLMProxy
     IngestionService -- Writes --> PostgresDB
 
@@ -80,9 +90,13 @@ graph TD
     RelationService -- Reads/Writes --> PostgresDB
     BiblioService -- Reads/Writes --> PostgresDB
 
+    AcquisitionService -- Calls via MCP --> ZLibMCP
+    ZLibMCP -- Writes --> ZLibDownloads
+    ZLibMCP -- Writes --> ZLibProcessed
+
     LiteLLMProxy -- Calls --> VertexAI
 ```
-**Notes:** Tier 0 uses local Docker containers for Postgres+pgvector, LiteLLM Proxy, Python Backend (Flask/FastAPI), and CPU-based text processing tools. Embeddings are generated via calls through the LiteLLM Proxy to the Vertex AI API (`text-embedding-large-exp-03-07`). Interfaces are local CLI and MCP Server. Designed for migration to Tier 1 (Cloud Serverless).
+**Notes:** Tier 0 uses local Docker containers for PhiloGraph components (Postgres+pgvector, LiteLLM Proxy, Python Backend, CPU Text Proc). Embeddings via LiteLLM Proxy to Vertex AI (`text-embedding-large-exp-03-07`, 768d recommended). Text acquisition via external local `zlibrary-mcp` server. Interfaces: local CLI, PhiloGraph MCP Server. Designed for Tier 1 migration.
 
 - **Core Technologies:** Vector Database (e.g., PostgreSQL+pgvector), Relational Database (PostgreSQL), File Storage.
 - **Architecture:** Service-Oriented, API-First, Plugin-based (for relationships, inference, embedding models, text processing components).
@@ -90,6 +104,8 @@ graph TD
 - **Key Components:** Text Processor, Search Module, Relationship Manager, Inference Module, Bibliography Manager, Interfaces (CLI, MCP, API, Web UI, Reader).
 
 ## Decision Log
+- **[2025-04-28 03:32:04] - Tier 0 Text Acquisition:** Decided to integrate the external `zlibrary-mcp` server for acquiring missing texts via MCP calls from the PhiloGraph backend. Documented in ADR 008 and updated architecture diagrams/components. Requires separate setup/running of `zlibrary-mcp`.
+- **[2025-04-28 01:40:33] - Tier 0 Embedding Dimension:** Based on research report (`docs/reports/optimal_embedding_dimension_for_philograph.md`), recommended using **768 dimensions** for `text-embedding-large-exp-03-07` via MRL truncation. This balances inferred semantic quality with Tier 0 resource constraints (RAM, CPU) for pgvector HNSW indexing/querying. 1024 dimensions is a fallback. Decision requires empirical validation. Updated relevant architecture documents (ADR 004, main architecture doc, memory bank).
 - **[2025-04-27 23:39:30] - Tier 0 Architecture Design:** Finalized Tier 0 MVP architecture based on spec v2.3. Key components: Local Docker deployment with PostgreSQL+pgvector, LiteLLM Proxy (as unified API gateway), Vertex AI free tier embeddings (via LiteLLM), CPU-based text processing (GROBID, PyMuPDF, semchunk), Python Backend (Flask/FastAPI), CLI/MCP interfaces. No LangChain in Tier 0. Architecture documented in `docs/architecture/tier0_mvp_architecture.md`. Emphasizes modularity for Tier 1 migration.
 - **[2025-04-27 21:18:07] - Tier 0 MVP Revision (Cloud Embeddings):** Revised Tier 0 definition in `docs/project-specifications.md` (v2.2) based on user feedback and middleware report. Tier 0 now uses free cloud embeddings (Vertex AI via local LiteLLM Proxy) instead of local CPU embeddings. Stack: Local Docker deployment with PostgreSQL+pgvector, LiteLLM Proxy, Vertex AI (free tier), CPU-based text processing, Python Backend, CLI/MCP. Acknowledges improved embedding performance but retains local processing bottlenecks and adds cloud dependency/setup requirements.
 - **[2025-04-27 18:21:09] - Tier 0 MVP Definition:** Defined Tier 0 MVP in `docs/project-specifications.md` (v2.1) based on synthesis report. Stack: Local Docker deployment using PostgreSQL+pgvector, Ollama (CPU) with OS quantized model, CPU-based text processing (GROBID, PyMuPDF, semchunk), Python backend (Flask/FastAPI), CLI/MCP interfaces. Chosen for minimal software cost and best migration path to Tier 1 (Cloud Serverless Postgres).

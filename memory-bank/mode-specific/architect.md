@@ -36,7 +36,7 @@
       section_id INTEGER REFERENCES sections(id), -- Optional, if chunk belongs to a section
       text_content TEXT NOT NULL,
       sequence INTEGER, -- Order within the section/document
-      embedding VECTOR({{TARGET_EMBEDDING_DIMENSION}}), -- Standardized dimension
+      embedding VECTOR(768), -- Recommended dimension (pending validation)
       metadata JSONB, -- e.g., page number
       created_at TIMESTAMPTZ DEFAULT NOW()
   );
@@ -77,6 +77,12 @@
 - Behavior: Retrieves metadata for a specific document.
 - Security: None (Local Tier 0)
 
+#### Method/Endpoint: POST /acquire
+- Input: `{ "text_details": { "title": "...", "author": "..." } }` or `{ "missing_id": "..." }`
+- Output: `{ "status": "searching/confirming/downloading/processing/complete/error", "results": [...], "processed_path": "..." }`
+- Behavior: Initiates the text acquisition workflow via the Acquisition Service, potentially returning search results for confirmation before proceeding with download and processing via `zlibrary-mcp`.
+- Security: None (Local Tier 0)
+
 ### Interface Definition: LiteLLM Proxy (OpenAI-Compatible REST - Tier 0) - [2025-04-27 23:39:30]
 - **Purpose**: Provide a unified endpoint for internal services to request embeddings.
 #### Method/Endpoint: POST /embeddings
@@ -92,7 +98,7 @@
 - **Responsibility**: Orchestrates core logic, exposes API, manages workflows (ingestion, search).
 - **Dependencies**: PostgreSQL+pgvector, LiteLLM Proxy, Text Processing Utilities, Local Filesystem.
 - **Interfaces Exposed**: Internal REST API (e.g., `/ingest`, `/search`).
-- **Internal Structure (Tier 0)**: Monolithic Flask/FastAPI application containing Ingestion, Search, Relationship, and Bibliography service logic. Runs in Docker.
+- **Internal Structure (Tier 0)**: Monolithic Flask/FastAPI application containing Ingestion, Search, Relationship, Bibliography, and **Text Acquisition** service logic. Runs in Docker.
 
 ### Component Specification: LiteLLM Proxy (Tier 0) - [2025-04-27 23:39:30]
 - **Responsibility**: Unified gateway for all external LLM/embedding API calls. Manages keys, routing, retries, basic cost tracking.
@@ -111,6 +117,12 @@
 - **Dependencies**: Local CPU resources, potentially separate Docker containers (e.g., for GROBID).
 - **Interfaces Exposed**: Varies (e.g., GROBID API, Python library calls).
 - **Internal Structure (Tier 0)**: Combination of Python libraries within Backend container and potentially separate Docker containers for tools like GROBID/AnyStyle.
+
+### Component Specification: zlibrary-mcp Server (External - Tier 0) - [2025-04-28 03:32:04]
+- **Responsibility**: Provides programmatic access to Z-Library for searching, downloading, and pre-processing texts for RAG. Acts as an external MCP server.
+- **Dependencies**: Node.js, Python 3.9+, Z-Library Account Credentials, Network Access. Runs as a separate local process.
+- **Interfaces Exposed**: MCP Tools (`search_books`, `download_book_to_file`, `process_document_for_rag`, etc.).
+- **Internal Structure**: Node.js/TypeScript application with Python bridge. Manages its own Python venv and a forked `zlibrary` library. (Ref: `zlibrary-mcp` README).
 
 ## System Diagrams
 <!-- Append new diagrams using the format below -->
@@ -239,4 +251,36 @@ sequenceDiagram
     DB-->>SearchSvc: Top-k Chunks + Metadata
     SearchSvc-->>API: Formatted Results
     API-->>CLI: Search Results
+```
+
+### Diagram: PhiloGraph Tier 0 Text Acquisition Workflow - [2025-04-28 03:32:04]
+- Description: Sequence diagram for acquiring missing texts via the external zlibrary-mcp server.
+```mermaid
+sequenceDiagram
+    participant User as User/Agent
+    participant CLI as CLI/MCP
+    participant API as Backend API
+    participant AcqSvc as Acquisition Service
+    participant ZLibMCP as zlibrary-mcp Server
+    participant IngestSvc as Ingestion Service
+
+    User->>CLI: Trigger Acquisition (e.g., for missing citation)
+    CLI->>API: POST /acquire (text_details)
+    API->>AcqSvc: Start Acquisition(text_details)
+    AcqSvc->>ZLibMCP: use_mcp_tool('search_books', {query: ...})
+    ZLibMCP-->>AcqSvc: Search Results (bookDetails list)
+    AcqSvc->>API: Present Results for Confirmation
+    API->>CLI: Display Results
+    User->>CLI: Confirm Selection (selected bookDetails)
+    CLI->>API: POST /acquire/confirm (selected bookDetails)
+    API->>AcqSvc: Confirm Download(bookDetails)
+    AcqSvc->>ZLibMCP: use_mcp_tool('download_book_to_file', {bookDetails: ..., process_for_rag: true})
+    ZLibMCP-->>AcqSvc: { success: true, processed_path: "/path/to/processed_rag_output/file.txt" }
+    AcqSvc->>API: Report Download/Processing Status
+    API->>CLI: Update User
+    AcqSvc->>IngestSvc: Trigger Ingestion(processed_path)
+    Note over IngestSvc: Ingestion proceeds similar to 3.1, reading from ZLibProcessed path.
+    IngestSvc-->>AcqSvc: Ingestion Status
+    AcqSvc-->>API: Final Acquisition Status
+    API-->>CLI: Final Status
 ```
