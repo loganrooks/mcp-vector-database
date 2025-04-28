@@ -181,32 +181,43 @@ async def call_grobid_extractor(pdf_path: str | Path) -> Optional[Dict[str, Any]
         # --- API Call Implementation ---
         logger.debug(f"Using GROBID API at: {config.GROBID_API_URL}")
         endpoint = f"{config.GROBID_API_URL}/api/processFulltextDocument"
+        response = None
+        tei_xml = None
         try:
             with open(pdf_path, 'rb') as f:
                 files = {'input': (Path(pdf_path).name, f, 'application/pdf')}
                 # Use the shared async client
-                response = await http_client.make_async_request(
-                    "POST",
-                    endpoint,
-                    files=files,
-                    # Increase timeout for potentially long processing
-                    timeout=300.0 # 5 minutes, adjust as needed
-                )
-                response.raise_for_status() # Check for HTTP errors
-                tei_xml = response.text
-                logger.info(f"Received TEI XML from GROBID API for {pdf_path}")
+                try:
+                    response = await http_client.make_async_request(
+                        "POST",
+                        endpoint,
+                        files=files,
+                        # Increase timeout for potentially long processing
+                        timeout=300.0 # 5 minutes, adjust as needed
+                    )
+                    response.raise_for_status() # Check for HTTP errors
+                    tei_xml = response.text
+                    logger.info(f"Received TEI XML from GROBID API for {pdf_path}")
+                except http_client.httpx.RequestError as e:
+                    logger.error(f"GROBID API request failed for {pdf_path}: {e}")
+                    return None
+                except http_client.httpx.HTTPStatusError as e:
+                    logger.error(f"GROBID API returned error for {pdf_path}: {e.response.status_code} - {e.response.text}")
+                    return None
+
+            # If request was successful and we have XML, parse it
+            if tei_xml:
                 # TODO: Implement TEI XML parsing
                 parsed_data = parse_grobid_tei(tei_xml)
                 return parsed_data
+            else:
+                 # Should not happen if exceptions are caught correctly, but safety net
+                 logger.error(f"GROBID API call for {pdf_path} completed but yielded no TEI XML.")
+                 return None
 
-        except http_client.httpx.RequestError as e:
-            logger.error(f"GROBID API request failed for {pdf_path}: {e}")
+        except Exception as e: # Catch other potential errors (e.g., file open, parse_grobid_tei)
+            logger.error(f"Error during GROBID processing for {pdf_path}: {e}", exc_info=True)
             return None
-        except http_client.httpx.HTTPStatusError as e:
-             logger.error(f"GROBID API returned error for {pdf_path}: {e.response.status_code} - {e.response.text}")
-             return None
-        except Exception as e:
-            logger.error(f"Error during GROBID API call for {pdf_path}: {e}", exc_info=True)
             return None
 
     else:
