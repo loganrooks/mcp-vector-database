@@ -89,5 +89,106 @@
 - Testing approach: Test ingestion and citation generation with various combinations of EPUBs, PDFs (with/without page numbers), and texts with canonical numbering. Verify consistency of citation pointers.
 
 ## Pseudocode Library
+### Pseudocode: MCP Server - Tier 0
+- Created: 2025-04-28 03:46:40
+```pseudocode
+// Link: pseudocode/tier0/mcp_server.md
+// Defines MCP tools (philograph_ingest, philograph_search, philograph_acquire_missing)
+// Interacts with Backend API via HTTP calls. Handles MCP requests and translates them.
+```
+#### TDD Anchors:
+- Test successful tool calls forward requests to backend API.
+- Test handling of backend API errors and translation to MCP errors.
+- Test schema validation for tool arguments (though framework might handle).
+
+### Pseudocode: CLI - Tier 0
+- Created: 2025-04-28 03:46:10
+```pseudocode
+// Link: pseudocode/tier0/cli.md
+// Defines commands (ingest, search, show, list, add-to-collection, acquire-missing-texts).
+// Parses args using Typer/Click, calls Backend API via HTTP, displays formatted results/errors.
+```
+#### TDD Anchors:
+- Test command parsing and argument handling for all commands.
+- Test successful API calls for each command's primary function.
+- Test error handling for API connection/response issues (e.g., 4xx, 5xx).
+- Test user-friendly display of results and errors.
+- Test interactive confirmation flow for `acquire-missing-texts`.
+
+### Pseudocode: Text Acquisition Service - Tier 0
+- Created: 2025-04-28 03:45:36
+```pseudocode
+// Link: pseudocode/tier0/text_acquisition.md
+// Orchestrates calls to zlibrary-mcp via MCP (search_books, download_book_to_file).
+// Manages acquisition state (searching, confirming, processing, complete, error).
+// Handles user confirmation step (Tier 0). Triggers ingestion pipeline on success.
+```
+#### TDD Anchors:
+- Test successful acquisition workflow (search -> confirm -> download -> ingest trigger).
+- Test handling of errors from zlibrary-mcp calls (search fail, download fail, process fail).
+- Test state management logic for acquisition requests (in-memory or persistent).
+- Test identification of missing texts (if implemented).
+
+### Pseudocode: Search Module - Tier 0
+- Created: 2025-04-28 03:45:09
+```pseudocode
+// Link: pseudocode/tier0/search_module.md
+// Generates query embedding via LiteLLM Proxy HTTP call.
+// Calls DB Layer (vector_search_chunks) with embedding, filters, and k.
+// Formats database results into API response structure.
+```
+#### TDD Anchors:
+- Test query embedding generation via LiteLLM proxy call (success/failure).
+- Test database search call (db_layer.vector_search_chunks) with correct parameters.
+- Test result formatting maps all expected fields.
+- Test error handling (embedding failure, DB failure).
+- Test handling of various filter combinations.
+
+### Pseudocode: Backend API - Tier 0
+- Created: 2025-04-28 03:44:43
+```pseudocode
+// Link: pseudocode/tier0/backend_api.md
+// Defines REST endpoints (/ingest, /search, /acquire, /acquire/confirm, /documents, /collections).
+// Uses Flask/FastAPI. Orchestrates calls to Ingestion, Search, Acquisition, DB Layer.
+// Handles requests from CLI/MCP. Includes basic error handling.
+```
+#### TDD Anchors:
+- Test endpoint routing and request parsing (valid/invalid data).
+- Test successful orchestration of underlying services for each endpoint.
+- Test error handling and appropriate HTTP status code responses (2xx, 4xx, 5xx).
+- Test acquisition workflow endpoints (/acquire, /acquire/confirm).
+
+### Pseudocode: Text Processing Pipeline - Tier 0
+- Created: 2025-04-28 03:44:07
+```pseudocode
+// Link: pseudocode/tier0/ingestion_pipeline.md
+// Workflow: Extract (GROBID/PyMuPDF) -> Chunk (semchunk) -> Embed (LiteLLM Proxy) -> Index (DB Layer).
+// Handles PDF, EPUB, MD, TXT. Calls external tools/services via HTTP or library calls.
+// Includes batching for embedding requests. Basic citation parsing.
+```
+#### TDD Anchors:
+- Test processing of different file types (PDF, EPUB, MD, TXT).
+- Test interaction with external tools (GROBID, semchunk, AnyStyle - mocks/stubs).
+- Test embedding request batching and calls to LiteLLM proxy (success/failure).
+- Test database indexing calls (add_document, add_section, add_chunks_batch).
+- Test error handling and logging at each stage (extraction, chunking, embedding, indexing).
+- Test citation parsing logic.
+
+### Pseudocode: Database Interaction Layer - Tier 0
+- Created: 2025-04-28 03:43:31
+```pseudocode
+// Link: pseudocode/tier0/db_layer.md
+// Defines functions for CRUD on documents, sections, chunks, references, relationships, collections.
+// Implements vector search (vector_search_chunks) using pgvector operators.
+// Abstracts SQL for PostgreSQL. Includes connection management and helper utilities.
+```
+#### TDD Anchors:
+- Test DB connection management (get/close).
+- Test CRUD operations for each entity (add, get, check_exists).
+- Test vector search function with/without filters and different distance metrics.
+- Test relationship queries (get_relationships).
+- Test collection management (add_collection, add_item_to_collection, get_collection_items).
+- Test batch chunk insertion (add_chunks_batch).
+- Test utility functions (format_vector, json_serialize, row mapping).
 <!-- Append new pseudocode blocks using the format below -->
 <!-- No pseudocode generated in this task -->

@@ -1,6 +1,15 @@
 # SPARC Mode Feedback Log
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-04-28 03:38:36] User Feedback: Version Control Guidance in Delegations
+
+*   **Source:** User interaction following Architect mode completion summary.
+*   **Issue:** SPARC delegation messages lack instructions regarding version control practices.
+*   **Action:** SPARC must include guidance in `new_task` messages specifying:
+    *   When commits are appropriate (e.g., before successful `attempt_completion`).
+    *   That commits are *not* needed before an `attempt_completion` triggered by an Early Return.
+    *   That workspace clearing is not needed when resuming after an Early Return, especially if only memory bank files changed.
+*   **Learnings:** Providing clear version control expectations within task delegations improves workflow consistency and reduces ambiguity for delegated modes.
 ### [2025-04-27 23:36:16] User Feedback: Delegation Process Refinement
 
 *   **Source:** User interaction during SPARC task delegation.
