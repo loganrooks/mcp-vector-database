@@ -208,8 +208,8 @@
         [
           "edit",
           {
-            "fileRegex": "memory-bank\\*\\.md$",
-            "description": "Feedback files only"
+            "fileRegex": "memory-bank/.*$",
+            "description": "All files in memory-bank directory"
           }
         ]
       ],
