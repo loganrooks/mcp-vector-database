@@ -238,34 +238,70 @@ async def call_grobid_extractor(pdf_path: str | Path) -> Optional[Dict[str, Any]
         #     return None
         return None # Return None if no API URL and no local library logic
 
+import xml.etree.ElementTree as ET
+
 def parse_grobid_tei(tei_xml: str) -> Optional[Dict[str, Any]]:
     """
-    Parses TEI XML output from GROBID.
-    Placeholder implementation. Requires XML parsing library (e.g., lxml).
+    Parses TEI XML output from GROBID using xml.etree.ElementTree.
+    Minimal implementation to pass basic test.
     """
     # TDD: Test parsing of GROBID TEI XML for structure, text, metadata, biblio
-    logger.debug("Parsing GROBID TEI XML (Placeholder Implementation)")
+    logger.debug("Parsing GROBID TEI XML")
     try:
-        # TODO: Implement actual TEI XML parsing using lxml or similar
-        # Extract:
-        # - Metadata (title, authors, abstract, keywords, year)
-        # - Structure (sections, subsections with titles)
-        # - Text content per section
-        # - Bibliography entries (raw strings or structured if possible)
+        # Define the TEI namespace
+        ns = {'tei': 'http://www.tei-c.org/ns/1.0'}
 
-        # Placeholder data:
-        metadata = {"title": "Placeholder Title from TEI", "author": "Placeholder Author"}
-        text_by_section = {
-            "Abstract": "This is the abstract text.",
-            "Introduction": "This is the introduction text.",
-            "Section 1": "Text for section 1.",
-            "References": "Raw reference string 1.\nRaw reference string 2."
-        }
-        references_raw = ["Raw reference string 1.", "Raw reference string 2."] # Extracted from biblio section
+        root = ET.fromstring(tei_xml)
+
+        metadata = {}
+        text_by_section = {}
+        references_raw = []
+
+        # --- Extract Metadata ---
+        title_elem = root.find('.//tei:titleStmt/tei:title[@type="main"]', ns)
+        metadata['title'] = title_elem.text if title_elem is not None else None
+
+        # Simple author extraction (adjust if multiple authors or complex names)
+        author_elem = root.find('.//tei:analytic/tei:author/tei:persName', ns)
+        if author_elem is not None:
+            forename = author_elem.findtext('tei:forename', '', ns)
+            surname = author_elem.findtext('tei:surname', '', ns)
+            metadata['author'] = f"{forename} {surname}".strip()
+        else:
+            metadata['author'] = None
+
+        # --- Extract Text by Section ---
+        # Abstract
+        abstract_div = root.find('.//tei:body/tei:div[@type="abstract"]', ns)
+        if abstract_div is not None:
+            # Concatenate text from all <p> tags within the abstract div
+            abstract_text = ' '.join(p.text for p in abstract_div.findall('tei:p', ns) if p.text)
+            text_by_section['Abstract'] = abstract_text.strip()
+
+        # Other sections (Introduction, Section 1, etc.)
+        for div in root.findall('.//tei:body/tei:div', ns):
+            div_type = div.get('type')
+            if div_type != 'abstract': # Skip abstract as it's handled separately
+                head_elem = div.find('tei:head', ns)
+                section_title = head_elem.text if head_elem is not None else f"Section_{div_type or 'unknown'}"
+                section_text = ' '.join(p.text for p in div.findall('tei:p', ns) if p.text).strip()
+                if section_text:
+                    text_by_section[section_title] = section_text
+
+        # --- Extract References ---
+        ref_list = root.find('.//tei:back/tei:div[@type="references"]/tei:listBibl', ns)
+        if ref_list is not None:
+            for bibl in ref_list.findall('tei:bibl', ns):
+                if bibl.text:
+                    references_raw.append(bibl.text.strip())
 
         return {"text_by_section": text_by_section, "metadata": metadata, "references_raw": references_raw}
+
+    except ET.ParseError as pe:
+        logger.error(f"Failed to parse TEI XML (ParseError): {pe}", exc_info=True)
+        return None
     except Exception as e:
-        logger.error(f"Failed to parse TEI XML: {e}", exc_info=True)
+        logger.error(f"Failed to parse TEI XML (General Error): {e}", exc_info=True)
         return None
 
 # --- Chunking ---
@@ -391,10 +427,10 @@ def basic_reference_parser(reference_string: str) -> Optional[Dict[str, Any]]:
     year = year_match.group(1) if year_match else None
     # Very naive split
     parts = reference_string.split(f"({year})") if year else [reference_string]
-    author = parts[0].strip().rstrip(',.') if len(parts) > 0 else None
+    author = parts[0].strip() if len(parts) > 0 else None
     title = parts[1].strip().lstrip('. ') if len(parts) > 1 else None
 
-    if title or author or year:
+    if year: # Only proceed if a year was found by the regex
         return {
             "title": title,
             "author": author,

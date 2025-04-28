@@ -317,8 +317,175 @@ async def test_call_grobid_extractor_api_request_error(mock_make_request, tmp_pa
 # Check that the final result is the data returned by parse_grobid_tei
 # assert result == expected_parsed_data # This is also not relevant in error case
 
+@pytest.mark.asyncio
+@patch('src.philograph.utils.http_client.make_async_request', new_callable=AsyncMock)
+@patch('src.philograph.config.GROBID_API_URL', 'http://dummy-grobid:8070')
+async def test_call_grobid_extractor_api_status_error(mock_make_request, tmp_path, caplog):
+    """Tests handling of httpx.HTTPStatusError during GROBID API call."""
+    # Configure make_async_request mock to raise HTTPStatusError
+    error_message = "Simulated Server Error"
+    mock_response = MagicMock() # Need a mock response object for the exception
+    mock_response.status_code = 500
+    mock_response.text = "Internal Server Error Details"
+    # Use the real exception type
+    status_error = http_client.httpx.HTTPStatusError(
+        message=error_message,
+        request=MagicMock(), # Mock request object
+        response=mock_response
+    )
+    mock_make_request.side_effect = status_error
+
+    pdf_path = tmp_path / "status_error.pdf"
+    pdf_path.touch()
+
+    with caplog.at_level(logging.ERROR):
+        result = await text_processing.call_grobid_extractor(pdf_path)
+
+    # Assertions
+    assert result is None # Should return None on status error
+    mock_make_request.assert_awaited_once() # Check it was called
+
+    # Check logs
+    assert len(caplog.records) == 1
+@pytest.mark.asyncio
+@patch('src.philograph.utils.text_processing.logger') # Use logger mock via patch
+@patch('src.philograph.config.GROBID_API_URL', None) # Mock config value to None
+async def test_call_grobid_extractor_no_api_url(mock_logger, tmp_path):
+    """Tests behavior when GROBID_API_URL is not configured."""
+    pdf_path = tmp_path / "no_api.pdf"
+    pdf_path.touch()
+
+    result = await text_processing.call_grobid_extractor(pdf_path)
+
+    # Assertions
+    assert result is None # Should return None if API URL is not set
+
+    # Check logs - Use mock_logger directly
+    mock_logger.warning.assert_called_once_with(
+        "GROBID_API_URL not configured. Local GROBID library interaction not implemented."
+    )
+# --- Tests for parse_grobid_tei ---
+
+def test_parse_grobid_tei_basic():
+    """Tests basic parsing of a minimal GROBID TEI XML structure."""
+    # Minimal TEI XML example (replace with more realistic sample if needed)
+    tei_xml = """
+    <TEI xmlns="http://www.tei-c.org/ns/1.0">
+        <teiHeader>
+            <fileDesc>
+                <titleStmt>
+                    <title level="a" type="main">Sample Title</title>
+                </titleStmt>
+                <publicationStmt>
+                    <publisher>Publisher</publisher>
+                </publicationStmt>
+                <sourceDesc>
+                    <biblStruct>
+                        <analytic>
+                            <author><persName><forename>Test</forename><surname>Author</surname></persName></author>
+                        </analytic>
+                        <monogr>
+                            <title level="j">Journal Name</title>
+                            <imprint>
+                                <date when="2023">2023</date>
+                            </imprint>
+                        </monogr>
+                    </biblStruct>
+                </sourceDesc>
+            </fileDesc>
+        </teiHeader>
+        <text>
+            <body>
+                <div type="abstract"><p>This is the abstract.</p></div>
+                <div type="introduction"><head>Introduction</head><p>Introductory text.</p></div>
+                <div type="section"><head>Section 1</head><p>Section 1 text.</p></div>
+            </body>
+            <back>
+                <div type="references">
+                    <listBibl>
+                        <bibl>Reference 1 string.</bibl>
+                        <bibl>Reference 2 string.</bibl>
+                    </listBibl>
+                </div>
+            </back>
+        </text>
+    </TEI>
+    """
+    # Since the function is a placeholder, this test will currently fail
+    # as it expects real parsing, not the placeholder data.
+    # We expect failure in the Red phase.
+    expected_metadata = {"title": "Sample Title", "author": "Test Author"} # Simplified expectation
+    expected_sections = {
+        "Abstract": "This is the abstract.",
+        "Introduction": "Introductory text.",
+        "Section 1": "Section 1 text.",
+        # Placeholder doesn't extract refs section text separately
+    }
+    expected_refs = ["Reference 1 string.", "Reference 2 string."]
+
+    # This call will return the placeholder data, not the parsed data
+    result = text_processing.parse_grobid_tei(tei_xml)
+
+    assert result is not None
+    # These assertions WILL FAIL against the placeholder implementation
+    assert result["metadata"]["title"] == expected_metadata["title"]
+def test_parse_grobid_tei_parse_error(caplog):
+    """Tests handling of invalid XML input."""
+    invalid_xml = "<TEI><unclosedTag>"
+
+    with caplog.at_level(logging.ERROR):
+        result = text_processing.parse_grobid_tei(invalid_xml)
+
+    assert result is None
+    assert "Failed to parse TEI XML (ParseError)" in caplog.text
 # --- Tests for call_grobid_extractor ---
+# --- Tests for chunk_text_semantically ---
+
+def test_chunk_text_semantically_basic():
+    """Tests the placeholder paragraph splitting."""
+    text = "This is the first paragraph.\n\nThis is the second paragraph."
+    chunk_size = 100 # Placeholder size, not used by current implementation
+    expected_chunks = [
+        "This is the first paragraph.",
+        "This is the second paragraph."
+    ]
+    # This test should pass against the placeholder implementation
+def test_chunk_text_semantically_no_paragraphs():
+    """Tests the placeholder splitting with text containing no double newlines."""
+    text = "This is a single block of text. It has sentences. But no paragraph breaks."
+    chunk_size = 100 # Placeholder size
+    expected_chunks = [text] # Expect the whole text as one chunk
+    # This test should pass against the placeholder implementation's fallback
+    result = text_processing.chunk_text_semantically(text, chunk_size)
+    assert result == expected_chunks
+# --- Tests for basic_reference_parser ---
+
+def test_basic_reference_parser_simple():
+    """Tests the basic reference parser with a simple author-year-title format."""
+    ref_string = "Author, A. N. (2023). This is the title. Journal Name, 10(2), 100-110."
+    # Placeholder implementation is very naive, this test should fail.
+    expected_result = {
+        "title": "This is the title. Journal Name, 10(2), 100-110.", # Placeholder is greedy
+        "author": "Author, A. N.",
+        "year": "2023",
+        "raw": ref_string,
+        "source": "basic_parser"
+    }
+    result = text_processing.basic_reference_parser(ref_string)
+    assert result is not None
+    assert result == expected_result
 # TODO: Add tests for GROBID (requires mocking http_client)
+def test_basic_reference_parser_no_year():
+    """Tests the basic parser when no year pattern is found."""
+    ref_string = "Author, A. N. Some Title Without Year. Publisher."
+    # The current implementation relies on finding (YYYY)
+    # It should ideally return None or minimal data if year isn't found.
+    # Let's expect None for now, driving minimal change.
+    expected_result = None # Or potentially just {'raw': ref_string, 'source': 'basic_parser'}? Let's aim for None.
+
+    result = text_processing.basic_reference_parser(ref_string)
+    # This assertion might fail depending on how the placeholder handles no year match
+    assert result is None
 
 # --- Tests for parse_grobid_tei ---
 # TODO: Add tests for TEI parsing (requires sample TEI XML and XML parser)
