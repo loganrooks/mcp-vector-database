@@ -1,6 +1,31 @@
 # SPARC Mode Feedback Log
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-04-28 10:02:37] Delegation: Git Initialization and Commit Task
+
+*   **Trigger**: Early Return from `tdd` mode due to user request to address version control.
+*   **Context**: `tdd` mode completed initial tests for 4 utility modules after `code` mode finished initial implementation. Need to establish git history before proceeding.
+*   **Action Taken**: Delegating task to `devops` mode to initialize git, review changes, and create logical commits.
+*   **Rationale**: Address user requirement for version control before accumulating more changes ("git debt"). `devops` mode is suitable for establishing repository practices.
+*   **Outcome**: Pending `devops` mode completion.
+*   **Follow-up**: Resume `tdd` testing task after git history is established.
+*   **Note**: Due to SPARC file restrictions, this log entry serves as the record instead of `sparc.md#Delegations Log`. Core MB files (`activeContext.md`, `globalContext.md`) cannot be updated by SPARC.
+### [2025-04-28 03:53:15] Intervention: Premature Handover due to Context Misjudgment
+
+*   **Trigger**: User Correction.
+*   **Context**: SPARC incorrectly assessed the context window size (reported 81% when it was lower, e.g., 13% then 68%) and prematurely initiated the DELEGATE CLAUSE handover procedure.
+*   **Action Taken**: Logged the error. Cancelled the handover `new_task` call.
+*   **Rationale**: Misinterpretation or misreading of the context window size metric provided in the environment details.
+*   **Outcome**: Unnecessary handover attempt aborted. Workflow continues under the current instance for now.
+*   **Follow-up**: SPARC must pay closer attention to the actual context window percentage provided in `environment_details` and apply the 40-50% threshold accurately before triggering the DELEGATE CLAUSE.
+### [2025-04-28 03:50:05] Intervention: Memory Bank Update Failed (File Restriction)
+
+*   **Trigger**: `FileRestrictionError` during `insert_content` tool use.
+*   **Context**: Attempting to update `memory-bank/activeContext.md` with the status that Tier 0 pseudocode generation was complete.
+*   **Action Taken**: Logged the error. Halted direct update attempt.
+*   **Rationale**: The SPARC mode has restricted write access, only permitted for files matching `.*sparc.*\.md$ (Feedback files only)`. Core Memory Bank files like `activeContext.md` are protected from direct modification by this mode.
+*   **Outcome**: `activeContext.md` was not updated with the latest status.
+*   **Follow-up**: Need to investigate alternative mechanisms for updating core Memory Bank files (`activeContext.md`, `globalContext.md`). Potential options include delegating updates to `memory-bank-doctor` mode or requesting user intervention/guidance. This restriction must be considered in future Memory Bank update planning.
 ### [2025-04-28 03:38:36] User Feedback: Version Control Guidance in Delegations
 
 *   **Source:** User interaction following Architect mode completion summary.
