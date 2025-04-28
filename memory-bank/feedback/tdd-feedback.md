@@ -1,3 +1,19 @@
+### User Intervention - Commit Before Early Return - [2025-04-28 18:40:57]
+- **Trigger**: User denied `attempt_completion` for Early Return.
+- **Context**: Invoked Early Return due to context limit (53%) after successful TDD cycles for `basic_reference_parser`. Attempted completion without committing changes.
+- **Action**: User instructed to commit code changes and memory bank updates in separate commits before attempting completion, even for Early Return.
+- **Rationale**: Standard procedure requires committing work before concluding a task segment or handing off, ensuring changes are saved.
+- **Outcome**: Will proceed with commits before re-attempting completion.
+- **Follow-up**: Ensure commits are made before `attempt_completion` in future, including Early Return scenarios.
+### Early Return - Context Limit Reached - [2025-04-28 17:33:38]
+- **Trigger**: Context size reached 52% after completing TDD cycle for `basic_reference_parser` (no year case).
+- **Context**: Successfully added tests and minimal implementations/fixes for `call_grobid_extractor` (status error, no API URL), `parse_grobid_tei` (basic, parse error), `chunk_text_semantically` (placeholder basic, placeholder no paragraphs), and `basic_reference_parser` (simple, no year). All 17 tests in `tests/utils/test_text_processing.py` are passing.
+- **Issue**: Context size (52%) exceeds the recommended threshold (40-50%), risking degraded performance and potential errors.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves multiple TDD cycles, gradually increasing context. Reached limit before testing `parse_references` and `call_anystyle_parser`.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is reached.
+- **Context %**: 52%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/utils/text_processing.py`, specifically focusing on the remaining functions: `parse_references` and `call_anystyle_parser`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`) for context handover.
 ### Blocker & Early Return - [2025-04-28 16:53:10]
 - **Trigger**: Persistent failure of `test_call_grobid_extractor_api_request_error` and context approaching limit (was 50% before task resumption, currently 34% after).
 - **Context**: Attempting Green phase for `call_grobid_extractor` API error handling. Test mocks `http_client.make_async_request` to raise `httpx.RequestError`.

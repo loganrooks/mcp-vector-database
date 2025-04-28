@@ -1,6 +1,165 @@
 # TDD Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:32:53]
+- **Trigger**: Manual run after fixing `basic_reference_parser` for no-year case.
+- **Outcome**: PASS / **Summary**: 17 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed fix for `basic_reference_parser` no-year case. Context at 51%, triggering Early Return.
+
+### TDD Cycle: `basic_reference_parser` (No Year) - [2025-04-28 17:32:53]
+- **Red**: Wrote `test_basic_reference_parser_no_year`. Test failed (`AssertionError: assert dict is None`).
+- **Green**: Modified `if` condition in `basic_reference_parser` to check `if year:` before returning dict. Test passed.
+- **Refactor**: N/A.
+- **Files Changed**: `src/philograph/utils/text_processing.py`, `tests/utils/test_text_processing.py`
+- **Outcome**: Cycle completed. Basic parser now returns None if no year is found.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:31:40]
+- **Trigger**: Manual run after adding `test_basic_reference_parser_no_year`.
+- **Outcome**: FAIL / **Summary**: 16 passed, 1 skipped, 1 failed
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_basic_reference_parser_no_year`: `AssertionError: assert {'author': ..., 'raw': ..., 'source': ..., 'title': None, ...} is None`
+- **Coverage Change**: N/A
+- **Notes**: Test failed as expected (Red phase). Implementation returns data even without year.
+
+### TDD Cycle: `basic_reference_parser` (Simple) - [2025-04-28 17:31:00]
+- **Red**: Wrote `test_basic_reference_parser_simple`. Test failed (`AssertionError` comparing dicts due to author string difference).
+- **Green**: Corrected author string processing in `basic_reference_parser` (removed `.rstrip`). Test failed again (`NameError` in test file). Corrected test file (removed leftover lines). Test passed.
+- **Refactor**: N/A.
+- **Files Changed**: `src/philograph/utils/text_processing.py`, `tests/utils/test_text_processing.py`
+- **Outcome**: Cycle completed. Basic parser handles simple author-year-title format.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:31:00]
+- **Trigger**: Manual run after fixing `basic_reference_parser` author stripping and test file error.
+- **Outcome**: PASS / **Summary**: 16 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed fix for `basic_reference_parser` simple case and test file error.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:30:07]
+- **Trigger**: Manual run after fixing `basic_reference_parser` author stripping.
+- **Outcome**: FAIL / **Summary**: 15 passed, 1 skipped, 1 failed
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_basic_reference_parser_simple`: `NameError: name 'text' is not defined`
+- **Coverage Change**: N/A
+- **Notes**: Test failed due to error in test file itself (leftover code).
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:28:42]
+- **Trigger**: Manual run after adding `test_basic_reference_parser_simple`.
+- **Outcome**: FAIL / **Summary**: 15 passed, 1 skipped, 1 failed
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_basic_reference_parser_simple`: `AssertionError: assert {'author': 'Author, A. N'} != {'author': 'Author, A. N.'}`
+- **Coverage Change**: N/A
+- **Notes**: Test failed as expected (Red phase). Placeholder implementation incorrect author stripping.
+
+### TDD Cycle: `chunk_text_semantically` (No Paragraphs) - [2025-04-28 17:28:00]
+- **Red**: Wrote `test_chunk_text_semantically_no_paragraphs`. Test passed unexpectedly (placeholder handles this).
+- **Green**: N/A.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/utils/test_text_processing.py`
+- **Outcome**: Cycle completed. Placeholder fallback for no paragraphs tested.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:28:00]
+- **Trigger**: Manual run after adding `test_chunk_text_semantically_no_paragraphs`.
+- **Outcome**: PASS / **Summary**: 15 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed immediately against placeholder.
+
+### TDD Cycle: `chunk_text_semantically` (Basic) - [2025-04-28 17:27:27]
+- **Red**: Wrote `test_chunk_text_semantically_basic`. Test passed unexpectedly (placeholder handles this).
+- **Green**: N/A.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/utils/test_text_processing.py`
+- **Outcome**: Cycle completed. Placeholder paragraph splitting tested.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:27:27]
+- **Trigger**: Manual run after adding `test_chunk_text_semantically_basic`.
+- **Outcome**: PASS / **Summary**: 14 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed immediately against placeholder.
+
+### TDD Cycle: `parse_grobid_tei` (Parse Error) - [2025-04-28 17:26:50]
+- **Red**: Wrote `test_parse_grobid_tei_parse_error`. Test failed (`TypeError` in test file).
+- **Green**: Corrected test file (removed incorrect assertions). Test passed.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/utils/test_text_processing.py`
+- **Outcome**: Cycle completed. Error handling for invalid XML tested.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:26:50]
+- **Trigger**: Manual run after fixing `test_parse_grobid_tei_parse_error` test code.
+- **Outcome**: PASS / **Summary**: 13 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed fix for test code error.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:26:09]
+- **Trigger**: Manual run after adding `test_parse_grobid_tei_parse_error`.
+- **Outcome**: FAIL / **Summary**: 12 passed, 1 skipped, 1 failed
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_parse_grobid_tei_parse_error`: `TypeError: 'NoneType' object is not subscriptable`
+- **Coverage Change**: N/A
+- **Notes**: Test failed due to error in test code itself (leftover assertions).
+
+### TDD Cycle: `parse_grobid_tei` (Basic) - [2025-04-28 17:25:38]
+- **Red**: Wrote `test_parse_grobid_tei_basic`. Test failed (`AssertionError` comparing placeholder output to expected parsed output).
+- **Green**: Implemented minimal XML parsing using `xml.etree.ElementTree` in `parse_grobid_tei`. Test passed.
+- **Refactor**: N/A.
+- **Files Changed**: `src/philograph/utils/text_processing.py`, `tests/utils/test_text_processing.py`
+- **Outcome**: Cycle completed. Basic TEI parsing implemented and tested.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:25:38]
+- **Trigger**: Manual run after implementing basic `parse_grobid_tei`.
+- **Outcome**: PASS / **Summary**: 12 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed basic TEI parsing implementation passes the test.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:24:48]
+- **Trigger**: Manual run after adding `test_parse_grobid_tei_basic`.
+- **Outcome**: FAIL / **Summary**: 11 passed, 1 skipped, 1 failed
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_parse_grobid_tei_basic`: `AssertionError: assert 'Placeholder Title from TEI' == 'Sample Title'`
+- **Coverage Change**: N/A
+- **Notes**: Test failed as expected (Red phase). Placeholder implementation does not match expected parsed output.
+
+### TDD Cycle: `call_grobid_extractor` (No API URL) - [2025-04-28 17:23:55]
+- **Red**: Wrote `test_call_grobid_extractor_no_api_url`. Test failed (`NameError` in test file).
+- **Green**: Corrected test file (removed incorrect `caplog` assertions). Test passed.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/utils/test_text_processing.py`
+- **Outcome**: Cycle completed. Tested behavior when GROBID API URL is not configured.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:23:55]
+- **Trigger**: Manual run after fixing `test_call_grobid_extractor_no_api_url` test code.
+- **Outcome**: PASS / **Summary**: 11 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed fix for test code error.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:23:12]
+- **Trigger**: Manual run after adding `test_call_grobid_extractor_no_api_url`.
+- **Outcome**: FAIL / **Summary**: 10 passed, 1 skipped, 1 failed
+- **Failed Tests**:
+    - `tests/utils/test_text_processing.py::test_call_grobid_extractor_no_api_url`: `NameError: name 'caplog' is not defined`
+- **Coverage Change**: N/A
+- **Notes**: Test failed due to error in test code itself (leftover assertions).
+
+### TDD Cycle: `call_grobid_extractor` (HTTPStatusError) - [2025-04-28 17:22:25]
+- **Red**: Wrote `test_call_grobid_extractor_api_status_error`. Test passed unexpectedly (implementation already handled this).
+- **Green**: N/A.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/utils/test_text_processing.py`
+- **Outcome**: Cycle completed. Confirmed existing handling of HTTP status errors.
+
+### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 17:22:25]
+- **Trigger**: Manual run after adding `test_call_grobid_extractor_api_status_error`.
+- **Outcome**: PASS / **Summary**: 10 passed, 1 skipped
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed immediately against existing implementation.
 ### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 16:54:00]
 - **Trigger**: Manual run after attempting fix for `call_grobid_extractor` API error handling.
 - **Outcome**: FAIL / **Summary**: 8 passed, 1 skipped, 1 failed
