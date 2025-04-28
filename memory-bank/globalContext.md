@@ -1,4 +1,5 @@
 # Global Context - PhiloGraph Project
+- **[2025-04-28 13:01:37] - Debug - Progress:** Investigation of `test_get_db_pool_failure` concluded. Test remains failing after multiple standard and advanced mocking attempts. Diagnosis points to complex async/mocking interaction. [See Issue-ID: TDD-DBPOOL-FAIL-20250428]
 
 ## Product Context
 - **Project Name:** PhiloGraph
@@ -104,6 +105,7 @@ graph TD
 - **Key Components:** Text Processor, Search Module, Relationship Manager, Inference Module, Bibliography Manager, Interfaces (CLI, MCP, API, Web UI, Reader).
 
 ## Decision Log
+- **[2025-04-28 13:01:37] - Debug - Decision:** Concluded debugging for `test_get_db_pool_failure`. Standard and researched advanced mocking techniques (custom async CM) failed to resolve the issue where `psycopg.OperationalError` is not caught. Diagnosis: Complex interaction likely requires specialized async testing expertise or library-specific patterns. Recommending further investigation or alternative testing strategy. [See Issue-ID: TDD-DBPOOL-FAIL-20250428]
 - **[2025-04-28 03:32:04] - Tier 0 Text Acquisition:** Decided to integrate the external `zlibrary-mcp` server for acquiring missing texts via MCP calls from the PhiloGraph backend. Documented in ADR 008 and updated architecture diagrams/components. Requires separate setup/running of `zlibrary-mcp`.
 - **[2025-04-28 01:40:33] - Tier 0 Embedding Dimension:** Based on research report (`docs/reports/optimal_embedding_dimension_for_philograph.md`), recommended using **768 dimensions** for `text-embedding-large-exp-03-07` via MRL truncation. This balances inferred semantic quality with Tier 0 resource constraints (RAM, CPU) for pgvector HNSW indexing/querying. 1024 dimensions is a fallback. Decision requires empirical validation. Updated relevant architecture documents (ADR 004, main architecture doc, memory bank).
 - **[2025-04-27 23:39:30] - Tier 0 Architecture Design:** Finalized Tier 0 MVP architecture based on spec v2.3. Key components: Local Docker deployment with PostgreSQL+pgvector, LiteLLM Proxy (as unified API gateway), Vertex AI free tier embeddings (via LiteLLM), CPU-based text processing (GROBID, PyMuPDF, semchunk), Python Backend (Flask/FastAPI), CLI/MCP interfaces. No LangChain in Tier 0. Architecture documented in `docs/architecture/tier0_mvp_architecture.md`. Emphasizes modularity for Tier 1 migration.
@@ -126,6 +128,8 @@ graph TD
 - **2025-04-04 12:59:13 - Specification Update:** Incorporated detailed feedback regarding PDF/EPUB page numbers, footnote processing, bulk input, local file management, external integrations (Calibre, Quercus, Social Network), and technical expandability strategy into `docs/project-specifications.md`. Prioritized core data model and MCP essentials in initial phases.
 
 ## Progress
+- **[2025-04-28 13:05:04] - Debug - Progress:** Successfully fixed `test_get_db_pool_failure` by mocking `cursor.execute` to raise `psycopg.OperationalError` within the nested async context managers. Test passed verification. [See Issue-ID: TDD-DBPOOL-FAIL-20250428]
+- **[2025-04-28 10:34:52] - Git Initialization:** Completed by DevOps mode. Repository initialized, `.gitignore` configured, and initial project state committed across 5 logical commits (fcb00d8, e5557d2, a31eed4, 1ff8e4e, cdcbafd). Ready to resume testing.
 - **[2025-04-28 04:23:39] - Tier 0 Implementation:** Completed initial code structure and configuration for Tier 0 MVP. Created core Python modules (`src/philograph/*`), Docker setup (`Dockerfile`, `docker-compose.yml`,
 `litellm_config.yaml`), and initial `README.md`. Basic tests for config module created. Ready for testing phase.
 ## Project Files
