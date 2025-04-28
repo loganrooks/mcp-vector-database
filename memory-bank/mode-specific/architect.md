@@ -209,7 +209,7 @@ sequenceDiagram
     IngestSvc->>TPUtils: Chunk Text(extracted text)
     TPUtils-->>IngestSvc: Text Chunks
     IngestSvc->>LiteProxy: POST /embeddings (chunks, model='philo-embed')
-    LiteProxy->>VertexAI: Call Embeddings API(chunks)
+    LiteProxy->>VertexAI: Call Embeddings API(chunks, model='text-embedding-large-exp-03-07')
     VertexAI-->>LiteProxy: Embeddings
     LiteProxy-->>IngestSvc: Embeddings
     IngestSvc->>DB: Store Document, Sections, Chunks, Embeddings, Metadata, Refs
@@ -232,7 +232,7 @@ sequenceDiagram
     CLI->>API: POST /search (query="...", filters={...})
     API->>SearchSvc: Perform Search(query, filters)
     SearchSvc->>LiteProxy: POST /embeddings (query, model='philo-embed')
-    LiteProxy->>VertexAI: Call Embeddings API(query)
+    LiteProxy->>VertexAI: Call Embeddings API(query, model='text-embedding-large-exp-03-07')
     VertexAI-->>LiteProxy: Query Embedding
     LiteProxy-->>SearchSvc: Query Embedding
     SearchSvc->>DB: SELECT ... WHERE metadata=? ORDER BY embedding <=> query_embedding LIMIT k

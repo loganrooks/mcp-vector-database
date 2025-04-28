@@ -82,7 +82,7 @@ graph TD
 
     LiteLLMProxy -- Calls --> VertexAI
 ```
-**Notes:** Tier 0 uses local Docker containers for Postgres+pgvector, LiteLLM Proxy, Python Backend (Flask/FastAPI), and CPU-based text processing tools. Embeddings are generated via calls through the LiteLLM Proxy to the Vertex AI free tier API. Interfaces are local CLI and MCP Server. Designed for migration to Tier 1 (Cloud Serverless).
+**Notes:** Tier 0 uses local Docker containers for Postgres+pgvector, LiteLLM Proxy, Python Backend (Flask/FastAPI), and CPU-based text processing tools. Embeddings are generated via calls through the LiteLLM Proxy to the Vertex AI API (`text-embedding-large-exp-03-07`). Interfaces are local CLI and MCP Server. Designed for migration to Tier 1 (Cloud Serverless).
 
 - **Core Technologies:** Vector Database (e.g., PostgreSQL+pgvector), Relational Database (PostgreSQL), File Storage.
 - **Architecture:** Service-Oriented, API-First, Plugin-based (for relationships, inference, embedding models, text processing components).
