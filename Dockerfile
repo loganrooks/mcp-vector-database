@@ -14,11 +14,18 @@ WORKDIR /app
 # Install Python dependencies
 # Copy only requirements first to leverage Docker cache
 COPY requirements.txt .
+# Copy tests directory explicitly
+COPY tests /app/tests
+
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
-COPY ./src /app/src
+# Copy the entire application context (Still useful for other files like README, etc.)
+# This ensures all files (src, tests, etc.) are in the image layer
+# COPY . /app # Removed: Relying on explicit copies and volume mounts
+
+# Debug: List contents after explicit copies
+RUN ls -l /app
 
 # Expose the port the app runs on (defined in config, default 8000)
 # This is informational; the actual port mapping happens in docker-compose.yml
@@ -26,6 +33,7 @@ EXPOSE 8000
 
 # Add a non-root user for security
 RUN useradd --create-home appuser
+RUN chown -R appuser:appuser /app
 USER appuser
 WORKDIR /app
 

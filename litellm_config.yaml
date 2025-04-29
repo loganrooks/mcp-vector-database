@@ -5,7 +5,7 @@ model_list:
     litellm_params:
       model: vertex_ai/text-embedding-large-exp-03-07 # Target Vertex AI model
       # Optional: Specify output dimension using MRL if needed and supported by model/LiteLLM
-      # output_dimensionality: 768 # As recommended in ADR 004
+      output_dimensionality: 768 # As recommended in ADR 004 - Uncommented to fix 500 error
 
 litellm_settings:
   # Set the path to your GCP credentials JSON file via environment variable GOOGLE_APPLICATION_CREDENTIALS
@@ -20,10 +20,10 @@ litellm_settings:
   #     models: ["philo-embed"]
   #     # Add budget/rate limits if desired
 
-general_settings:
-    # Port and host are typically set via command line or docker-compose, not here.
-    # master_key: "sk-1234" # Optional: Secure the proxy itself if exposed
-    pass
+general_settings: {}
+# Port and host are typically set via command line or docker-compose, not here.
+# master_key: "sk-1234" # Optional: Secure the proxy itself if exposed
+# Explicitly setting general_settings to an empty map {}
 
 # Add other LiteLLM settings as needed (e.g., cost tracking DB, alerts)
 # See LiteLLM documentation for more options: https://docs.litellm.ai/docs/proxy/configs

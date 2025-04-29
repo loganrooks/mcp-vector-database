@@ -20,6 +20,8 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks: # Add db to the network
+      - philograph-net
 
   litellm-proxy:
     image: ghcr.io/berriai/litellm:main-latest # Use official LiteLLM image
@@ -41,6 +43,8 @@ services:
     depends_on:
       db: # Optional: Wait for DB if LiteLLM needs it for logging/state (not default)
         condition: service_healthy
+    networks: # Add litellm-proxy to the network
+      - philograph-net
 
   philograph-backend:
     build:
@@ -54,9 +58,11 @@ services:
       LITELLM_HOST: litellm-proxy # Override host for service discovery
       # Ensure DB connection uses service discovery name
       DB_HOST: db
+      PYTHONPATH: /app/src # Add src directory to Python path
     volumes:
       # Mount source code for development hot-reloading (if using uvicorn --reload)
       - ./src:/app/src
+      - ./tests:/app/tests # Mount tests directory as a workaround for build issues
       # Mount data directory if needed by ingestion service (adjust path as needed)
       - ${SOURCE_FILE_DIR:-./data/source_documents}:/app/data/source_documents:ro # Mount read-only
       # Mount potential output dirs if needed (e.g., for logs, temp files)
@@ -71,6 +77,8 @@ services:
     restart: unless-stopped
     # Optional: Override command to run MCP server instead of API
     # command: ["python", "-m", "src.philograph.mcp.main"]
+    networks: # Add backend to the network
+      - philograph-net
 
   # --- Optional Placeholder Services (Uncomment and configure if needed) ---
   # grobid:
@@ -91,3 +99,7 @@ services:
 volumes:
   postgres_data:
     driver: local
+
+networks: # Define the custom network
+  philograph-net:
+    driver: bridge
