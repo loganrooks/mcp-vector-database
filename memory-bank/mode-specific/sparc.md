@@ -3,16 +3,21 @@
 
 ## Intervention Log
 <!-- Append intervention details using the format below -->
+### [2025-04-29 04:29:45] Intervention: SPARC Handover (DELEGATE CLAUSE)
+- **Trigger**: SPARC Self-Monitoring - Context Limit Exceeded (~100% / ~200k tokens).
+- **Context**: Received Early Return from TDD mode [Ref: TDD Feedback 2025-04-29 04:28:25]. Context size exceeded threshold.
+- **Action Taken**: Updated `activeContext.md`. Preparing handover message for new SPARC instance via `new_task`.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` in `general.context_management` rules to prevent performance degradation.
+- **Outcome**: Handover initiated.
+- **Follow-up**: New SPARC instance to resume orchestration based on handover message.
 
 ## Workflow State
-<!-- Update current workflow state here (consider if this should be newest first or overwrite) -->
-
-### [2025-04-28 18:44:28] Task: Resume TDD for text_processing.py (Post-Context Limit #1)
-- Assigned to: tdd
-- Description: Continue TDD for `src/philograph/utils/text_processing.py`. Previous session completed tests for `basic_reference_parser` (commit `4f03a2d`) and invoked Early Return due to context limit. Resume testing with `parse_references` and `call_anystyle_parser`.
-- Expected deliverable: Completed tests for `text_processing.py`.
-- Status: completed
-- Completion time: 2025-04-28 19:06:05
+# Workflow State (Current - Overwrite this section)
+- Current phase: Refinement (Testing)
+- Phase start: [Timestamp needed - Check previous logs if critical, otherwise use current] 2025-04-29 00:00:00 (Estimate)
+- Current focus: TDD for Backend API (`src/philograph/api/main.py`)
+- Next actions: Re-delegate TDD task to complete `/collections` (duplicate name) test cycle.
+- Last Updated: [2025-04-29 02:37:50]
 - Outcome: Completed tests for parse_references and call_anystyle_parser in text_processing.py. Minor fixes applied (await). All tests passing (1 skipped).
 - Link to Progress Entry: [See globalContext.md entry 2025-04-28 19:06:05]
 ### [2025-04-28 16:57:29] Task: Debug test_call_grobid_extractor_api_request_error
@@ -25,6 +30,14 @@
 - Link to Progress Entry: [See globalContext.md entry 2025-04-28 17:06:27]
 ### [2025-04-28 12:26:14] Task: Debug test_get_db_pool_failure
 - Assigned to: debug
+### [2025-04-29 04:21:23] Task: Resume TDD for PhiloGraph CLI (`src/philograph/cli/main.py`) (Post-Syntax Fix)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/cli/main.py` after syntax fix. Start with `test_collection_add_item_invalid_collection_id`, then `collection add` (invalid item ID), `collection list`, `acquire`, `status`.
+- Expected deliverable: Completed tests for specified CLI commands in `tests/cli/test_main.py`.
+- Status: failed (Early Return - Context 50%)
+- Completion time: [2025-04-29 04:28:25]
+- Outcome: Completed TDD cycles for `collection add` (invalid IDs - passed unexpectedly), `collection list` (success, empty, not found). Context limit reached before testing `collection list` API error or `acquire`/`status`. [Ref: TDD Feedback 2025-04-29 04:28:25]
+- Link to Progress Entry: [See globalContext.md entry TBD]
 - Description: Debug persistent failure in `tests/data_access/test_db_layer.py::test_get_db_pool_failure` related to mocking psycopg connection errors in async context. See `memory-bank/feedback/tdd-feedback.md` for details.
 - Expected deliverable: Fixed test or clear diagnosis of the mocking issue.
 - Status: completed
@@ -32,6 +45,126 @@
 - Outcome: Fixed test_get_db_pool_failure by correcting async mocking strategy (commit e5dfc68).
 - Link to Progress Entry: [See globalContext.md entry 2025-04-28 10:34:52]
 ## Delegations Log
+### [2025-04-29 03:09:03] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API /acquire Endpoints (Post-Context Limit #16)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/api/main.py`. Previous session completed tests for `POST /acquire` (success, missing query) and `POST /acquire/confirm` (success), invoking Early Return (Context 51%) [Ref: TDD Feedback 2025-04-29 03:08:33]. Resume testing with error handling for `POST /acquire/confirm` and all cases for `GET /acquire/status/{id}`.
+- Expected deliverable: Completed tests for remaining `/acquire` endpoints in `tests/api/test_main.py`.
+- Status: failed (Early Return - Context 51%)
+- Completion time: 2025-04-29 03:08:33
+- Outcome: Completed TDD cycles for `POST /acquire` (Success, Missing Query) and `POST /acquire/confirm` (Success). Context limit reached before testing error handling and `GET /acquire/status/{id}`. [Ref: TDD Feedback 2025-04-29 03:08:33]
+- Link to Progress Entry: [See globalContext.md entry TBD]
+### [2025-04-29 00:40:30] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API (Post-Context Limit #15)
+- Assigned to: tdd
+### [2025-04-29 02:27:15] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API (Post-Docker Workaround)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/api/main.py` after Docker workaround. Verify env, test `/documents` 404, `/collections`, `/acquire`.
+- Expected deliverable: Completed tests for specified endpoints.
+- Status: failed (Early Return - Context 54%)
+- Completion time: 2025-04-29 02:35:51
+- Outcome: Fixed test env (`PYTHONPATH`, mock data). Verified `test_get_document_success`. Completed TDD for `/documents` 404, `/collections` success/validation. Added failing test for duplicate collection name. Returned early due to context.
+- Link to Progress Entry: [See globalContext.md entry 2025-04-29 02:35:51]
+- Description: Resume TDD for `src/philograph/api/main.py`. Previous session blocked by Docker build issue (`COPY tests` failing) and context limit (~51%). Resume by debugging Dockerfile, verifying test execution in container, then continue testing API endpoints.
+- Expected deliverable: Fixed Dockerfile, verified test execution, completed tests for `/search`, `/documents`, `/collections`, `/acquire`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context ~51% & Docker Blocker). Blocked by Docker build issue: `COPY tests /app/tests` in `Dockerfile` fails to copy directory. Multiple fixes attempted unsuccessfully. [See TDD Feedback 2025-04-29 00:40:30]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-29 00:40:30]
+### [2025-04-29 00:16:23] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API (Post-Context Limit #14)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/api/main.py`. Previous session fixed test env issues (DB URL, Dockerfile) and added `test_get_document_success`, invoking Early Return (Context 69%). Resume by executing tests in container, then continue with `/documents` 404, `/collections`, `/acquire`.
+- Expected deliverable: Completed tests for `/documents`, `/collections`, `/acquire` in `tests/api/test_main.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context 69%). Diagnosed/fixed test env issues (DB URL scheme, Dockerfile missing tests). Added `test_get_document_success`. Prepared to run tests inside container. Remaining: Execute tests in container, continue with `/documents` 404, `/collections`, `/acquire`. [See TDD Feedback 2025-04-29 00:29:14]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-29 00:29:14]
+### [2025-04-29 00:07:29] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API (Post-Context Limit #13)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/api/main.py`. Previous session completed tests for `/` and basic `/ingest` scenarios, invoking Early Return (Context 51%). Resume testing with remaining `/ingest` cases and `/search`.
+- Expected deliverable: Completed tests for `/ingest` and `/search` in `tests/api/test_main.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context 49%). Completed `/ingest` tests (directory, errors, validation). Started `/search` tests (success, filters, validation). Refactored Pydantic `.dict()` to `model_dump()`. 11 tests passing. Remaining: `/search` error cases, `/documents`, `/collections`, `/acquire`. [See TDD Feedback 2025-04-29 00:14:52]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-29 00:14:52]
+### [2025-04-29 00:06:33] Task: PhiloGraph Tier 0 MVP Testing - Backend API
+- Assigned to: tdd
+- Description: Implement unit tests for `src/philograph/api/main.py`. Cover endpoints, models, service mocking, error handling.
+- Expected deliverable: Completed tests in `tests/api/`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context 51%). Setup complete, 3 tests passing (`/`, `/ingest` success/skip). Remaining: `/ingest` directory/error cases, `/search`. [See TDD Feedback 2025-04-29 00:05:57]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-29 00:05:57]
+### [2025-04-28 23:41:43] Task: Resume PhiloGraph Tier 0 MVP Testing - Ingestion Pipeline (Post-Context Limit #11)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/ingestion/pipeline.py::process_document`. Previous session completed tests for basic directory handling and invoked Early Return (Context 53%). Resume testing with subdirectory recursion and iteration error handling.
+- Expected deliverable: Completed tests in `tests/ingestion/test_pipeline.py`.
+- Status: completed
+- Completion time: 2025-04-28 23:57:03
+- Outcome: Completed tests for directory recursion/error handling. All 29 tests pass. [See TDD Completion 2025-04-28 23:57:03]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 23:49:54]
+### [2025-04-28 23:32:02] Task: Resume PhiloGraph Tier 0 MVP Testing - Ingestion Pipeline (Post-Context Limit #10)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/ingestion/pipeline.py::process_document`. Previous session completed tests for DB error handling and invoked Early Return (Context 50.8%). Resume testing with directory processing logic.
+- Expected deliverable: Completed tests in `tests/ingestion/test_pipeline.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context 50.8%). Completed tests for DB error handling (`check_exists`, `add_doc`, `add_section`, `add_chunks_batch`, `add_reference`). Modified source for `add_reference` error propagation. Remaining: Directory processing logic. [See TDD Feedback 2025-04-28 23:40:14]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 23:40:14]
+### [2025-04-28 23:22:01] Task: Resume PhiloGraph Tier 0 MVP Testing - Ingestion Pipeline (Post-Context Limit #9)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/ingestion/pipeline.py::process_document`. Previous session completed tests for helpers and invoked Early Return (Context 51%). Resume testing with `process_document` core logic and error handling.
+- Expected deliverable: Completed tests in `tests/ingestion/test_pipeline.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context 49%). Added 7 tests for `process_document` (success, skip, file not found, extraction/embedding/indexing errors). Remaining: DB check error test, other DB errors, directory processing. [See TDD Feedback 2025-04-28 23:30:26]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 23:30:26]
+### [2025-04-28 23:11:41] Task: Resume PhiloGraph Tier 0 MVP Testing - Ingestion Pipeline (Post-Context Limit #8)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/ingestion/pipeline.py`. Previous session completed tests for `get_embeddings_in_batches` helper and invoked Early Return (Context 45%). Resume testing with batching/dimension tests, `extract_content_and_metadata`, and `process_document`.
+- Expected deliverable: Completed tests in `tests/ingestion/test_pipeline.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context 51%). Completed tests for `get_embeddings_in_batches` (batching, dimension) and `extract_content_and_metadata` (dispatch). Remaining: `process_document`. [See TDD Feedback 2025-04-28 23:20:31]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 23:20:31]
+### [2025-04-28 23:02:44] Task: PhiloGraph Tier 0 MVP Testing - Ingestion Pipeline
+- Assigned to: tdd
+- Description: Implement unit tests for `src/philograph/ingestion/pipeline.py`. Cover core functionality, processing steps (mocked), DAL interaction (mocked), and error handling.
+- Expected deliverable: Completed tests in `tests/ingestion/test_pipeline.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context 45%). Added 6 tests for `get_embeddings_in_batches` helper. Fixed `pytest.ini` path and `await` in pipeline.py. Remaining: batching/dimension tests, `extract_content_and_metadata`, `process_document`. [See TDD Feedback 2025-04-28 23:10:12]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 23:10:12]
+### [2025-04-28 22:47:00] Task: Resume PhiloGraph Tier 0 MVP Testing - Data Access Layer (Post-Context Limit #6)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/data_access/db_layer.py`. Previous session completed tests for `get_relationships` and invoked Early Return due to context limit (43%). Resume testing with collection operations.
+- Expected deliverable: Completed tests for `db_layer.py`.
+- Status: completed
+- Completion time: 2025-04-28 23:01:44
+- Outcome: Completed testing for `db_layer.py`. Added 3 tests for `get_collection_items` edge cases (empty, non-existent ID, DB error). All 54 tests passing. [See TDD Completion 2025-04-28 23:01:44]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 22:55:51]
+### [2025-04-28 22:39:22] Task: Resume PhiloGraph Tier 0 MVP Testing - Data Access Layer (Post-Context Limit #5)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/data_access/db_layer.py`. Previous session completed tests for `vector_search_chunks` edge cases and `add_relationship`, invoking Early Return due to context limit (~52%). Resume testing with `get_relationships` and collection operations.
+- Expected deliverable: Completed tests for `db_layer.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context 43%). Completed tests for `get_relationships` (outgoing, incoming, both, type filter, non-existent). Fixed metadata mapping. Remaining: collections. [See TDD Feedback 2025-04-28 22:45:28]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 22:45:28]
+### [2025-04-28 22:30:18] Task: Resume PhiloGraph Tier 0 MVP Testing - Data Access Layer (Post-Context Limit #4)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/data_access/db_layer.py`. Previous session completed tests for `add_chunks_batch`, `add_reference`, basic `vector_search_chunks` cases and invoked Early Return due to context limit (~46%). Resume testing with `vector_search_chunks` edge cases, relationship operations, and collection operations.
+- Expected deliverable: Completed tests for `db_layer.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context Limit ~52%). Completed tests for `vector_search_chunks` edge cases and `add_relationship`. Remaining: `get_relationships`, collections. [See TDD Feedback 2025-04-28 22:37:46]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 22:37:46]
+### [2025-04-28 21:57:18] Task: Resume PhiloGraph Tier 0 MVP Testing - Data Access Layer (Post-Context Limit #3)
+- Assigned to: tdd
+- Description: Resume TDD for `src/philograph/data_access/db_layer.py`. Previous session completed tests for `add_document`, `get_document_by_id`, `check_document_exists`, `add_section`, `add_chunk` (25 tests passing) and invoked Early Return due to context limit (44%). Resume testing with `add_chunks_batch`, `add_reference`, `vector_search_chunks`, relationship operations, and collection operations.
+- Expected deliverable: Completed tests for `db_layer.py`.
+- Status: blocked
+- Completion time: N/A
+- Outcome: Early Return (Context Limit ~46%). Completed tests for `add_chunks_batch`, `add_reference`, and basic `vector_search_chunks` cases. Remaining: search edge cases, relationships, collections. [See TDD Feedback 2025-04-28 22:28:28]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-28 22:28:28]
 ### [2025-04-28 19:09:32] Task: PhiloGraph Tier 0 MVP Testing - Data Access Layer
 - Assigned to: tdd
 - Description: Implement unit tests for `src/philograph/data_access/db_layer.py` and `src/philograph/data_access/models.py`.
@@ -40,4 +173,12 @@
 - Completion time: N/A
 - Outcome: Early Return (Context Limit 44%). Completed tests for utility/connection functions, `add_document`, `get_document_by_id`, `check_document_exists`, `add_section`, `add_chunk` in `db_layer.py`. Remaining: batch, search, refs, relationships, collections. [See TDD Feedback 2025-04-28 21:54:05]
 - Link to Progress Entry: [See globalContext.md entry 2025-04-28 21:15:51]
+### [2025-04-29 01:25:27] Task: Verify Dockerfile Fix and Test Execution Environment
+- Assigned to: devops
+- Description: Verify if recent `Dockerfile` changes (`COPY . /app`) fixed the issue preventing the `tests` directory from being copied into the `philograph-backend` image. Check build, directory existence, and basic pytest execution.
+- Expected deliverable: Confirmation of whether the Docker environment is fixed and tests can be executed.
+- Status: failed
+- Completion time: 2025-04-29 02:19:23
+- Outcome: Early Return (Intractable Docker Blocker). Verification failed. The `/app/tests` directory remains inaccessible inside the container despite multiple `Dockerfile` modifications and rebuilds. TDD remains blocked. [See DevOps Feedback 2025-04-29 02:19:23]
+- Link to Progress Entry: [See globalContext.md entry 2025-04-29 02:19:23]
 <!-- Append new delegation records here -->

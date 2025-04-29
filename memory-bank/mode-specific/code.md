@@ -4,6 +4,13 @@
 <!-- No interventions logged during this implementation phase. -->
 ## Intervention Log
 <!-- Append intervention details using the format below -->
+### [2025-04-29 04:18:51] Intervention: Fix CLI Test Syntax Errors
+- **Trigger**: Task handover from TDD mode [Ref: TDD Feedback 2025-04-29 04:17:00].
+- **Context**: Persistent syntax errors in `tests/cli/test_main.py` around line 597 after failed tool use in TDD.
+- **Action Taken**: Identified and removed stray parenthesis and duplicate line using `apply_diff`.
+- **Rationale**: Direct correction of syntax errors.
+- **Outcome**: File `tests/cli/test_main.py` corrected.
+- **Follow-up**: Recommend syntax verification (`pytest --collect-only`). Update MB. Proceed to `attempt_completion`. [See Code Feedback 2025-04-29 04:18:51]
 ### [2025-04-28 04:23:39] PhiloGraph Tier 0 Core Structure
 - **Purpose**: Establish foundational code structure, configuration, utilities, API, CLI, MCP server, and Docker setup for Tier 0 MVP.
 - **Files**:

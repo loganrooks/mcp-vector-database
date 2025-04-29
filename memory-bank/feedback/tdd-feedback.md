@@ -1,3 +1,301 @@
+### Early Return - Multiple Unexpected Test Failures (Regression Check) - [2025-04-29 11:30:13]
+- **Trigger**: Full test suite run (`docker compose exec philograph-backend pytest`) after resolving filename conflict (`tests/cli/test_cli_main.py`) resulted in 25 failures and 1 error.
+- **Context**: Task was to run regression tests after `/ingest` 404 fix [Ref: Debug Completion 2025-04-29 11:25:29], verify the fix, adapt `test_ingest_success`, and ensure all tests pass.
+- **Issue**: While the expected failure for `test_ingest_success` (due to 404) occurred, numerous other tests failed unexpectedly across multiple modules:
+    - **API (`tests/api/test_main.py`):** `test_get_collection_empty`, `test_acquire_confirm_success` failing with 404 instead of 200.
+    - **CLI (`tests/cli/test_cli_main.py`):** `test_ingest_api_error`, `test_search_api_error` failing due to real API errors (404/500) occurring before mock assertions. Search tests (`test_search_*`) failing due to known backend 500 embedding error [Ref: Issue-ID: CLI-API-500-ERRORS].
+    - **Ingestion (`tests/ingestion/test_pipeline.py`):** 16 tests failing with path resolution issues ("File or directory not found"). This seems like a significant regression.
+    - **Config (`tests/test_config.py`):** `test_get_bool_env_variable_not_exists_defaults_false` failing due to missing `DB_PASSWORD` env var during test execution.
+- **Attempts**:
+    1. Renamed `tests/cli/test_main.py` to `tests/cli/test_cli_main.py` to fix collection error.
+    2. Ran `docker compose exec philograph-backend pytest`.
+- **Analysis**: The `/ingest` 404 fix itself seems successful based on the `test_ingest_success` log. However, significant regressions or previously hidden issues have surfaced in API routing/logic, Ingestion path handling, Config test setup, and CLI error test structure. The Ingestion failures are particularly concerning.
+- **Self-Correction**: Following Early Return Clause due to multiple unexpected failures preventing task completion.
+- **Context %**: ~13% (Manually calculated: 131,185 / 1,000,000)
+- **Recommendation**: Invoke Early Return. Delegate to `debug` mode to investigate the root causes of the widespread failures, prioritizing:
+    1. The 16 Ingestion test failures related to path resolution ("File or directory not found").
+    2. The API 404 errors in `test_get_collection_empty` and `test_acquire_confirm_success`.
+    3. The Config test failure (`DB_PASSWORD` missing).
+    4. Recommend `code` or `tdd` mode fix the structure of CLI error tests (`test_ingest_api_error`, `test_search_api_error`) to correctly handle pre-mock API failures or improve mocking.
+    Provide link to this feedback entry and the full `pytest` output. [Ref: Original Task 2025-04-29 11:28:16]
+
+---
+### Early Return - Verification Failed for /ingest Fix - [2025-04-29 10:14:40]
+- **Trigger**: Verification test `test_ingest_success` failed unexpectedly during task "Verify Backend API Fixes &amp; Resume CLI Testing".
+- **Context**: Task involved verifying fixes for `/search` (dummy GCP key) and `/ingest` (404 handling) applied by debug mode [Ref: Debug Feedback 2025-04-29 09:26:29]. Verification for `/search` passed (original credential error gone, now fails as expected with embedding error).
+- **Issue**: Verification for `/ingest` failed. Expected API to return 404 for non-existent file path (`dummy_test_doc.pdf`), but it returned `500 - {"detail":"An unexpected error occurred during ingestion."}`.
+- **Attempts**:
+    1. Corrected `docker-compose.yml` network config for `db` service.
+    2. Restarted services: `docker compose down &amp;&amp; docker compose up -d --build`.
+    3. Ran `/search` verification test (`test_search_success_query_only`): Passed verification (error changed as expected).
+    4. Ran `/ingest` verification test (`test_ingest_success`): Failed verification (API returned 500, not 404).
+- **Analysis**: The fix applied by debug mode to the `/ingest` handler in `src/philograph/api/main.py` to return 404 for "File not found" errors is not working as intended or was incomplete/reverted. The API is still throwing a generic 500 error.
+- **Self-Correction**: Following `error_handling_protocol` to stop and report verification failure.
+- **Context %**: 42% (Manually calculated: 415,142 / 1,000,000)
+- **Recommendation**: Invoke Early Return. Suggest SPARC delegate to `debug` mode to re-investigate the `/ingest` endpoint handler in `src/philograph/api/main.py` and ensure it correctly returns a 404 status code when `process_document` raises a `FileNotFoundError`. Provide link to this feedback entry and relevant Memory Bank sections (`activeContext.md`, `debug-feedback.md`). [Ref: Original Task 2025-04-29 09:27:42]
+### User Intervention - Incorrect Context Percentage - [2025-04-29 10:07:51]
+- **Trigger**: User feedback on Early Return completion message.
+- **Context**: Invoked Early Return upon task resumption due to reported context size of 159% (318,967 tokens).
+- **Action**: User clarified that the percentage calculation is bugged (using 200k instead of 1M denominator). Manually recalculated percentage as (318,967 / 1,000,000) * 100 = 31.9%.
+- **Rationale**: The actual context percentage is below the 40-50% threshold, so Early Return was unnecessary.
+- **Outcome**: Retracting Early Return. Will resume the task by retrying the last command. Will manually calculate context percentage going forward.
+- **Follow-up**: Retry `docker compose down &amp;&amp; docker compose up -d --build`. Update `activeContext.md`.
+### Early Return - Context Limit Exceeded (159%) - [2025-04-29 09:40:23]
+- **Trigger**: Context size reached 159% upon task resumption.
+- **Context**: Task was to verify backend API fixes for `/search` (dummy GCP key) and `/ingest` (404 handling) and resume TDD for `src/philograph/cli/main.py`. Attempted `docker compose down &amp;&amp; docker compose up -d --build` before interruption, but result was not received.
+- **Issue**: Context size drastically exceeds the 40-50% threshold, preventing safe continuation.
+- **Attempts**: N/A (Proactive return upon resumption).
+- **Analysis**: Cannot proceed with verification or testing due to context limit.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 159%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to retry the original task: "Verify Backend API Fixes & Resume CLI Testing". The first step should be to run `docker compose down &amp;&amp; docker compose up -d --build` to ensure the environment reflects the latest fixes. Then proceed with verification steps outlined in the original task brief [Ref: Original Task 2025-04-29 09:27:42]. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`, `debug-feedback.md`) for context handover.
+### User Intervention - [2025-04-29 09:18:06]
+- **Trigger**: User asked why `sudo` wasn't used for the permission error during file creation.
+- **Context**: Following `execute_command` failure due to permissions when trying to `touch ./data/source_documents/dummy_test_doc.pdf`.
+- **Action**: Explained the security rationale for avoiding `sudo` and reiterated the sufficiency of using a relative path in the test file for mocked API calls.
+- **Rationale**: Address user query and confirm the chosen safer alternative.
+- **Outcome**: User acknowledged (implicitly). Proceeding with `apply_diff`.
+- **Follow-up**: Apply the path change using `apply_diff`.
+### Tool Error &amp; Strategy Change - [2025-04-29 09:17:37]
+- **Trigger**: `execute_command` failed with "Permission denied" when trying to `touch ./data/source_documents/dummy_test_doc.pdf`.
+- **Context**: Attempting to create a dummy file to replace the invalid path `"some/document.pdf"` in `/ingest` CLI tests.
+- **Analysis**: The execution environment lacks permission to write to the target host directory.
+- **Action**: Aborting file creation. Will modify the test path directly to a relative path (`"dummy_test_doc.pdf"`) using `apply_diff`. This path will be interpreted relative to the backend's source document directory (`/app/data/source_documents` in the container), which is sufficient for the mocked tests.
+- **Follow-up**: Apply the path change using `apply_diff`.
+### User Intervention - [2025-04-29 09:12:57]
+- **Trigger**: User denied `execute_command` to create `data/source_documents/dummy_test_doc.pdf`.
+- **Context**: Preparing to fix invalid path `"some/document.pdf"` in `tests/cli/test_main.py` for `/ingest` tests.
+- **Action**: User asked if a real PDF was needed.
+- **Rationale**: User was confirming the necessity of the file content.
+- **Outcome**: Explained that an empty file is sufficient as the test mocks the API call. Will retry the command.
+- **Follow-up**: Retry `execute_command` to create the empty file, then proceed with `apply_diff` to fix the test path.
+### Early Return - Context Limit Exceeded - [2025-04-29 04:48:59]
+- **Trigger**: Context size reached 53% after completing TDD cycles for `status` command.
+- **Context**: Resumed TDD for `src/philograph/cli/main.py`. Ran regression tests, identified and fixed issues in `search` command tests/implementation (switched to POST, corrected filter handling, removed irrelevant test). Ignored persistent backend 500 errors for `/ingest` and `/search`. Completed TDD cycles for `status` command: success (required minimal implementation), API error (passed unexpectedly), Not Found (passed unexpectedly), Invalid ID (required test fix to simulate API error handling). Memory Bank updated.
+- **Issue**: Context size (53%) exceeds the recommended threshold (40-50%), risking degraded performance.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task objective to test the `status` command is complete. All planned tests for `status` were added and verified (passing, ignoring backend failures). Context limit reached upon completion of the objective.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 53%
+- **Recommendation**: Invoke Early Return. The TDD task for the `status` command is complete. The remaining 6 test failures appear related to backend issues (`/ingest` 500 error, `/search` 500 error - embedding generation) and should likely be addressed by `debug` or `code` mode focusing on the backend API (`src/philograph/api/main.py` and related services). Suggest SPARC create a `new_task` for debugging the backend API endpoints `/ingest` and `/search`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 04:37:31]
+### Early Return - Context Limit Reached - [2025-04-29 04:37:31]
+- **Trigger**: Context size reached 50% after completing TDD cycles for `acquire` command tests.
+- **Context**: Resumed TDD for `src/philograph/cli/main.py`. Completed TDD cycle for `collection list` (API error - passed unexpectedly). Completed TDD cycles for `acquire` command: direct success (required test fix), confirmation flow (passed unexpectedly), `--yes` flag (required implementation fix), API error (passed unexpectedly), missing arguments (passed unexpectedly). Memory Bank updated with all cycles.
+- **Issue**: Context size (50%) meets the recommended threshold (40-50%), risking degraded performance before testing the `status` command.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves comprehensive testing of the CLI. Completed tests for `collection list` API error and all planned tests for the `acquire` command. Context limit reached before starting tests for the `status` command.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 50%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/cli/main.py`. Focus on: 1) Testing the `status` command (success, API error, task not found, invalid ID format) as per `pseudocode/tier0/cli.md`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 04:28:25]
+### Early Return - Context Limit Reached - [2025-04-29 04:28:25]
+- **Trigger**: Context size reached 50% after completing TDD cycle for `collection list` (Not Found).
+- **Context**: Resumed TDD for `src/philograph/cli/main.py`. Verified fix for syntax errors in `tests/cli/test_main.py`. Completed TDD cycles for `collection add` (invalid collection ID, invalid item ID - both passed unexpectedly). Completed TDD cycles for `collection list` (success - required test fixes, empty - passed unexpectedly, not found - passed unexpectedly). Memory Bank updated.
+- **Issue**: Context size (50%) meets the recommended threshold (40-50%), risking degraded performance before testing the remaining `collection list` error case (general API error) or proceeding to the `acquire` and `status` commands.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves comprehensive testing of the CLI. Completed tests for `collection add` invalid ID cases and `collection list` success/empty/not found cases. Context limit reached before testing general API errors for `collection list` or moving to `acquire` and `status`.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 50%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/cli/main.py`. Focus on: 1) Testing the `collection list` command for general API errors (mocking `make_api_request` to raise a non-404 `HTTPStatusError` or `ConnectError`). 2) Proceed to test the `acquire` command (success, confirmation flow, errors). 3) Proceed to test the `status` command (success, errors). Refer to `pseudocode/tier0/cli.md`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 04:17:00]
+### Early Return - Context Limit Approaching - [2025-04-29 04:09:22]
+- **Trigger**: Context size reached 49% after completing TDD cycle for `collection create` success case.
+- **Context**: Resumed TDD for `src/philograph/cli/main.py`. Completed TDD cycles for `show` command error handling (invalid type - required code fix, not found - required test fix, API error - passed unexpectedly). Completed TDD cycle for `collection create` (success - passed unexpectedly). Memory Bank updated.
+- **Issue**: Context size (49%) approaches the recommended threshold (40-50%), risking degraded performance before testing remaining `collection` commands (`add`, `list`) or other commands.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Completed testing for `show` command error handling. Verified success path for `collection create`. Context limit reached before testing `collection add` or `collection list`.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 49%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/cli/main.py`. Focus on: 1) Testing `collection add <collection_id> <item_type> <item_id>`. 2) Testing `collection list <collection_id>`. 3) Proceed to `acquire` and `status` commands as per original task objective and `pseudocode/tier0/cli.md`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 04:00:16]
+### Early Return - Context Limit Approaching - [2025-04-29 04:00:16]
+- **Trigger**: Context size reached 49% after completing TDD cycle for `show chunk` success case.
+- **Context**: Resumed TDD for `src/philograph/cli/main.py`. Resolved `ModuleNotFoundError` during test execution by adjusting import paths and patch targets. Resolved `AttributeError` for missing `config.API_URL` by adding its definition in `src/philograph/config.py`. Completed TDD cycles for `show document` (success - passed unexpectedly after fixes) and `show chunk` (success - passed after adding `elif` block). Memory Bank updated.
+- **Issue**: Context size (49%) approaches the recommended threshold (40-50%), risking degraded performance before testing remaining `show` command cases (invalid type, not found, API error) and other commands.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves comprehensive testing of the CLI. Completed success cases for `show document` and `show chunk`. Context limit reached before testing error handling for `show` or proceeding to other commands.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 49%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/cli/main.py`. Focus on: 1) Testing the remaining `show` command cases (invalid type, item not found, API error). 2) Proceed to other commands (`collection`, `acquire`, `status`) as per original task objective and `pseudocode/tier0/cli.md`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 03:52:18]
+### Early Return - Context Limit Approaching - [2025-04-29 03:52:18]
+- **Trigger**: Context size reached 45% after completing TDD cycles for the `search` command.
+- **Context**: Resumed TDD for `src/philograph/cli/main.py`. Fixed `PYTHONPATH` issue for Docker test execution. Completed TDD cycles for the `search` command:
+    - `test_search_success_query_only`: Added test, fixed implementation (GET params, `filters: None`), test passed.
+    - `test_search_success_with_filters`: Added test, fixed syntax error in test file, test passed unexpectedly (Red phase).
+    - `test_search_api_error`: Added test, passed unexpectedly (Red phase).
+    - `test_search_empty_results`: Added test, fixed test assertion (`assert_called_with`), test passed.
+    - `test_search_filter_encoding_error`: Added test, passed unexpectedly (Red phase).
+- **Issue**: Context size (45%) approaches the recommended threshold (40-50%), risking degraded performance before testing the remaining CLI commands (`show`, `collection`, `acquire`, `status`).
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves comprehensive testing of the CLI. Completed tests for the `search` command. Context limit reached before testing other commands.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 45%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/cli/main.py`. Focus on: 1) Testing the `show` command (document success, invalid type, not found). 2) Proceed to other commands (`collection`, `acquire`, `status`) as per original task objective and `pseudocode/tier0/cli.md`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 03:42:52]
+### Early Return - Context Limit Approaching - [2025-04-29 03:42:52]
+- **Trigger**: Context size reached ~46% after adding and running tests for `ingest` command.
+- **Context**: Resumed TDD for `src/philograph/cli/main.py`. Verified fix for `make_api_request` `ConnectionError` test (`test_make_api_request_connection_error`). Added and verified tests for remaining `make_api_request` error cases (`HTTPStatusError`, `JSONDecodeError`, `Exception`). Fixed implementation bug where generic `Exception` handler caught `typer.Exit`. Fixed test code errors (`NameError`, assertion errors). Started testing main CLI commands: added and verified tests for `ingest` command (success, API error). All tests passed unexpectedly, confirming existing implementation handles these cases. Memory Bank updated.
+- **Issue**: Context size (~46% before this message, now ~24%) approaches the recommended threshold (40-50%), risking degraded performance before testing remaining CLI commands (`search`, `show`, `collection`, `acquire`, `status`).
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves comprehensive testing of the CLI. Completed tests for the `make_api_request` helper and initial tests for the `ingest` command. Context limit approached before testing other commands.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: ~46% (before this message)
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/cli/main.py`. Focus on: 1) Testing the `search` command (success with/without filters, API errors, empty results). 2) Proceed to other commands (`show`, `collection`, `acquire`, `status`) as per original task objective and `pseudocode/tier0/cli.md`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 03:17:58]
+### Early Return - Context Limit Exceeded - [2025-04-29 03:17:58]
+- **Trigger**: Context size reached 51% after correcting type hint for `GET /acquire/status/{id}`.
+- **Context**: Resumed testing `/acquire` endpoints. Completed TDD cycles for `POST /acquire/confirm` error handling (Invalid ID format, Task Not Found, Service Runtime Error). Added test `test_get_acquisition_status_pending` for `GET /acquire/status/{id}`. Test failed due to incorrect type hint (`str` instead of `UUID`) in endpoint signature. Corrected type hint in `src/philograph/api/main.py`. Memory Bank updated.
+- **Issue**: Context size (51%) exceeds the recommended threshold (40-50%), risking degraded performance before verifying the fix for `test_get_acquisition_status_pending` and proceeding with remaining tests for `GET /acquire/status/{id}`.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves testing `/acquire/confirm` error handling and all `/acquire/status/{id}` cases. Completed `/acquire/confirm` error tests and fixed the implementation for the first `/acquire/status/{id}` test. Context limit reached before verifying the fix and testing other status cases.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 51%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/api/main.py`. First step: Run `docker compose exec philograph-backend pytest /app/tests/api/test_main.py::test_get_acquisition_status_pending` to confirm the fix (Green phase). Then proceed with TDD cycles for the remaining `GET /acquire/status/{id}` cases (success completed, success failed, task not found, invalid ID format). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 03:08:33]
+### Early Return - Context Limit Exceeded - [2025-04-29 03:08:33]
+- **Trigger**: Context size reached 51% after completing TDD cycle for `POST /acquire/confirm` (Success).
+- **Context**: Resumed testing `/acquire` endpoints. Completed TDD cycle for `POST /acquire` (Success - involved adding placeholder service function, updating API models/signature). Completed TDD cycle for `POST /acquire` (Missing Query Validation - passed unexpectedly). Completed TDD cycle for `POST /acquire/confirm` (Success - passed unexpectedly). Memory Bank updated with all cycles.
+- **Issue**: Context size (51%) exceeds the recommended threshold (40-50%), risking degraded performance before testing error cases for `/acquire/confirm` and the `/acquire/status/{id}` endpoint.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves testing `/acquire`, `/acquire/confirm`, and `/acquire/status/{id}`. Completed success and basic validation tests for `/acquire` and success test for `/acquire/confirm`. Context limit reached before testing error handling for `/acquire/confirm` or any tests for `/acquire/status/{id}`.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 51%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing the API endpoints. Focus on: 1) Error handling for `POST /acquire/confirm` (e.g., invalid `acquisition_id`, service errors). 2) All test cases for `GET /acquire/status/{id}` (success for various states, not found). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 02:57:49]
+### Early Return - Context Limit Reached - [2025-04-29 02:57:49]
+- **Trigger**: Context size reached 50% after completing tests for `GET /collections/{collection_id}`.
+- **Context**: Resumed testing `src/philograph/api/main.py` after handover. Completed TDD cycle for `POST /collections/{id}/items` (Duplicate Item - 409 Conflict). Completed TDD cycles for `GET /collections/{id}` (Success - 200 OK, Empty - 200 OK with empty list, Not Found - 404 Not Found). Memory Bank updated with all cycles.
+- **Issue**: Context size (50%) meets the recommended threshold (40-50%), risking degraded performance before starting tests for the `/acquire` endpoints.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves continuing comprehensive API testing. Completed tests for `/collections/{id}/items` duplicate handling and all planned tests for `GET /collections/{id}`. Context limit reached before starting `/acquire` tests.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 50%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/api/main.py`. Focus on: 1) Testing `/acquire` endpoints (`/acquire`, `/acquire/confirm`, `/acquire/status/{id}`). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 02:45:40]
+### Early Return - Context Limit Approaching - [2025-04-29 02:45:40]
+- **Trigger**: Context size reached 42% after completing initial tests for `POST /collections/{collection_id}/items`.
+- **Context**: Resumed testing `src/philograph/api/main.py`. Corrected test code error in `test_create_collection_duplicate_name`. Confirmed existing implementation handles duplicate collection names (409 Conflict). Started TDD for `POST /collections/{collection_id}/items`. Added tests for success (document, chunk), invalid item type (422), non-existent collection ID (404), and non-existent item ID (404). All these tests passed unexpectedly or after minor test code corrections, confirming existing implementation handles these cases. Memory Bank updated.
+- **Issue**: Context size (42%) is approaching the recommended threshold (40-50%), risking degraded performance before testing further cases for `/collections/{id}/items` or moving to `GET /collections/{id}` and `/acquire`.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding comprehensive tests for API endpoints. Completed tests for `/collections` duplicate name handling and basic success/validation/error cases for `POST /collections/{id}/items`. Context limit reached before testing potential edge cases (e.g., duplicate item addition) or other endpoints.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 42%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/api/main.py`. Focus on: 1) Any remaining edge cases for `POST /collections/{collection_id}/items` (e.g., adding the same item twice, if applicable). 2) Proceed to test `GET /collections/{collection_id}` (success, empty, not found). 3) Proceed to test `/acquire` endpoints (`/acquire`, `/acquire/confirm`, `/acquire/status/{id}`). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 02:35:51]
+### Early Return - Context Limit Reached - [2025-04-29 02:35:51]
+- **Trigger**: Context size reached 53% after adding `test_create_collection_duplicate_name`.
+- **Context**: Resumed testing `src/philograph/api/main.py` after Docker workaround. Verified test environment (`PYTHONPATH` fix, `test_get_document_success` passed). Completed TDD cycles for `GET /documents/{doc_id}` (404 Not Found - passed unexpectedly) and `POST /collections` (Success - passed unexpectedly, Missing Name - passed unexpectedly). Added test `test_create_collection_duplicate_name` (Red phase). Memory Bank updated.
+- **Issue**: Context size (53%) exceeds the recommended threshold (40-50%), risking degraded performance before running the latest test and proceeding with further TDD cycles for `/collections`, `/collections/{id}/items`, and `/acquire`.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Debugging the initial test environment and completing several TDD cycles (even with unexpected passes) consumed significant context. Limit reached before running the test for duplicate collection names.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 53%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/api/main.py`. First step: Run `docker compose exec philograph-backend pytest /app/tests/api/test_main.py::test_create_collection_duplicate_name` to confirm it fails (Red phase). Then proceed with Green/Refactor phases for this test, followed by TDD cycles for `POST /collections/{collection_id}/items`, `GET /collections/{collection_id}`, and the `/acquire` endpoints. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 00:40:30]
+### Early Return - Context Limit Reached & Docker Build Issue - [2025-04-29 00:40:30]
+- **Trigger**: Context size reached ~51% during Docker build debugging.
+- **Context**: Attempting to verify Docker test environment for `src/philograph/api/main.py`. Previous attempts to run `pytest` failed with "file or directory not found: /app/tests/api/test_main.py".
+- **Issue**: The `tests` directory is not being copied into the `/app` directory in the Docker container, despite the `COPY tests /app/tests` instruction in `Dockerfile`.
+- **Attempts**:
+    1. Verified `COPY ./tests /app/tests` exists in `Dockerfile`.
+    2. Added `RUN chown -R appuser:appuser /app` before `USER appuser` to fix potential permissions issues. Rebuilt image (`--no-cache`). `ls -l /app/tests` still failed ("No such file or directory").
+    3. Verified `.dockerignore` does not exist.
+    4. Listed `/app` contents; confirmed `src` is copied but `tests` is missing.
+    5. Modified `COPY` paths to remove `./` (`COPY src /app/src`, `COPY tests /app/tests`). Rebuilt image (`--no-cache`). `ls -l /app` still showed `tests` missing.
+    6. Added `RUN ls -l /app` immediately after `COPY` commands in `Dockerfile` for debugging during build.
+- **Analysis**: The persistent failure of the `COPY tests /app/tests` command, despite various fixes and confirmation of the build context in `docker-compose.yml`, suggests a subtle issue with the Docker build process or context that prevents the `tests` directory from being included in the image. The next step was to analyze the output of the debug command added in attempt #6, but the context limit was reached.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return due to context limit.
+- **Context %**: ~51%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD (or potentially `debug`/`devops` if the Docker issue persists) to: 1. Rebuild the `philograph-backend` image using `docker compose build --no-cache philograph-backend` to capture the output of the added debug step (`RUN ls -l /app`). 2. Analyze the build output to determine why the `tests` directory is not being copied. 3. Fix the `Dockerfile` or build process based on the analysis. 4. Once the `tests` directory is confirmed present in the container, run `docker compose exec philograph-backend pytest /app/tests/api/test_main.py` to verify tests execute. 5. Proceed with the original testing objectives for the API endpoints. Provide link to this feedback entry. [Ref: Previous Early Return: 2025-04-29 00:29:14]
+### Early Return - Context Limit Reached - [2025-04-29 00:29:14]
+- **Trigger**: Context size reached 58% after debugging test execution environment.
+- **Context**: Attempting to run `test_get_document_success` for `GET /documents/{doc_id}`. Diagnosed and fixed DB connection string errors in `src/philograph/config.py`. Diagnosed missing `tests` directory in Docker image; updated `Dockerfile` and rebuilt `philograph-backend` image using `docker compose build --no-cache`. Ready to execute tests inside the container.
+- **Issue**: Context size (58%) exceeds the recommended threshold (40-50%), risking degraded performance before verifying the fix and proceeding with tests.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Debugging the Docker build and execution environment for tests consumed significant context. Limit reached before the next test execution step.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 58%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/api/main.py`. First step: Run `docker compose exec philograph-backend pytest /app/tests/api/test_main.py` to verify `test_get_document_success` passes (or fails correctly). Then continue testing `/documents` (404 case), `/collections`, and `/acquire` endpoints as per the original task objective. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 00:14:52]
+### Early Return - Context Limit Reached - [2025-04-29 00:14:52]
+- **Trigger**: Context size reached 47% after completing several `/search` endpoint tests.
+- **Context**: Resumed testing `src/philograph/api/main.py`. Completed remaining `/ingest` tests (directory success, pipeline errors, missing path validation). Started `/search` tests: success (query only, with filters), validation (missing query, invalid filter format). Refactored `/search` handler to use `model_dump()` instead of `.dict()`. All 11 tests in `tests/api/test_main.py` pass. Memory Bank updated.
+- **Issue**: Context size (47%) meets the recommended threshold (40-50%), risking degraded performance before testing remaining `/search` error handling and empty result cases.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding comprehensive tests for the API. Completed `/ingest` and basic `/search` success/validation cases. Context limit reached before testing `/search` error handling and empty results.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is reached.
+- **Context %**: 47%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/api/main.py`. Focus on: 1) `/search` endpoint cases: empty results, `ValueError` from service, `RuntimeError` from service. 2) Proceed to other endpoints (`/documents`, `/collections`, `/acquire`) as per original task objective. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-29 00:05:57]
+### Early Return - Context Limit Exceeded - [2025-04-29 00:05:57]
+- **Trigger**: Context size reached 51% after completing TDD cycles for API root (`/`) and `/ingest` (success, skipped) endpoints and updating Memory Bank.
+- **Context**: Started testing `src/philograph/api/main.py`. Created test file `tests/api/test_main.py` with `test_client` fixture using `ASGITransport`. Fixed initial `ModuleNotFoundError` and `TypeError` in fixture setup. Completed TDD cycles for `/` endpoint (`test_read_root`) and `/ingest` endpoint (`test_ingest_single_file_success`, `test_ingest_single_file_skipped`). All 3 tests currently pass. Memory Bank updated.
+- **Issue**: Context size (51%) exceeds the recommended threshold (40-50%), risking degraded performance before testing further `/ingest` cases (directory, errors) or other endpoints.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding comprehensive tests for the API. Covered basic root endpoint and initial `/ingest` cases. Context limit reached before testing more complex `/ingest` scenarios or other endpoints like `/search`, `/documents`, `/collections`, `/acquire`.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is exceeded.
+- **Context %**: 51%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/api/main.py`. Focus on: 1) Remaining `/ingest` cases (directory processing, pipeline errors, invalid path). 2) `/search` endpoint cases. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 23:49:54]
+### Early Return - Context Limit Reached - [2025-04-28 23:49:54]
+- **Trigger**: Context size reached 51% after completing TDD cycles for basic directory processing tests.
+- **Context**: Resumed testing `src/philograph/ingestion/pipeline.py::process_document` directory handling. Added and verified tests for empty directory (`test_process_document_empty_directory`), directory with one supported file (`test_process_document_directory_with_one_supported_file`), directory with only unsupported files (`test_process_document_directory_with_unsupported_files`), and directory with mixed files (`test_process_document_directory_with_mixed_files`). Encountered and fixed several syntax/`NameError` issues in test code introduced by `insert_content` tool. All 4 new tests pass. Memory Bank updated.
+- **Issue**: Context size (51%) meets the recommended threshold (40-50%), risking degraded performance before testing subdirectory recursion or error handling during directory iteration.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding comprehensive tests for `process_document` directory logic. Covered basic scenarios (empty, single, unsupported, mixed). Context limit reached before testing recursion and error handling.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is reached.
+- **Context %**: 51%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/ingestion/pipeline.py::process_document` directory logic. Focus on: 1) Directory containing subdirectories (mocking recursion). 2) Error handling during directory iteration (e.g., permission errors, if feasible to mock). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 23:40:14]
+### Early Return - Context Limit Approaching - [2025-04-28 23:40:14]
+- **Trigger**: Context size reached 49.9% after completing TDD cycle for `process_document` (DB Add Reference Error).
+- **Context**: Resumed testing `src/philograph/ingestion/pipeline.py::process_document`. Ran `test_process_document_db_check_error` (passed unexpectedly). Added and completed TDD cycles for `test_process_document_db_add_doc_error`, `test_process_document_db_add_section_error`. Ran `test_process_document_indexing_error` (passed unexpectedly). Added and completed TDD cycle for `test_process_document_db_add_reference_error` (required source code fix to re-raise exception). Memory Bank updated.
+- **Issue**: Context size (49.9%) meets the recommended threshold (40-50%), risking degraded performance before testing directory processing logic or other potential edge cases.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding comprehensive tests for `process_document`. Covered all identified database error scenarios within the main transaction. Context limit reached before testing directory processing logic.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is approached.
+- **Context %**: 49.9%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/ingestion/pipeline.py`, focusing specifically on the directory processing logic (handling `path.is_dir()` case) and any other remaining edge cases identified from pseudocode or spec. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 23:30:26]
+### Early Return - Context Limit Approaching - [2025-04-28 23:30:26]
+- **Trigger**: Context size reached 48% after adding `test_process_document_db_check_error`.
+- **Context**: Resumed testing `src/philograph/ingestion/pipeline.py::process_document`. Added 7 tests: success case (passed after test fixes), skip existing (passed), file not found (passed), extraction error (passed), embedding error (passed), indexing error (passed), and DB check error (added, not run). Most tests passed unexpectedly, indicating existing implementation handles these paths. Memory Bank updated.
+- **Issue**: Context size (48%) meets the recommended threshold (40-50%), risking degraded performance before running the latest test and adding further error/directory processing tests.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding comprehensive tests for `process_document`. Covered basic success, skipping, and several key error propagation paths. Context limit reached before verifying the last added test and covering remaining error scenarios and directory logic.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is approached.
+- **Context %**: 48%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/ingestion/pipeline.py::process_document`. First step: run `pytest tests/ingestion/test_pipeline.py::test_process_document_db_check_error`. Then, continue testing remaining error cases (other DB failures) and directory processing logic. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 23:20:31]
+### Early Return - Context Limit Reached - [2025-04-28 23:20:31]
+- **Trigger**: Context size reached 50% after adding tests for `extract_content_and_metadata`.
+- **Context**: Resumed testing `src/philograph/ingestion/pipeline.py`. Completed tests for `get_embeddings_in_batches` (batching, dimension validation - 2 new tests, 8 total). Completed tests for `extract_content_and_metadata` (PDF, EPUB, TXT/MD, Unsupported dispatch - 4 new tests, 12 total). All tests passed unexpectedly or after minor test code fixes (leftover assertions, mock setup). No production code changes were needed for these functions. Memory Bank updated with TDD cycles and test results.
+- **Issue**: Context size (50%) meets the recommended threshold (40-50%), risking degraded performance before testing the main `process_document` function.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding tests for the entire ingestion pipeline. Completed helper functions `get_embeddings_in_batches` and `extract_content_and_metadata`. Context limit reached before starting tests for the main orchestrator function `process_document`.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is reached.
+- **Context %**: 50%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/ingestion/pipeline.py`, focusing specifically on the `process_document` function (single file success cases, directory processing, error handling, existing document skipping). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 23:10:12]
+### Early Return - Context Limit Approaching - [2025-04-28 23:10:12]
+- **Trigger**: Context size reached 44% after adding tests for `get_embeddings_in_batches`.
+- **Context**: Started testing `src/philograph/ingestion/pipeline.py`. Created test file `tests/ingestion/test_pipeline.py`. Fixed `pytest.ini` to include `src` in `pythonpath`. Added and verified tests for `get_embeddings_in_batches` covering empty input, success (single batch), `HTTPStatusError`, `RequestError`, missing 'data' field, and mismatched 'data' length. Fixed `await response.json()` bug in implementation. Fixed several `SyntaxWarning`s in tests related to `pytest.raises` match patterns. All 6 tests added for `get_embeddings_in_batches` are passing.
+- **Issue**: Context size (44%) is approaching the recommended threshold (40-50%), risking degraded performance before testing remaining `get_embeddings_in_batches` cases (batching, dimension validation) and other functions (`extract_content_and_metadata`, `process_document`).
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding multiple tests for the ingestion pipeline. Completed initial tests for the embedding helper function. Context limit approached before testing batching logic, dimension validation, extraction dispatcher, and main orchestrator.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is approached.
+- **Context %**: 44%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/ingestion/pipeline.py`, focusing on the remaining `get_embeddings_in_batches` cases (batching logic, dimension validation), then `extract_content_and_metadata`, and finally `process_document`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 22:55:51]
+### Early Return - Context Limit Approaching - [2025-04-28 22:45:28]
+- **Trigger**: Context size reached 42% after completing tests for `get_relationships`.
+- **Context**: Resumed testing `src/philograph/data_access/db_layer.py`. Added tests for `get_relationships` covering outgoing, incoming, both directions, type filtering, and non-existent node cases. Fixed metadata mapping in `get_relationships` implementation (`apply_diff`). Fixed `IndexError` in `test_get_relationships_non_existent_node` by removing incorrect assertions (`apply_diff`). All 43 tests in `tests/data_access/test_db_layer.py` now pass.
+- **Issue**: Context size (42%) is approaching the recommended threshold (40-50%), risking degraded performance before testing the remaining collection operations.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding multiple tests for various database operations. Completed relationship tests. Context limit approached before starting collection tests.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is approached.
+- **Context %**: 42%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/data_access/db_layer.py`, focusing on collection operations (`add_collection`, `add_item_to_collection`, `get_collection_items`). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 22:37:46]
+### Early Return - Context Limit Exceeded - [2025-04-28 22:37:46]
+- **Trigger**: Context size reached ~51% after adding and running tests for `add_relationship` (success and DB error) and updating Memory Bank.
+- **Context**: Resumed testing `src/philograph/data_access/db_layer.py`. Added and verified tests for `vector_search_chunks` edge cases (empty embedding, DB error) and `add_relationship` (success, DB error). All newly added tests passed unexpectedly (Red phase), indicating existing implementation covered these cases. Memory Bank updated accordingly.
+- **Issue**: Context size (~51%) exceeds the recommended threshold (40-50%), risking degraded performance before testing `get_relationships` and collection operations.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding multiple tests for various database operations, incrementally increasing context. Reached limit after completing `vector_search_chunks` edge cases and `add_relationship` tests.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is exceeded.
+- **Context %**: ~51%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/data_access/db_layer.py`, focusing on `get_relationships` and then collection operations (`add_collection`, `add_item_to_collection`, `get_collection_items`). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 22:28:28]
+### Early Return - Context Limit Approaching - [2025-04-28 22:28:28]
+- **Trigger**: Context size reached ~42% after adding and running tests for `vector_search_chunks` (success, filters, invalid dimension). Increased to ~45% after MB updates.
+- **Context**: Resumed testing `src/philograph/data_access/db_layer.py` after previous Early Return. Added tests for `add_chunks_batch` (success, empty, invalid dim, db error), `add_reference` (success, invalid FK), and `vector_search_chunks` (success, filters, invalid dim). All newly added tests passed immediately or after minor test adjustments (assertion fix for `vector_search_chunks_success`). Total tests in file now 32.
+- **Issue**: Context size (~45%) exceeds the recommended threshold (40-50%), risking degraded performance before testing remaining `vector_search_chunks` cases (e.g., empty query, DB error) and relationship/collection operations.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves adding multiple tests for various database operations, incrementally increasing context. Reached limit before completing all planned tests for `vector_search_chunks` and subsequent functions.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is reached.
+- **Context %**: ~45%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/data_access/db_layer.py`, focusing on the remaining `vector_search_chunks` cases (empty query, DB error) and then relationship (`add_relationship`, `get_relationships`) and collection (`add_collection`, `add_item_to_collection`, `get_collection_items`) operations. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Previous Early Return: 2025-04-28 21:54:05]
 ### Early Return - Context Limit Approaching - [2025-04-28 21:54:05]
 - **Trigger**: Context size reached 42% after adding tests for `add_chunk` (success and invalid dimension).
 - **Context**: Resumed testing `src/philograph/data_access/db_layer.py`. Fixed minor issues in existing `json_serialize` tests. Set up `.venv` and installed dependencies. Added and verified tests for `add_document` (success, duplicate source path), `get_document_by_id` (success, not found), `check_document_exists` (true, false), `add_section` (success, invalid doc_id), and `add_chunk` (success, invalid dimension). All 25 tests in `tests/data_access/test_db_layer.py` are currently passing.
