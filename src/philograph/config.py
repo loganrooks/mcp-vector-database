@@ -95,11 +95,12 @@ DB_PASSWORD = get_env_variable("DB_PASSWORD") # No default for password
 DB_NAME = get_env_variable("DB_NAME", "philograph_db")
 DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 # Async version for psycopg pool
-ASYNC_DATABASE_URL = f"postgresql+psycopg_async://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # --- Backend API Settings ---
 BACKEND_HOST = get_env_variable("BACKEND_HOST", "0.0.0.0")
 BACKEND_PORT = get_int_env_variable("BACKEND_PORT", 8000)
+API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}" # Construct API_URL
 
 # --- LiteLLM Proxy Settings ---
 LITELLM_PROXY_URL = get_env_variable("LITELLM_PROXY_URL", "http://litellm-proxy:4000")

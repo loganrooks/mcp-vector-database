@@ -332,30 +332,7 @@ class CollectionItemDetail(BaseModel):
     item_id: int
     added_at: str # Assuming DB returns string representation
 
-@app.get("/collections/{collection_id}", response_model=List[CollectionItemDetail], status_code=status.HTTP_200_OK)
-async def get_collection(
-    collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to retrieve.")
-):
-    """Retrieves the items within a specific collection."""
-    # TDD: Test retrieving items from an existing collection
-    # TDD: Test retrieving items from an empty collection
-    # TDD: Test retrieving items from a non-existent collection ID (should it be 404 or empty list?) - Assuming empty list for now based on db_layer behavior
-    logger.info(f"Getting items for collection {collection_id}")
-    try:
-        async with db_layer.get_db_connection() as conn:
-            items = await db_layer.get_collection_items(conn, collection_id)
-            # The db_layer function is expected to return a list of dicts matching CollectionItemDetail
-            if not items:
-                # Raise 404 if the collection is empty (implying it doesn't exist or has no items)
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found.")
-            return items
-    except HTTPException as http_exc:
-        # Re-raise HTTPException to let FastAPI handle it correctly
-        raise http_exc
-    except Exception as e:
-        logger.exception(f"Error getting items for collection {collection_id}", exc_info=e)
-        # Consider specific exceptions if db_layer raises them
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving collection items.")
+# Removed duplicate endpoint definition. The definition below is the correct one.
 
 @app.get("/collections/{collection_id}", response_model=CollectionGetResponse)
 async def get_collection(collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to retrieve.")):

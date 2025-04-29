@@ -407,7 +407,13 @@ async def get_relationships(conn: psycopg.AsyncConnection, node_id: str, directi
         await cur.execute(sql, tuple(params))
         results = await cur.fetchall()
 
-    return [Relationship(**row) for row in results]
+    # Map metadata_jsonb to metadata field for Pydantic model
+    processed_results = []
+    for row in results:
+        rel_data = dict(row) # Copy the dict_row result
+        rel_data['metadata'] = rel_data.pop('metadata_jsonb', {}) or {} # Pop 'metadata_jsonb', provide default {} if None/missing
+        processed_results.append(Relationship(**rel_data))
+    return processed_results
 
 # --- Collection Operations ---
 
@@ -420,7 +426,7 @@ async def add_collection(conn: psycopg.AsyncConnection, name: str) -> int:
         result = await cur.fetchone()
         if result:
             await conn.commit()
-            return result['id']
+            return result[0]
         else:
             await conn.rollback()
             raise RuntimeError("Failed to retrieve ID after collection insert.")

@@ -56,9 +56,13 @@ def make_api_request(method: str, endpoint: str, json_data: Optional[Dict[str, A
         error_console.print(f"Error from server ({e.response.status_code}): {error_detail}")
         raise typer.Exit(code=1)
     except Exception as e:
-        logger.exception(f"Unexpected error calling API endpoint {url}", exc_info=e)
-        error_console.print(f"An unexpected error occurred: {e}")
-        raise typer.Exit(code=1)
+        # Avoid logging/printing generic message if it's a planned exit
+        if not isinstance(e, typer.Exit):
+            logger.exception(f"Unexpected error calling API endpoint {url}", exc_info=e)
+            error_console.print(f"An unexpected error occurred: {e}")
+            raise typer.Exit(code=1) # Re-raise typer.Exit for unexpected errors
+        else:
+            raise # Re-raise the original typer.Exit if it was planned (e.g., from JSONDecodeError)
 
 def display_results(data: Any):
     """Formats and prints data nicely for the console using Rich."""
@@ -165,18 +169,30 @@ def search(
     if year: filters['year'] = year
     if doc_id: filters['doc_id'] = doc_id
 
+    # Prepare parameters for GET request
+    # Prepare JSON payload for POST request
     payload = {"query": query, "limit": limit}
-    if filters: payload['filters'] = filters
+    if filters:
+        payload['filters'] = filters # Send filters as a dictionary object
 
     console.print(f"Searching for '{query}'...")
+    # Use POST request with JSON payload
     response_data = make_api_request("POST", "/search", json_data=payload)
-    if response_data and "results" in response_data:
-        if not response_data["results"]:
+    # The API is expected to return a dict with a 'results' key containing a list
+    if isinstance(response_data, dict) and "results" in response_data and isinstance(response_data["results"], list):
+        results = response_data["results"]
+        if not results:
             console.print("No results found.")
         else:
-            display_results(response_data) # Pass the whole dict for context
+            # Pass the list of results to display_results
+            display_results({"results": results}) # Wrap in dict for display_results
+    elif response_data is None: # Handle case where make_api_request returns None due to error handled internally
+        # Error already printed by make_api_request, just exit
+        pass # typer.Exit already raised in make_api_request
     else:
-        error_console.print("Error: Received unexpected response from search API.")
+        # Log the unexpected response type
+        logger.warning(f"Received unexpected response type from search API: {type(response_data)}")
+        error_console.print(f"Error: Received unexpected response format from search API.")
 
 
 @app.command()
@@ -202,13 +218,13 @@ def show(
         except ValueError:
             error_console.print(f"Error: Invalid Document ID '{item_id}'. Must be an integer.")
             raise typer.Exit(code=1)
-    # Add other item types like 'chunk', 'section' if needed
-    # elif item_type_lower == 'chunk':
-    #     endpoint = f"/chunks/{item_id}" # Assuming this endpoint exists
-    #     response_data = make_api_request("GET", endpoint)
-    #     display_results(response_data)
+    elif item_type_lower == 'chunk':
+        # Assuming chunk IDs are strings, no conversion needed for now
+        endpoint = f"/chunks/{item_id}" # Assuming this endpoint exists
+        response_data = make_api_request("GET", endpoint)
+        display_results(response_data)
     else:
-        error_console.print(f"Error: Unsupported item type: '{item_type}'. Supported types: 'document'.")
+        error_console.print(f"Error: Invalid item type '{item_type}'. Must be 'document' or 'chunk'.")
         raise typer.Exit(code=1)
 
 # Define command groups for better organization
@@ -252,6 +268,7 @@ def collection_list_items(
 def acquire(
     title: Optional[str] = typer.Option(None, "--title", "-t", help="Title of the text to acquire."),
     author: Optional[str] = typer.Option(None, "--author", "-a", help="Author of the text to acquire."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Automatically confirm acquisition if only one option is found."),
     # threshold: Optional[int] = typer.Option(None, "--threshold", help="Minimum citation count to find missing texts (alternative).")
 ):
     """
@@ -279,6 +296,20 @@ def acquire(
                 error_console.print("Error: API returned confirmation status but no options or ID.")
                 raise typer.Exit(code=1)
 
+            # Auto-confirm if --yes is used and only one option exists
+            if yes and len(options) == 1:
+                selected_book = options[0]
+                console.print(f"Found 1 match. Auto-confirming acquisition for: '{selected_book.get('title')}' (--yes used).")
+                # Directly proceed to confirmation API call
+                confirm_payload = {
+                    "acquisition_id": acquisition_id,
+                    "selected_book_details": selected_book
+                }
+                confirm_response = make_api_request("POST", "/acquire/confirm", json_data=confirm_payload)
+                display_results(confirm_response)
+                return # Exit after auto-confirmation
+
+            # If not auto-confirmed, proceed with manual selection
             console.print("\n[bold yellow]Potential matches found. Select a book to acquire (enter number) or 0 to cancel:[/bold yellow]")
             table = Table(show_header=True, header_style="bold magenta")
             table.add_column("#", style="dim", width=3)
@@ -332,3 +363,14 @@ def acquire(
 # --- Main Execution ---
 if __name__ == "__main__":
     app()
+@app.command()
+def status(
+    acquisition_id: str = typer.Argument(..., help="The ID of the acquisition task to check.")
+):
+    """
+    Check the status of a specific acquisition task.
+    """
+    logger.info(f"CLI: Checking status for acquisition ID: {acquisition_id}")
+    endpoint = f"/acquire/status/{acquisition_id}"
+    response_data = make_api_request("GET", endpoint)
+    display_results(response_data)
