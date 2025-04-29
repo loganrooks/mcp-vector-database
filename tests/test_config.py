@@ -75,7 +75,7 @@ def test_get_int_env_variable_no_default_raises_error():
 # --- Tests for get_bool_env_variable ---
 
 @pytest.mark.parametrize("true_val", ['true', '1', 'yes', 'y', 'TRUE', 'YES'])
-@patch.dict(os.environ, {}) # Start clean for each param
+@patch.dict(os.environ, {"DB_PASSWORD": "testpassword"}) # Add required var
 def test_get_bool_env_variable_true_values(true_val):
     """Test retrieving boolean 'true' from various string representations."""
     os.environ["BOOL_VAR"] = true_val
@@ -88,7 +88,7 @@ def test_get_bool_env_variable_true_values(true_val):
     del os.environ["BOOL_VAR"] # Clean up for next param
 
 @pytest.mark.parametrize("false_val", ['false', '0', 'no', 'n', 'FALSE', 'NO'])
-@patch.dict(os.environ, {}) # Start clean for each param
+@patch.dict(os.environ, {"DB_PASSWORD": "testpassword"}) # Add required var
 def test_get_bool_env_variable_false_values(false_val):
     """Test retrieving boolean 'false' from various string representations."""
     os.environ["BOOL_VAR"] = false_val
@@ -97,21 +97,21 @@ def test_get_bool_env_variable_false_values(false_val):
     assert config.get_bool_env_variable("BOOL_VAR", default=True) is False
     del os.environ["BOOL_VAR"] # Clean up for next param
 
-@patch.dict(os.environ, {}, clear=True)
+@patch.dict(os.environ, {"DB_PASSWORD": "testpassword"}, clear=True) # Add required var
 def test_get_bool_env_variable_not_exists_defaults_false():
     """Test retrieving a non-existent bool variable defaults to False."""
     import importlib
     importlib.reload(config)
     assert config.get_bool_env_variable("NON_EXISTENT_BOOL") is False
 
-@patch.dict(os.environ, {"INVALID_BOOL": "maybe"})
+@patch.dict(os.environ, {"INVALID_BOOL": "maybe", "DB_PASSWORD": "testpassword"}) # Add required var
 def test_get_bool_env_variable_invalid_value_defaults_false():
     """Test retrieving an invalid bool variable defaults to False."""
     import importlib
     importlib.reload(config)
     assert config.get_bool_env_variable("INVALID_BOOL", default=False) is False
 
-@patch.dict(os.environ, {"INVALID_BOOL_TRUE_DEFAULT": "maybe"})
+@patch.dict(os.environ, {"INVALID_BOOL_TRUE_DEFAULT": "maybe", "DB_PASSWORD": "testpassword"}) # Add required var
 def test_get_bool_env_variable_invalid_value_uses_explicit_default():
     """Test retrieving an invalid bool variable uses the explicit default (True)."""
     import importlib
