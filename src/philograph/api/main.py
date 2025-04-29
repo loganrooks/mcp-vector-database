@@ -1,8 +1,10 @@
 import logging
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
+from uuid import UUID
 
 import psycopg
+import fastapi # ADDED for explicit status codes
 from fastapi import FastAPI, HTTPException, Body, Path as FastApiPath, Query, status
 from pydantic import BaseModel, Field
 
@@ -84,22 +86,20 @@ class CollectionGetResponse(BaseModel):
     collection_id: int
     items: List[CollectionItem]
 
-class AcquireRequest(BaseModel):
-    text_details: Optional[Dict[str, str]] = None # e.g., {"title": "...", "author": "..."}
-    find_missing_threshold: Optional[int] = Query(default=None, description="Threshold for finding missing texts (alternative to text_details).")
+# Models for the new /acquire initiation flow based on test_acquire_success
+class AcquireInitiateRequest(BaseModel):
+    query: str = Field(..., description="Search query for the text.")
+    search_type: str = Field(default="book_meta", description="Type of search (e.g., 'book_meta', 'full_text').") # Assuming default based on test
+    download: bool = Field(default=True, description="Whether to automatically download if a single exact match is found.")
 
-class AcquireResponseNeedsConfirmation(BaseModel):
-    status: str = "needs_confirmation"
+class AcquireInitiateResponse(BaseModel):
     message: str
-    options: List[Dict[str, Any]] # List of bookDetails from zlibrary-mcp
     acquisition_id: str
 
-class AcquireResponseError(BaseModel):
-    status: str = "error"
-    message: str
+# Models for /acquire/confirm and /acquire/status remain
 
 class AcquireConfirmRequest(BaseModel):
-    acquisition_id: str
+    # acquisition_id is now a path parameter
     selected_book_details: Dict[str, Any] # Full bookDetails object
 
 class AcquireConfirmResponse(BaseModel):
@@ -110,7 +110,7 @@ class AcquireConfirmResponse(BaseModel):
 
 class AcquisitionStatusResponse(BaseModel):
     status: str
-    details: Optional[Dict[str, str]] = None
+    details: Optional[Dict[str, Any]] = None # Allow any type in details dict
     selected_book: Optional[Dict[str, Any]] = None
     error_message: Optional[str] = None
     processed_path: Optional[str] = None
@@ -126,12 +126,12 @@ async def lifespan(app: FastAPI):
     await db_layer.get_db_pool() # Initialize DB pool
     http_client.get_async_client() # Initialize HTTP client
     # Initialize schema if needed (optional, might be done via separate script/migration tool)
-    # try:
-    #     async with db_layer.get_db_connection() as conn:
-    #         await db_layer.initialize_schema(conn)
-    # except Exception as e:
-    #     logger.error(f"Failed to initialize database schema during startup: {e}")
-    #     # Decide if startup should fail or continue
+    try:
+        async with db_layer.get_db_connection() as conn:
+            await db_layer.initialize_schema(conn)
+    except Exception as e:
+        logger.error(f"Failed to initialize database schema during startup: {e}")
+        # Decide if startup should fail or continue - For now, let it continue but log error
     yield
     # Shutdown: Cleanup resources
     logger.info("FastAPI application shutdown...")
@@ -149,6 +149,10 @@ app = FastAPI(
 
 # --- API Endpoints ---
 
+@app.get("/", status_code=status.HTTP_200_OK)
+async def read_root():
+    """Basic health check endpoint."""
+    return {"message": "PhiloGraph API is running"}
 @app.post("/ingest", response_model=IngestResponse, status_code=status.HTTP_202_ACCEPTED)
 async def handle_ingest_request(request: IngestRequest):
     """
@@ -167,29 +171,51 @@ async def handle_ingest_request(request: IngestRequest):
         # For Tier 0, run synchronously and wait for the result
         # In Tier 1+, this would likely enqueue a background task
         result = await ingestion_pipeline.process_document(request.path)
+        logger.info(f"Pipeline result for {request.path}: {result}") # ADDED LOGGING
 
-        if result["status"] == "Success":
-             # Return 201 Created if a single doc was successfully added
-             # Changed status code to 200 OK as 201 might imply resource creation *at this endpoint*
-             return IngestResponse(status=result["status"], message=result.get("message", "Ingestion successful"), document_id=result.get("document_id"))
-        elif result["status"] == "Skipped":
+        # Use .get() for safety in case 'status' key is missing
+        result_status = result.get("status") # Renamed variable
+        if result_status == "Success":
+             # Return 200 OK (previously 201)
+             return IngestResponse(status=result_status, message=result.get("message", "Ingestion successful"), document_id=result.get("document_id"))
+        elif result_status == "Skipped":
              # Return 200 OK if skipped
-             return IngestResponse(status=result["status"], message=result.get("message", "Document already exists"))
-        elif result["status"] == "Directory Processed":
+             return IngestResponse(status=result_status, message=result.get("message", "Document already exists"))
+        elif result_status == "Directory Processed":
              # Return 200 OK for directory summary
-             return IngestResponse(status=result["status"], message=result.get("message"), details=result.get("details"))
-        else: # Error case
-             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.get("message", "Ingestion failed"))
+             return IngestResponse(status=result_status, message=result.get("message"), details=result.get("details"))
+        elif result_status == "Error": # Explicitly check for Error status using renamed variable
+            error_message = result.get("message", "Ingestion failed")
+            logger.warning(f"Pipeline returned error status for {request.path}. Message: {error_message}") # ADDED LOGGING
+            # More robust check for "not found" case-insensitively
+            if "not found" in error_message.lower():
+                logger.warning(f"Ingestion source not found for {request.path}: {error_message}")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingestion source file not found") # Standardized detail
+            else:
+                logger.error(f"Ingestion pipeline returned error for {request.path}: {error_message}")
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_message)
+        else: # Catch unexpected status from pipeline
+             logger.error(f"Unexpected status from ingestion pipeline for {request.path}. Full result: {result}") # ADDED LOGGING
+             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unexpected status from ingestion pipeline.")
 
     except ValueError as ve: # e.g., invalid path from pipeline
-        logger.error(f"Value error during ingestion for {request.path}: {ve}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+        logger.error(f"Caught ValueError during ingestion for {request.path}: {ve}", exc_info=True) # ADDED LOGGING + exc_info
+        # More robust check for "not found" case-insensitively
+        if "not found" in str(ve).lower():
+             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingestion source file not found") # Standardized detail
+        else:
+             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
     except RuntimeError as rte: # Catch errors raised by pipeline (embedding, db etc.)
-        logger.error(f"Runtime error during ingestion for {request.path}: {rte}")
+        logger.error(f"Caught RuntimeError during ingestion for {request.path}: {rte}", exc_info=True) # ADDED LOGGING + exc_info
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(rte))
     except Exception as e:
-        logger.exception(f"Unexpected error during ingestion for {request.path}", exc_info=e)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred during ingestion.")
+        # Log the specific exception type as well
+        logger.exception(f"Caught unexpected {type(e).__name__} during ingestion for {request.path}", exc_info=e) # MODIFIED LOGGING
+        # Check if it's an HTTPException we already raised (like the 404) and re-raise it
+        if isinstance(e, HTTPException):
+            raise e
+        # Otherwise, raise the generic 500, fixing the status code reference
+        raise HTTPException(status_code=fastapi.status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred during ingestion.")
 
 # (Remaining endpoints will be added in the next step)
 @app.post("/search", response_model=SearchResponse)
@@ -204,7 +230,7 @@ async def handle_search_request(request: SearchRequest):
     # TDD: Test handling of errors from search_service (e.g., embedding failure)
     logger.info(f"Received search request: query='{request.query[:50]}...', filters={request.filters}, limit={request.limit}")
     try:
-        filters_dict = request.filters.dict(exclude_none=True) if request.filters else None
+        filters_dict = request.filters.model_dump(exclude_none=True) if request.filters else None
         results = await search_service.perform_search(
             query_text=request.query,
             top_k=request.limit,
@@ -288,6 +314,12 @@ async def add_collection_item(
         # Determine if it was collection_id or item_id that failed
         # This might require querying if the collection exists first, or better error parsing
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection or item not found.")
+    except psycopg.errors.UniqueViolation as uv_error:
+        logger.warning(f"Unique constraint violation adding item to collection {collection_id}: {uv_error}")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"{request.item_type.capitalize()} ID {request.item_id} already exists in collection ID {collection_id}."
+        )
     except ValueError as ve: # Catch invalid item_type from db_layer if validation added there
          logger.warning(f"Invalid item type provided: {ve}")
          raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
@@ -295,6 +327,35 @@ async def add_collection_item(
         logger.exception(f"Error adding item to collection {collection_id}", exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error adding item to collection.")
 
+class CollectionItemDetail(BaseModel):
+    item_type: str
+    item_id: int
+    added_at: str # Assuming DB returns string representation
+
+@app.get("/collections/{collection_id}", response_model=List[CollectionItemDetail], status_code=status.HTTP_200_OK)
+async def get_collection(
+    collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to retrieve.")
+):
+    """Retrieves the items within a specific collection."""
+    # TDD: Test retrieving items from an existing collection
+    # TDD: Test retrieving items from an empty collection
+    # TDD: Test retrieving items from a non-existent collection ID (should it be 404 or empty list?) - Assuming empty list for now based on db_layer behavior
+    logger.info(f"Getting items for collection {collection_id}")
+    try:
+        async with db_layer.get_db_connection() as conn:
+            items = await db_layer.get_collection_items(conn, collection_id)
+            # The db_layer function is expected to return a list of dicts matching CollectionItemDetail
+            if not items:
+                # Raise 404 if the collection is empty (implying it doesn't exist or has no items)
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found.")
+            return items
+    except HTTPException as http_exc:
+        # Re-raise HTTPException to let FastAPI handle it correctly
+        raise http_exc
+    except Exception as e:
+        logger.exception(f"Error getting items for collection {collection_id}", exc_info=e)
+        # Consider specific exceptions if db_layer raises them
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving collection items.")
 
 @app.get("/collections/{collection_id}", response_model=CollectionGetResponse)
 async def get_collection(collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to retrieve.")):
@@ -315,54 +376,29 @@ async def get_collection(collection_id: int = FastApiPath(..., gt=0, description
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving collection.")
 
 
-@app.post("/acquire",
-          response_model=AcquireResponseNeedsConfirmation | AcquireResponseError, # Union for multiple responses
-          responses={ # Define possible responses for OpenAPI docs
-              status.HTTP_200_OK: {"model": AcquireResponseNeedsConfirmation},
-              status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": AcquireResponseError},
-              status.HTTP_400_BAD_REQUEST: {"model": AcquireResponseError}
-          })
-async def handle_acquire_request(request: AcquireRequest):
+@app.post("/acquire", response_model=AcquireInitiateResponse, status_code=status.HTTP_202_ACCEPTED)
+async def initiate_acquisition_endpoint(request: AcquireInitiateRequest):
     """
-    Starts the text acquisition process.
-    Either provide `text_details` to search for a specific text,
-    or provide `find_missing_threshold` to search for frequently cited missing texts.
+    Initiates the text acquisition process by searching for a text.
+    (Minimal implementation for TDD Green phase)
     """
-    # TDD: Test triggering acquisition with valid text details -> needs_confirmation
-    # TDD: Test triggering acquisition with threshold -> needs_confirmation or error
-    # TDD: Test request missing required details returns 400/422
-    # TDD: Test handling errors from the text_acquisition service
-    logger.info(f"Received acquisition request: {request.dict(exclude_none=True)}")
-
-    if request.text_details:
-        try:
-            result = await acquisition_service.start_acquisition_search(request.text_details)
-            if result["status"] == "needs_confirmation":
-                return AcquireResponseNeedsConfirmation(**result)
-            else: # status == "error"
-                # Return 500 for now, could refine based on error type
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.get("message", "Acquisition search failed"))
-        except Exception as e:
-             logger.exception("Unexpected error during specific text acquisition search", exc_info=e)
-             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error: {e}")
-
-    elif request.find_missing_threshold is not None:
-        # Placeholder: Logic to find missing texts based on threshold and then call start_acquisition_search
-        # This requires the find_missing_texts_from_citations function to be implemented
-        logger.warning("Finding missing texts by threshold not fully implemented yet.")
-        # Example:
-        # missing_texts = await acquisition_service.find_missing_texts_from_citations(request.find_missing_threshold)
-        # if not missing_texts:
-        #     return AcquireResponseError(status="error", message="No missing texts found above threshold.")
-        # # How to handle multiple missing texts? Trigger one search? Return list?
-        # # For now, just return error indicating not implemented
-        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Finding missing texts by threshold not implemented.")
-    else:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Either 'text_details' or 'find_missing_threshold' must be provided.")
+    logger.info(f"Received acquisition initiation request: query='{request.query}', type='{request.search_type}', download={request.download}")
+    try:
+        # Call the acquisition service function (mocked in the test)
+        acq_id = await acquisition_service.initiate_acquisition(
+            query=request.query,
+            search_type=request.search_type,
+            download=request.download
+        )
+        return AcquireInitiateResponse(message="Acquisition initiated.", acquisition_id=acq_id)
+    except Exception as e:
+        # Basic error handling for now
+        logger.exception(f"Error initiating acquisition for query: {request.query}", exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to initiate acquisition: {e}")
 
 
-@app.post("/acquire/confirm", response_model=AcquireConfirmResponse)
-async def handle_acquire_confirm(request: AcquireConfirmRequest):
+@app.post("/acquire/confirm/{acquisition_id}", response_model=AcquireConfirmResponse) # Added path parameter
+async def handle_acquire_confirm(acquisition_id: UUID, request: AcquireConfirmRequest): # Added path parameter to signature
     """
     Confirms the selection of a book for download and triggers the download/processing/ingestion.
     """
@@ -370,31 +406,35 @@ async def handle_acquire_confirm(request: AcquireConfirmRequest):
     # TDD: Test confirming with invalid acquisition_id returns 404
     # TDD: Test response indicating download/processing started/completed
     # TDD: Test handling errors from text_acquisition service during confirmation/download trigger
-    logger.info(f"Received acquisition confirmation for ID: {request.acquisition_id}")
+    logger.info(f"Received acquisition confirmation for ID: {acquisition_id}") # Use path parameter
     try:
         result = await acquisition_service.confirm_and_trigger_download(
-            request.acquisition_id, request.selected_book_details
+            acquisition_id, request.selected_book_details # Use path parameter
         )
 
         if result["status"] == "complete":
              return AcquireConfirmResponse(**result)
         elif result["status"] == "error":
              raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.get("message", "Confirmation or processing failed"))
-        elif result["status"] == "not_found":
+        elif result["status"] == "not_found": # Note: Service might return this status OR raise ValueError
              raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=result.get("message", "Acquisition ID not found"))
         else: # Should not happen if service logic is correct
              logger.error(f"Unexpected status from confirm_and_trigger_download: {result.get('status')}")
              raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unexpected status during confirmation.")
+    except ValueError as e: # Catch ValueError for not found case
+        logger.warning(f"Acquisition task not found for ID {acquisition_id}: {e}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
     except HTTPException:
         raise # Re-raise HTTP exceptions
     except Exception as e:
-        logger.exception(f"Unexpected error during acquisition confirmation for ID: {request.acquisition_id}", exc_info=e)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error: {e}")
+        logger.exception(f"Unexpected error during acquisition confirmation for ID: {acquisition_id}", exc_info=e) # Use path parameter
+        # Align detail message with test expectation
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to confirm acquisition: {e}")
 
 
 @app.get("/acquire/status/{acquisition_id}", response_model=Optional[AcquisitionStatusResponse])
-async def get_acquisition_status(acquisition_id: str = FastApiPath(..., description="ID of the acquisition process.")):
+async def get_acquisition_status(acquisition_id: UUID = FastApiPath(..., description="ID of the acquisition process.")): # Changed type hint to UUID
     """
     Retrieves the current status of an acquisition process (uses in-memory store for Tier 0).
     """

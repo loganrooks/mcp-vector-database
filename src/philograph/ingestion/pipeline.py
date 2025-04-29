@@ -58,7 +58,7 @@ async def get_embeddings_in_batches(
                 timeout=120.0 # Increased timeout for potentially large batches
             )
             response.raise_for_status() # Check for HTTP errors
-            response_data = response.json()
+            response_data = await response.json() # Await the coroutine
 
             if 'data' not in response_data or len(response_data['data']) != len(chunk_texts):
                 logger.error(f"Mismatch between requested ({len(chunk_texts)}) and received embeddings ({len(response_data.get('data', []))}) in batch {batch_num}. Response: {response_data}")
@@ -141,13 +141,22 @@ async def process_document(file_path_relative: str) -> Dict[str, Any]:
     try:
         # Ensure the relative path doesn't try to escape the source dir
         # Note: config.SOURCE_FILE_DIR_ABSOLUTE is already resolved
-        full_path = (config.SOURCE_FILE_DIR_ABSOLUTE / file_path_relative).resolve()
+        # .resolve(strict=True) will raise FileNotFoundError if path doesn't exist
+        full_path = (config.SOURCE_FILE_DIR_ABSOLUTE / file_path_relative).resolve(strict=True)
+        # Path traversal check (redundant if resolve(strict=True) works as expected, but keep for safety)
         if config.SOURCE_FILE_DIR_ABSOLUTE not in full_path.parents and full_path != config.SOURCE_FILE_DIR_ABSOLUTE:
              logger.error(f"Attempted path traversal: {file_path_relative}")
-             return {"status": "Error", "message": "Invalid path"}
+             # This case should ideally not be reached if resolve(strict=True) is used
+             return {"status": "Error", "message": "Invalid path (traversal attempt)"}
+    except FileNotFoundError:
+         # This is the expected exception if the path doesn't exist
+         logger.warning(f"Path not found during resolution: {file_path_relative}")
+         # Return the standard "not found" message for the API handler
+         return {"status": "Error", "message": "File or directory not found"}
     except Exception as path_e:
+         # Catch other potential path errors (e.g., permission denied, invalid characters)
          logger.error(f"Error resolving path '{file_path_relative}': {path_e}")
-         return {"status": "Error", "message": "Invalid path format"}
+         return {"status": "Error", "message": f"Invalid path or access error: {path_e}"}
 
 
     if file_utils.check_directory_exists(full_path):
@@ -316,13 +325,16 @@ async def _process_single_file(file_path_relative: Path) -> Dict[str, Any]:
                                 try:
                                     await db_layer.add_reference(conn, link_chunk_id, ref_details)
                                 except Exception as ref_e:
-                                     logger.warning(f"Failed to add parsed reference to DB for doc {doc_id}: {ref_e}", exc_info=True)
-                            logger.info(f"Stored {len(parsed_references)} parsed reference details for doc {doc_id}.")
+                                     # logger.warning(f"Failed to add parsed reference to DB for doc {doc_id}: {ref_e}", exc_info=True)
+                                     # Re-raise to fail the transaction
+                                     raise RuntimeError(f"DB reference insert failed: {ref_e}") from ref_e
+                            # logger.info(f"Stored {len(parsed_references)} parsed reference details for doc {doc_id}.") # This won't be reached if an error occurs
                         else:
                              logger.warning(f"Could not find a chunk to link references to for doc {doc_id}.")
             except Exception as e:
-                logger.warning(f"Reference parsing/storing failed for doc {doc_id}: {e}", exc_info=True)
-                # Non-critical failure for Tier 0, continue processing
+                # logger.warning(f"Reference parsing/storing failed for doc {doc_id}: {e}", exc_info=True)
+                # Re-raise to fail the transaction
+                raise RuntimeError(f"Reference parsing/storing failed: {e}") from e
 
             # --- Transaction Commit ---
             # If we reach here without exceptions, the context manager commits implicitly
