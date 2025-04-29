@@ -1,3 +1,12 @@
+### Early Return - Context Limit Reached - [2025-04-28 20:30:58]
+- **Trigger**: Context size reached 51% after completing TDD cycles for `db_layer` utility functions and connection management (`format_vector_for_pgvector`, `json_serialize`, `get_db_pool`, `get_db_connection`, `close_db_pool`).
+- **Context**: Successfully added and passed tests for utility functions and connection management in `tests/data_access/test_db_layer.py`. Fixed issues related to mocking `AsyncConnectionPool` (`TypeError: unexpected keyword argument 'row_factory'`, `AttributeError: 'coroutine' object has no attribute 'connection'`) and stray assertions (`NameError`). Resolved the historical `test_get_db_pool_failure` issue (Issue-ID: TDD-DBPOOL-FAIL-20250428) by applying the correct mocking strategy and fixing the source code (`db_pool` not reset on exception). All 15 tests related to these functions are passing.
+- **Issue**: Context size (51%) exceeds the recommended threshold (40-50%), risking degraded performance and potential errors before starting the more complex CRUD operation tests.
+- **Attempts**: N/A (Proactive return based on context size).
+- **Analysis**: Task involves multiple TDD cycles for a complex module, gradually increasing context. Reached limit before testing CRUD and search operations.
+- **Self-Correction**: Following protocol to invoke Early Return when context limit is reached.
+- **Context %**: 51%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/data_access/db_layer.py`, focusing on the CRUD and search operations (e.g., `add_document`, `get_document_by_id`, `add_chunk`, `vector_search_chunks`, etc.). Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover.
 ### User Intervention - Insufficient Detail in Early Return Completion - [2025-04-28 18:43:12]
 - **Trigger**: User denied `attempt_completion` for Early Return.
 - **Context**: Invoked Early Return due to context limit (53%) after committing code and memory bank changes. The `attempt_completion` message lacked detail.
