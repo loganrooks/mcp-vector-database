@@ -1,6 +1,89 @@
 # TDD Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Test Execution: Unit (`test_db_layer.py::close_db_pool`) - [2025-04-28 20:30:58]
+- **Trigger**: Manual run after fixing test code (`test_close_db_pool_no_pool`).
+- **Outcome**: PASS / **Summary**: 2 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed `close_db_pool` works correctly when pool exists and when it's None.
+
+### TDD Cycle: `close_db_pool` - [2025-04-28 20:30:58]
+- **Red**: Wrote `test_close_db_pool_closes_existing_pool` and `test_close_db_pool_no_pool`. Second test failed (`NameError` due to leftover assertion).
+- **Green**: Removed erroneous assertion from `test_close_db_pool_no_pool`. Tests passed.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/data_access/test_db_layer.py`
+- **Outcome**: Cycle completed. `close_db_pool` tested.
+
+### Test Execution: Unit (`test_db_layer.py::get_db_connection`) - [2025-04-28 20:26:31]
+- **Trigger**: Manual run after adding tests.
+- **Outcome**: PASS / **Summary**: 3 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed `get_db_connection` context manager yields connection and propagates errors correctly.
+
+### TDD Cycle: `get_db_connection` - [2025-04-28 20:26:31]
+- **Red**: Wrote `test_get_db_connection_success`, `test_get_db_connection_pool_error`, `test_get_db_connection_psycopg_error`.
+- **Green**: Tests passed immediately against existing implementation.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/data_access/test_db_layer.py`
+- **Outcome**: Cycle completed. `get_db_connection` tested.
+
+### Test Execution: Unit (`test_db_layer.py::test_get_db_pool_failure`) - [2025-04-28 20:25:28]
+- **Trigger**: Manual run after fixing source code (`db_layer.py`).
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed fix for `get_db_pool` failure case (resetting global `db_pool` on exception). [Ref: Issue-ID: TDD-DBPOOL-FAIL-20250428]
+
+### TDD Cycle: `get_db_pool` (Failure Case) - [2025-04-28 20:25:28]
+- **Red**: Wrote `test_get_db_pool_failure` using previously successful mocking strategy. Test failed (`AssertionError: assert <Mock> is None`).
+- **Green**: Modified `get_db_pool` in `src/philograph/data_access/db_layer.py` to set `db_pool = None` in the `except` block. Test passed.
+- **Refactor**: N/A.
+- **Files Changed**: `src/philograph/data_access/db_layer.py`, `tests/data_access/test_db_layer.py`
+- **Outcome**: Cycle completed. `get_db_pool` failure case tested and fixed. [Ref: Issue-ID: TDD-DBPOOL-FAIL-20250428]
+
+### Test Execution: Unit (`test_db_layer.py::get_db_pool`) - [2025-04-28 20:21:53]
+- **Trigger**: Manual run after fixing test code (patch decorator and stray assertion).
+- **Outcome**: PASS / **Summary**: 2 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed `get_db_pool` success and memoization tests pass after fixing mocks.
+
+### TDD Cycle: `get_db_pool` (Success & Memoization) - [2025-04-28 20:21:53]
+- **Red**: Wrote `test_get_db_pool_success_first_call` and `test_get_db_pool_returns_existing_pool`. Tests failed (`AttributeError: 'coroutine' object has no attribute 'connection'`).
+- **Green**: Changed `@patch` decorator from `new_callable=AsyncMock` to `new_callable=MagicMock`. Tests failed again (`NameError` from stray assertion). Removed stray assertion. Tests passed.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/data_access/test_db_layer.py`
+- **Outcome**: Cycle completed. `get_db_pool` success and memoization tested.
+
+### Test Execution: Unit (`test_db_layer.py::json_serialize`) - [2025-04-28 19:57:11]
+- **Trigger**: Manual run after adding tests.
+- **Outcome**: PASS / **Summary**: 3 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Tests passed immediately against existing implementation.
+
+### TDD Cycle: `json_serialize` - [2025-04-28 19:57:11]
+- **Red**: Wrote `test_json_serialize_valid_dict`, `test_json_serialize_none`, `test_json_serialize_empty_dict`.
+- **Green**: Tests passed immediately against existing implementation.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/data_access/test_db_layer.py`
+- **Outcome**: Cycle completed. `json_serialize` tested.
+
+### Test Execution: Unit (`test_db_layer.py::format_vector_for_pgvector`) - [2025-04-28 19:44:51]
+- **Trigger**: Manual run after fixing assertion in `test_format_vector_for_pgvector_valid`.
+- **Outcome**: PASS / **Summary**: 4 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed `format_vector_for_pgvector` tests pass.
+
+### TDD Cycle: `format_vector_for_pgvector` - [2025-04-28 19:44:51]
+- **Red**: Wrote tests `test_format_vector_for_pgvector_valid` (intentionally failing assertion), `test_format_vector_for_pgvector_empty`, `test_format_vector_for_pgvector_invalid_type`, `test_format_vector_for_pgvector_not_a_list`. First test failed as expected, others passed.
+- **Green**: Corrected assertion in `test_format_vector_for_pgvector_valid`. All tests passed.
+- **Refactor**: N/A.
+- **Files Changed**: `tests/data_access/test_db_layer.py`
+- **Outcome**: Cycle completed. `format_vector_for_pgvector` tested.
 ### Test Execution: Unit (`test_text_processing.py`) - [2025-04-28 19:00:00]
 - **Trigger**: Final run after completing TDD cycles for `parse_references` and `call_anystyle_parser`.
 - **Outcome**: PASS / **Summary**: 22 passed, 1 skipped
