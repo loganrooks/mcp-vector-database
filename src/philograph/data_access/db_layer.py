@@ -72,9 +72,8 @@ async def get_db_pool() -> AsyncConnectionPool:
                 conninfo=config.ASYNC_DATABASE_URL,
                 min_size=1,
                 max_size=10, # Adjust pool size as needed
-                open=True, # Open pool immediately
-                # Use dict_row factory for easier access to results
-                row_factory=dict_row
+                open=True # Open pool immediately
+                # row_factory=dict_row # Removed: Apply row_factory at cursor level if needed
             )
             # Test connection
             async with db_pool.connection() as conn:
@@ -83,6 +82,7 @@ async def get_db_pool() -> AsyncConnectionPool:
                     logger.info("Database connection pool initialized successfully.")
         except psycopg.Error as e:
             logger.exception("Failed to initialize database connection pool.", exc_info=e)
+            db_pool = None # Ensure pool is None if initialization fails
             raise ConnectionError("Database connection pool initialization failed") from e
     return db_pool
 
