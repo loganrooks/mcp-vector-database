@@ -1,4 +1,6 @@
 import logging
+import json
+import psycopg
 from typing import Any, Dict, List, Optional
 
 import httpx # For potential errors from http_client
@@ -35,9 +37,18 @@ async def get_query_embedding(text: str) -> List[float]:
             timeout=30.0 # Reasonable timeout for a single query embedding
         )
         response.raise_for_status() # Check for HTTP errors
-        response_data = response.json()
+        # Log raw response before attempting to parse JSON
+        logger.debug(f"LiteLLM raw response status: {response.status_code}")
+        logger.debug(f"LiteLLM raw response text: {response.text}")
 
-        if 'data' not in response_data or len(response_data['data']) != 1 or 'embedding' not in response_data['data'][0]:
+        try:
+            response_data = response.json()
+            logger.debug(f"LiteLLM JSON response data: {response_data}") # Log parsed JSON
+        except json.JSONDecodeError as json_err:
+            logger.error(f"Failed to decode JSON response from LiteLLM: {json_err}", exc_info=True)
+            raise RuntimeError("Embedding generation failed (JSON Decode Error)") from json_err
+
+        if 'data' not in response_data or not isinstance(response_data['data'], list) or len(response_data['data']) != 1 or 'embedding' not in response_data['data'][0]:
             logger.error(f"Unexpected response format from LiteLLM embedding endpoint: {response_data}")
             raise ValueError("Invalid response format received from embedding service")
 
@@ -51,13 +62,13 @@ async def get_query_embedding(text: str) -> List[float]:
         return embedding
 
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error fetching query embedding: {e.response.status_code} - {e.response.text}")
+        logger.error(f"HTTP error fetching query embedding: {e.response.status_code} - {e.response.text}", exc_info=True)
         raise RuntimeError(f"Embedding generation failed (HTTP {e.response.status_code})") from e
     except httpx.RequestError as e:
-        logger.error(f"Request error fetching query embedding: {e}")
+        logger.error(f"Request error fetching query embedding: {e}", exc_info=True)
         raise RuntimeError("Embedding generation failed (Request Error)") from e
-    except (ValueError, KeyError, json.JSONDecodeError) as e:
-         logger.error(f"Error processing query embedding response: {e}. Response: {response.text if 'response' in locals() else 'N/A'}")
+    except (ValueError, KeyError) as e: # JSONDecodeError is handled within the try block now
+         logger.error(f"Error processing query embedding response: {e}. Response: {response.text if 'response' in locals() else 'N/A'}", exc_info=True)
          raise RuntimeError("Embedding generation failed (Processing Error)") from e
     except Exception as e:
         logger.exception("Unexpected error fetching query embedding", exc_info=e)

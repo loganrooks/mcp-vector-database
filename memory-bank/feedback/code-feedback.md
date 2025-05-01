@@ -1,6 +1,21 @@
 # Code Mode Feedback Log
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-05-01 15:46:53] Fix: Correct Syntax Errors in Search Service
+- **Trigger**: Task handover from SPARC to fix syntax errors introduced during Debug session [Ref: Debug Feedback 2025-05-01 15:43:00].
+- **Context**: Syntax errors (indentation, try/except structure) around line 40 in `src/philograph/search/service.py` prevented further debugging of [Ref: Issue-ID: CLI-API-500-ERRORS].
+- **Action Taken**:
+    - Added missing `json` and `psycopg` imports.
+    - Used `apply_diff` to restructure the `try...except` block in `get_query_embedding`:
+        - Removed duplicate `response.json()` call.
+        - Moved logging statements inside the main `try` block before `response.json()`.
+        - Handled `json.JSONDecodeError` specifically within the `try` block.
+        - Corrected indentation of subsequent code and `except` blocks.
+        - Added `exc_info=True` to logger calls in except blocks for better debugging.
+        - Refined response format validation check (`isinstance(response_data['data'], list)`).
+- **Rationale**: Correcting syntax errors introduced by previous `insert_content` operation and improving error handling/logging structure.
+- **Outcome**: Syntax errors in `src/philograph/search/service.py` resolved. File parses correctly.
+- **Follow-up**: Update MB, commit changes, recommend TDD run for verification and continued debugging.
 ### [2025-04-29 04:18:51] Intervention: Fix Syntax Errors after TDD Early Return
 - **Trigger**: Task handover from TDD mode due to Early Return and persistent syntax errors [Ref: TDD Feedback 2025-04-29 04:17:00].
 - **Context**: Syntax errors (stray parenthesis, duplicate line) around line 597 in `tests/cli/test_main.py` introduced by failed tool use (`insert_content`/`apply_diff`) during TDD.
