@@ -8,8 +8,15 @@ ENV PYTHONUNBUFFERED 1
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies if needed (e.g., for psycopg binary)
-# RUN apt-get update && apt-get install -y --no-install-recommends some-package && rm -rf /var/lib/apt/lists/*
+# Install system dependencies needed for compiling psycopg (if needed) and other potential packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    build-essential \
+    iputils-ping \
+    telnet \
+    netcat-openbsd \
+    strace \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 # Copy only requirements first to leverage Docker cache

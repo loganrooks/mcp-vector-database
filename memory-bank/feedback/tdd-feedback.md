@@ -1,3 +1,33 @@
+### Early Return - Persistent SIGKILL Blocker &amp; Context Limit - [2025-04-30 07:15:15]
+- **Trigger**: Third consecutive `execute_command` attempt to run `pytest` within the `philograph-backend` container terminated with `SIGKILL` (signal 9), even when targeting a single test. Context size reached 41%.
+- **Context**: Task was to verify fixes applied by `debug` mode (fixture scope change, 2GB memory limit) intended to resolve previous `SIGKILL` errors during `pytest` execution.
+- **Issue**: The `SIGKILL` error persists despite the applied fixes and increased memory limit. The error occurs even when running a single test (`tests/api/test_main.py::test_get_document_success`), strongly suggesting the OOM condition happens during the initial pytest setup or the module-scoped fixture initialization (`test_client`), which loads the FastAPI application (`src/philograph/api/main.py`).
+- **Attempts**:
+    1. Ran `pytest -v -x tests/api/test_main.py` after `debug` mode increased memory limit to 2GB. Result: `SIGKILL` after 14 tests.
+    2. Ran `pytest -v -x tests/api/test_main.py::test_get_document_success` (single test). Result: `SIGKILL` during test setup.
+- **Analysis**: The root cause is highly likely excessive memory consumption (>2GB) during the FastAPI application startup process itself, triggered by the `test_client` fixture. This prevents any tests in `tests/api/test_main.py` from running successfully. The "Three Strikes" rule for the `execute_command` tool is triggered.
+- **Self-Correction**: Following "Three Strikes" rule and `error_handling_protocol`. Aborting further `pytest` attempts. Invoking Early Return due to intractable blocker and context limit approaching.
+- **Context %**: 41% (Manually calculated: 412,638 / 1,000,000)
+- **Recommendation**: Invoke Early Return. Delegate to `debug` mode via `new_task` to investigate the root cause of the excessive memory consumption during the FastAPI application (`src/philograph/api/main.py`) initialization within the `philograph-backend` container. Investigation should focus on:
+    - Profiling memory usage during app startup (if tools are available in the container).
+    - Examining `src/philograph/api/main.py` and its dependencies for potentially large resource loading (e.g., models, data caches) or inefficient initialization code.
+    - Considering further increasing the container memory limit (e.g., `4g`) in `docker-compose.yml` as a potential temporary workaround or diagnostic step.
+    Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`). [Ref: Previous Feedback 2025-04-29 16:31:45]
+### Blocker &amp; Early Return - Repeated SIGKILL during Pytest Execution - [2025-04-29 16:31:45]
+- **Trigger**: Two consecutive `execute_command` attempts to run `pytest` within the `philograph-backend` container terminated with `SIGKILL` (signal 9).
+- **Context**: Task was to run the full test suite (`pytest`) to assess API status after GCP credential configuration. Docker services were confirmed running.
+- **Issue**:
+    - First attempt (`docker compose exec philograph-backend pytest`) was killed during `tests/api/test_main.py`.
+    - Second attempt (`docker compose exec philograph-backend pytest -v -x tests/api/test_main.py`) was killed almost immediately, before printing test session details.
+- **Attempts**:
+    1. Ran full `pytest` suite. Result: `SIGKILL`.
+    2. Ran `pytest -v -x` targeting `tests/api/test_main.py`. Result: `SIGKILL`.
+- **Analysis**: The repeated, early `SIGKILL` strongly suggests an Out-of-Memory (OOM) condition within the `philograph-backend` container during `pytest` startup or fixture initialization, particularly for `tests/api/test_main.py`. This might be related to the recent environment changes (GCP credentials) triggering unexpected resource consumption during test setup. Previous test runs completed [Ref: TDD Feedback 2025-04-29 11:30:13], making this a new, critical blocker.
+- **Self-Correction**: Following "Three Strikes" rule (2 strikes) and `error_handling_protocol`. Aborting further `pytest` attempts. Invoking Early Return.
+- **Context %**: ~12%
+- **Recommendation**: Invoke Early Return. Delegate to `debug` mode via `new_task` to investigate the root cause of the `SIGKILL` errors during `pytest` execution in the `philograph-backend` container. Investigation should focus on memory usage during test setup, particularly for `tests/api/test_main.py`, and potential interactions with the new environment configuration. Provide link to this feedback entry. [Ref: Original Task 2025-04-29 16:29:46]
+
+---
 ### Early Return - Multiple Unexpected Test Failures (Regression Check) - [2025-04-29 11:30:13]
 - **Trigger**: Full test suite run (`docker compose exec philograph-backend pytest`) after resolving filename conflict (`tests/cli/test_cli_main.py`) resulted in 25 failures and 1 error.
 - **Context**: Task was to run regression tests after `/ingest` 404 fix [Ref: Debug Completion 2025-04-29 11:25:29], verify the fix, adapt `test_ingest_success`, and ensure all tests pass.

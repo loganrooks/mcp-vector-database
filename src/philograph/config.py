@@ -95,7 +95,8 @@ DB_PASSWORD = get_env_variable("DB_PASSWORD") # No default for password
 DB_NAME = get_env_variable("DB_NAME", "philograph_db")
 DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 # Async version for psycopg pool
-ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}" # Using hostname
+# ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@172.20.0.2:{DB_PORT}/{DB_NAME}" # Using explicit IP - REVERTED
 
 # --- Backend API Settings ---
 BACKEND_HOST = get_env_variable("BACKEND_HOST", "0.0.0.0")

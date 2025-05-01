@@ -1,3 +1,14 @@
+### Test Execution: Regression Verification (`tests/api/test_main.py::test_get_document_success`) - [2025-04-30 07:14:58]
+- **Trigger**: Manual run targeting single test after previous SIGKILL.
+- **Outcome**: FAIL / **Summary**: 0 passed, 1 error (SIGKILL)
+- **Failed Tests**: `tests/api/test_main.py::test_get_document_success` (Terminated by SIGKILL)
+- **Notes**: Confirmed SIGKILL occurs even when running only one test, pointing to fixture/app initialization OOM.
+
+### Test Execution: Regression Verification (`tests/api/test_main.py`) - [2025-04-30 07:14:23]
+- **Trigger**: Manual run after `debug` mode increased container memory limit to 2GB.
+- **Outcome**: FAIL / **Summary**: 14 passed, 1 error (SIGKILL)
+- **Failed Tests**: `tests/api/test_main.py::test_get_document_success` (Terminated by SIGKILL after this test passed)
+- **Notes**: Increased memory limit (2GB) was insufficient to prevent OOM SIGKILL.
 ### Test Execution: Unit (`tests/cli/test_main.py::test_status_invalid_id`) - [2025-04-29 04:48:39]
 - **Trigger**: Manual run after modifying test to expect API error handling via `make_api_request`.
 - **Outcome**: PASS / **Summary**: 1 passed (32 total passed, 6 failed due to backend issues)

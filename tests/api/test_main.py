@@ -14,7 +14,7 @@ from httpx import ASGITransport # Import ASGITransport
 
 from philograph.api.main import app
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="module")
 async def test_client() -> AsyncClient:
     """
     Provides an asynchronous test client for making requests to the API.

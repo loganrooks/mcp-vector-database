@@ -1,4 +1,5 @@
 import json
+import asyncio # Add asyncio import
 import logging
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple
@@ -13,7 +14,6 @@ from .. import config # Use relative import within the package
 logger = logging.getLogger(__name__)
 
 # --- Pydantic Models for Data Structures (Optional but helpful) ---
-
 class Document(BaseModel):
     id: int
     title: Optional[str] = None
@@ -65,25 +65,40 @@ async def get_db_pool() -> AsyncConnectionPool:
     """Initializes and returns the async connection pool."""
     global db_pool
     if db_pool is None:
-        logger.info(f"Initializing database connection pool for {config.DB_HOST}:{config.DB_PORT}...")
+        logger.info(f"Initializing database connection pool for {config.DB_HOST}:{config.DB_PORT} using URL: {config.ASYNC_DATABASE_URL}") # Log URL
         try:
+            logger.info("Creating AsyncConnectionPool instance...")
             # Use min_size=1 to keep at least one connection open
             db_pool = AsyncConnectionPool(
                 conninfo=config.ASYNC_DATABASE_URL,
                 min_size=1,
                 max_size=10, # Adjust pool size as needed
-                open=True # Open pool immediately
+                # Set explicit timeouts (in seconds)
+                timeout=30 # Timeout for acquiring a connection from the pool
+                # connect_timeout=30 # REMOVED: Invalid argument for AsyncConnectionPool
+                # open=True # DEPRECATED: Open pool immediately - REMOVED
                 # row_factory=dict_row # Removed: Apply row_factory at cursor level if needed
             )
+            logger.info("AsyncConnectionPool instance created. Opening pool...")
+            # Explicitly open the pool asynchronously
+            await db_pool.open() # This implicitly tries to connect
+            logger.info("Database connection pool opened.")
             # Test connection
+            logger.info("Attempting test query via pool...") # Add log before test
             async with db_pool.connection() as conn:
                  async with conn.cursor() as cur:
                     await cur.execute("SELECT 1")
-                    logger.info("Database connection pool initialized successfully.")
+                    result = await cur.fetchone()
+                    logger.info(f"Database test connection successful. Result: {result}")
         except psycopg.Error as e:
-            logger.exception("Failed to initialize database connection pool.", exc_info=e)
+            logger.exception("psycopg.Error during DB pool initialization/test.", exc_info=e)
             db_pool = None # Ensure pool is None if initialization fails
-            raise ConnectionError("Database connection pool initialization failed") from e
+            raise ConnectionError("Database connection pool initialization failed (psycopg.Error)") from e
+        except Exception as e: # Catch broader exceptions during init
+             logger.exception("Unexpected error during DB pool initialization/test.", exc_info=e)
+             db_pool = None
+             raise ConnectionError("Unexpected error during DB pool initialization") from e
+
     return db_pool
 
 @asynccontextmanager

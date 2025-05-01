@@ -1,4 +1,5 @@
 import logging
+import linecache
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 from uuid import UUID
@@ -119,19 +120,19 @@ class AcquisitionStatusResponse(BaseModel):
 
 # --- FastAPI Lifespan ---
 
+# --- FastAPI Lifespan (Original, without tracemalloc) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Initialize resources
     logger.info("FastAPI application startup...")
     await db_layer.get_db_pool() # Initialize DB pool
     http_client.get_async_client() # Initialize HTTP client
-    # Initialize schema if needed (optional, might be done via separate script/migration tool)
+    # Initialize schema if needed
     try:
         async with db_layer.get_db_connection() as conn:
             await db_layer.initialize_schema(conn)
     except Exception as e:
         logger.error(f"Failed to initialize database schema during startup: {e}")
-        # Decide if startup should fail or continue - For now, let it continue but log error
     yield
     # Shutdown: Cleanup resources
     logger.info("FastAPI application shutdown...")

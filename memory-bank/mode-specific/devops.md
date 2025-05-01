@@ -1,6 +1,16 @@
 # DevOps Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Git Debt Management - [2025-04-29 15:11:07]
+- **Action**: Analyzed uncommitted changes (`git diff`) and grouped them into logical commits to clear working directory.
+- **Commits Created**:
+    - `fix(infra): Apply Docker and LiteLLM config fixes from debugging` (2ee81f9)
+    - `fix(core): Apply fixes to API, CLI, config, and DB layer from debugging` (d749e9a)
+    - `fix(tests): Apply test fixes and add untracked test files` (e28e66b)
+    - `docs: Add project status review 2025-04-29` (b27290e)
+    - `chore(memory): Update memory bank files with recent activity` (403b0bd)
+- **Files Affected**: `Dockerfile`, `docker-compose.yml`, `litellm_config.yaml`, `dummy-gcp-key.json`, `src/*`, `tests/*`, `pytest.ini`, `docs/reports/project_status_review_2025-04-29.md`, `memory-bank/*`.
+- **Verification**: Used `git status` to confirm clean working tree after commits.
 ## Deployment History Log
 <!-- Append deployment details using the format below -->
 

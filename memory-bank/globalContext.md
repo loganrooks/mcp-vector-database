@@ -1,7 +1,11 @@
 ## Progress
+[2025-04-30 13:31:58] - Debug - Investigation Halted (DB Blocker): Investigation into Issue-ID: PYTEST-SIGKILL-DB-CONN-20250430 halted. Standard diagnostics (network, logs, config, code adjustments) failed to resolve persistent `psycopg_pool` connection failure. Invoking Early Return.
+[2025-04-29 15:10:49] - DevOps - Managed Git debt by grouping uncommitted changes into 5 logical commits (infra, core, tests, docs, memory). Working tree clean.
 [2025-04-29 11:25:59] - Debug - Resolved `/ingest` 404 handling bug (Issue-ID: CLI-API-500-ERRORS-INGEST). API now returns 404 for missing files. Commit: 0da0aea.
 
 ## Decision Log
+[2025-04-30 13:31:58] - Debug - Early Return Decision (Intractable DB Blocker): Invoked Early Return for Issue-ID: PYTEST-SIGKILL-DB-CONN-20250430. Persistent `psycopg_pool` connection failure ([Errno -2] Name or service not known / PoolTimeout) despite verified network connectivity, correct config, and code adjustments. Root cause likely subtle issue in psycopg/Python/Docker network interaction. Context: 43%. Recommending deeper investigation via `new_task`. [See Debug Feedback 2025-04-30 13:31:58]
+[2025-04-30 07:31:51] - Debug - Investigation: Persistent `SIGKILL`/`PoolTimeout` during `pytest` in `philograph-backend`. Traced to DB connection failure during `psycopg_pool` init. OS resolves 'db' hostname, but Python/psycopg fails with hostname or IP. Root cause likely Python/psycopg interaction with Docker DNS/network. [Ref: Issue-ID: PYTEST-SIGKILL-DB-CONN-20250430]
 [2025-04-29 11:25:59] - Debug - Fixed `/ingest` 404 bug by correcting variable shadowing (`status` vs `result_status`) and preventing generic `except Exception` from catching `HTTPException` in `api/main.py`. Also ensured `pipeline.py` returns standard "not found" message on `FileNotFoundError` during path resolution. [Ref: Issue-ID: CLI-API-500-ERRORS-INGEST]
 # Global Context - PhiloGraph Project
 - **[2025-04-28 13:01:37] - Debug - Progress:** Investigation of `test_get_db_pool_failure` concluded. Test remains failing after multiple standard and advanced mocking attempts. Diagnosis points to complex async/mocking interaction. [See Issue-ID: TDD-DBPOOL-FAIL-20250428]

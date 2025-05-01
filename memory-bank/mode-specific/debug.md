@@ -1,6 +1,19 @@
 # Debug Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Issue: PYTEST-SIGKILL-DB-CONN-20250430 - Pytest SIGKILL / DB Connection Failure - [Status: Open] - [2025-04-30 07:31:51]
+- **Reported**: [2025-04-30 07:15:15] (via TDD Feedback) / **Severity**: High / **Symptoms**: `pytest` in `philograph-backend` container terminates with `SIGKILL` or `ConnectionError: Database connection pool initialization failed ([Errno -2] Name or service not known)` when initializing `psycopg_pool`.
+- **Investigation**:
+    1. Confirmed `SIGKILL` persists with 2GB memory limit. [Ref: TDD Feedback 2025-04-30 07:15:15]
+    2. Added `tracemalloc` to `api/main.py` lifespan - `SIGKILL` occurred before logs printed. [2025-04-30 07:24:29]
+    3. Moved `tracemalloc` to top of `api/main.py` - `pytest` failed with `ConnectionError` before `SIGKILL`, `tracemalloc` logs not printed. [2025-04-30 07:26:13]
+    4. Isolated DB pool init (`db_layer.get_db_pool()`) via `docker compose exec python -c "..."` - Failed with `SIGKILL` after logging `[Errno -2] Name or service not known`. [2025-04-30 07:29:43]
+    5. Verified OS-level hostname resolution (`getent hosts db`) - Succeeded (`172.20.0.2 db`). [2025-04-30 07:30:07]
+    6. Temporarily hardcoded DB IP (`172.20.0.2`) in `config.py`. Re-ran isolation test - Failed with `ConnectionError` / `PoolTimeout`, still logging `[Errno -2] Name or service not known`. [2025-04-30 07:31:25]
+- **Root Cause**: Fundamental failure establishing connection from Python/`psycopg` to DB service (`db` or `172.20.0.2`) during pool initialization within the container. OS resolves hostname, but `psycopg` fails, leading to resource exhaustion (`SIGKILL`) or timeout. Reason for `psycopg` failure (reporting misleading error) is unclear (Network stack? IPv6? Library issue?).
+- **Fix Applied**: None. Reverted diagnostic changes.
+- **Verification**: N/A.
+- **Related Issues**: Original TDD SIGKILL reports [Ref: TDD Feedback 2025-04-30 07:15:15], [Ref: TDD Feedback 2025-04-29 16:31:45].
 ### Issue: CLI-API-500-ERRORS-INGEST - `/ingest` 500 error for file not found - [Status: Fix Applied] - [2025-04-29 09:25:27]
 - **Reported**: [2025-04-29 09:18:53] (via TDD Feedback) / **Severity**: Medium / **Symptoms**: `/ingest` API returns 500 Internal Server Error when the requested path does not exist.
 - **Investigation**:
