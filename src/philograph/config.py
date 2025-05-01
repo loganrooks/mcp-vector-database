@@ -1,5 +1,6 @@
 import os
 import logging
+import urllib.parse
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -91,12 +92,13 @@ def get_bool_env_variable(var_name: str, default: bool = False) -> bool:
 DB_HOST = get_env_variable("DB_HOST", "localhost")
 DB_PORT = get_int_env_variable("DB_PORT", 5432)
 DB_USER = get_env_variable("DB_USER", "philograph_user")
-DB_PASSWORD = get_env_variable("DB_PASSWORD") # No default for password
+DB_PASSWORD_RAW = get_env_variable("DB_PASSWORD") # No default for password
+DB_PASSWORD_ENCODED = urllib.parse.quote_plus(DB_PASSWORD_RAW) if DB_PASSWORD_RAW else None
 DB_NAME = get_env_variable("DB_NAME", "philograph_db")
-DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD_ENCODED}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 # Async version for psycopg pool
-ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}" # Using hostname
-# ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@172.20.0.2:{DB_PORT}/{DB_NAME}" # Using explicit IP - REVERTED
+ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD_ENCODED}@{DB_HOST}:{DB_PORT}/{DB_NAME}" # Using hostname
+# ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD_ENCODED}@172.20.0.2:{DB_PORT}/{DB_NAME}" # Using explicit IP - REVERTED
 
 # --- Backend API Settings ---
 BACKEND_HOST = get_env_variable("BACKEND_HOST", "0.0.0.0")
@@ -142,6 +144,12 @@ else:
 
 # Basic logging configuration (can be expanded)
 logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Enable DEBUG logging specifically for psycopg
+psycopg_logger = logging.getLogger('psycopg')
+psycopg_logger.setLevel(logging.DEBUG)
+logger.info("Enabled DEBUG logging for psycopg.")
+
 logger.info("Configuration loaded.")
 logger.info(f"Source file directory resolved to: {SOURCE_FILE_DIR_ABSOLUTE}")
 

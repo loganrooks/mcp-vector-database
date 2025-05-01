@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     telnet \
     netcat-openbsd \
     strace \
+    postgresql-client-common \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
