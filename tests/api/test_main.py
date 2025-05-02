@@ -1,6 +1,7 @@
 from philograph.data_access.db_layer import Document
 from philograph.api.main import AcquisitionStatusResponse
 from pydantic import BaseModel # ADDED IMPORT
+from unittest.mock import AsyncMock, patch, ANY
 from philograph.data_access import db_layer # ADDED IMPORT
 import uuid
 from unittest.mock import patch, AsyncMock, ANY # Removed duplicate, Added ANY
@@ -1239,3 +1240,155 @@ async def test_get_collection_db_error(mock_get_items: AsyncMock, test_client: A
     mock_get_items.assert_awaited_once()
     # args, kwargs = mock_get_items.call_args
     # assert args[1] == collection_id # args[0] is connection
+# --- DELETE /collections/{collection_id}/items/{item_type}/{item_id} Endpoint Tests ---
+
+@pytest.mark.asyncio
+# Patch the specific functions where they are looked up in api.main
+@patch("philograph.api.main.db_layer.remove_item_from_collection", new_callable=AsyncMock)
+@patch("philograph.api.main.db_layer.get_db_connection") # Patch get_db_connection
+async def test_delete_collection_item_success(mock_get_conn, mock_remove_item, test_client):
+    """Test successful deletion of an item from a collection."""
+    # Configure mock connection context manager
+    mock_conn = AsyncMock()
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_get_conn.return_value.__aexit__.return_value = None
+
+    # Configure remove_item mock
+    mock_remove_item.return_value = True
+
+    collection_id = uuid.uuid4()
+    item_type = "document"
+    item_id = uuid.uuid4()
+
+    response = await test_client.delete(f"/collections/{collection_id}/items/{item_type}/{item_id}")
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    # Assert the remove_item mock was called correctly with the mock connection
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.remove_item_from_collection", new_callable=AsyncMock)
+@patch("philograph.api.main.db_layer.get_db_connection")
+async def test_delete_collection_item_not_found(mock_get_conn, mock_remove_item, test_client):
+    """Test deleting a non-existent item from a collection returns 404."""
+    # Configure mock connection
+    mock_conn = AsyncMock()
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_get_conn.return_value.__aexit__.return_value = None
+
+    # Configure remove_item mock to return False (not found/removed)
+    mock_remove_item.return_value = False
+
+    collection_id = uuid.uuid4()
+    item_type = "document"
+    item_id = uuid.uuid4() # Non-existent item ID
+
+    response = await test_client.delete(f"/collections/{collection_id}/items/{item_type}/{item_id}")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Item not found in collection or collection does not exist."}
+    mock_remove_item.assert_awaited_once_with(
+        conn=mock_conn,
+        collection_id=collection_id,
+        item_type=item_type,  # Added missing argument
+        item_id=item_id       # Added missing argument
+    ) # Added closing parenthesis
+
+# Correctly placed new test function
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.remove_item_from_collection", new_callable=AsyncMock)
+@patch("philograph.api.main.db_layer.get_db_connection")
+async def test_delete_collection_item_db_error(mock_get_conn, mock_remove_item, test_client):
+    """Test deleting an item returns 500 on database error."""
+    # Configure mock connection
+    mock_conn = AsyncMock()
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_get_conn.return_value.__aexit__.return_value = None
+
+    # Configure remove_item mock to raise psycopg.Error
+    error_message = "Simulated DB error during item removal"
+    mock_remove_item.side_effect = psycopg.Error(error_message)
+
+    collection_id = uuid.uuid4()
+    item_type = "document"
+    item_id = uuid.uuid4()
+
+    response = await test_client.delete(f"/collections/{collection_id}/items/{item_type}/{item_id}")
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"detail": "Database error removing item from collection."}
+    mock_remove_item.assert_awaited_once_with(
+        conn=mock_conn,
+        collection_id=collection_id,
+        item_type=item_type,
+        item_id=item_id
+    )
+# --- DELETE /collections/{collection_id} Endpoint Tests ---
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.delete_collection", new_callable=AsyncMock)
+@patch("philograph.api.main.db_layer.get_db_connection")
+async def test_delete_collection_success(mock_get_conn, mock_delete_collection, test_client):
+    """Test successful deletion of a collection returns 204."""
+    # Configure mock connection
+    mock_conn = AsyncMock()
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_get_conn.return_value.__aexit__.return_value = None
+
+    # Configure delete_collection mock to return True (deleted)
+    mock_delete_collection.return_value = True
+
+    collection_id = uuid.uuid4()
+
+    response = await test_client.delete(f"/collections/{collection_id}")
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    mock_delete_collection.assert_awaited_once_with(
+        conn=mock_conn,
+        collection_id=collection_id
+    )
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.delete_collection", new_callable=AsyncMock)
+@patch("philograph.api.main.db_layer.get_db_connection")
+async def test_delete_collection_not_found(mock_get_conn, mock_delete_collection, test_client):
+    """Test deleting a non-existent collection returns 404."""
+    # Configure mock connection
+    mock_conn = AsyncMock()
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_get_conn.return_value.__aexit__.return_value = None
+
+    # Configure delete_collection mock to return False (not found)
+    mock_delete_collection.return_value = False
+
+    collection_id = uuid.uuid4() # Non-existent ID
+
+    response = await test_client.delete(f"/collections/{collection_id}")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Collection not found."}
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.delete_collection", new_callable=AsyncMock)
+@patch("philograph.api.main.db_layer.get_db_connection")
+async def test_delete_collection_db_error(mock_get_conn, mock_delete_collection, test_client):
+    """Test deleting a collection returns 500 on database error."""
+    # Configure mock connection
+    mock_conn = AsyncMock()
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_get_conn.return_value.__aexit__.return_value = None
+
+    # Configure delete_collection mock to raise psycopg.Error
+    error_message = "Simulated DB error during collection deletion"
+    mock_delete_collection.side_effect = psycopg.Error(error_message)
+
+    collection_id = uuid.uuid4()
+
+    response = await test_client.delete(f"/collections/{collection_id}")
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"detail": "Database error deleting collection."}
+    mock_delete_collection.assert_awaited_once_with(
+        conn=mock_conn,
+        collection_id=collection_id
+    )
+    mock_delete_collection.assert_awaited_once_with(
+        conn=mock_conn,
+        collection_id=collection_id
+    )

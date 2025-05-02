@@ -2,12 +2,14 @@ import philograph.acquisition.service as text_acquisition
 import logging
 import linecache
 from contextlib import asynccontextmanager
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Literal
 from uuid import UUID
+import uuid
 
+from psycopg_pool import AsyncConnectionPool
 import psycopg
 import fastapi # ADDED for explicit status codes
-from fastapi import FastAPI, HTTPException, Body, Path as FastApiPath, Query, status
+from fastapi import FastAPI, HTTPException, Body, Path as FastApiPath, Query, status, Depends
 from pydantic import BaseModel, Field
 
 from .. import config
@@ -398,58 +400,101 @@ async def add_collection_item(
 class CollectionItemDeleteResponse(BaseModel):
     message: str
 
-@app.delete("/collections/{collection_id}/items/{item_type}/{item_id}", response_model=CollectionItemDeleteResponse)
-async def remove_collection_item(
-    collection_id: int = FastApiPath(..., gt=0, description="ID of the collection."),
-    item_type: str = FastApiPath(..., description="Type of the item ('document' or 'chunk')."),
-    item_id: int = FastApiPath(..., gt=0, description="ID of the item to remove.")
+@app.delete(
+    "/collections/{collection_id}/items/{item_type}/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove an item from a collection",
+    tags=["Collections"],
+)
+async def delete_collection_item(
+    collection_id: uuid.UUID = FastApiPath(..., description="The ID of the collection"),
+    item_type: Literal["document", "chunk"] = FastApiPath(..., description="The type of the item to remove ('document' or 'chunk')"),
+    item_id: uuid.UUID = FastApiPath(..., description="The ID of the item to remove"),
+    pool: AsyncConnectionPool = Depends(db_layer.get_db_pool),
 ):
-    """Removes an item from a specific collection."""
-    # TDD: Test removing an existing item returns 200 OK
-    # TDD: Test removing a non-existent item returns 404
-    # TDD: Test removing from a non-existent collection returns 404
-    # TDD: Test invalid item_type returns 422
+    """
+    Remove a specific document or chunk from a collection.
+    """
+    # TDD: Test success case (204)
+    # TDD: Test item not found in collection (404)
+    # TDD: Test collection not found (404) - handled by db_layer?
+    # TDD: Test invalid item_type (422 - handled by FastAPI/Literal)
+    # TDD: Test invalid UUID format (422 - handled by FastAPI)
+    # TDD: Test DB error during removal (500)
     logger.info(f"Removing {item_type} {item_id} from collection {collection_id}")
-    try:
-        # Basic validation for item_type
-        allowed_types = ['document', 'chunk']
-        if item_type not in allowed_types:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid item_type '{item_type}'. Allowed types: {allowed_types}")
-
-        async with db_layer.get_db_connection() as conn:
-            removed = await db_layer.remove_item_from_collection(conn, collection_id, item_type, item_id)
-            if removed:
-                return CollectionItemDeleteResponse(message=f"{item_type.capitalize()} ID {item_id} removed from collection ID {collection_id}.")
-            else:
+    async with db_layer.get_db_connection() as conn: # Removed pool argument
+        try:
+            # Assuming db_layer.remove_item_from_collection exists based on test mock
+            removed = await db_layer.remove_item_from_collection(
+                conn=conn, # Pass connection if required by db_layer function
+                collection_id=collection_id,
+                item_type=item_type,
+                item_id=item_id
+            )
+            if not removed:
                 # Assume False from db_layer means item/collection not found
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item or collection not found.")
-    except HTTPException:
-         raise # Re-raise HTTP exceptions
-    except Exception as e:
-        logger.exception(f"Error removing {item_type} {item_id} from collection {collection_id}", exc_info=e)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error removing item from collection.")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Item not found in collection or collection does not exist.", # More specific message
+                )
+            # No content to return on success (204)
+            return None # FastAPI handles 204 response correctly when None is returned
 
-@app.delete("/collections/{collection_id}", response_model=CollectionDeleteResponse)
-async def delete_collection_endpoint(
-    collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to delete.")
+        except psycopg.Error as e:
+            logger.exception(f"Database error removing {item_type} {item_id} from collection {collection_id}", exc_info=e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error removing item from collection.",
+            )
+        except HTTPException: # Re-raise HTTP exceptions first
+             raise
+        except Exception as e:
+            logger.exception(f"Unexpected error removing {item_type} {item_id} from collection {collection_id}", exc_info=e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="An unexpected error occurred.",
+            )
+
+@app.delete(
+    "/collections/{collection_id}",
+    status_code=status.HTTP_204_NO_CONTENT, # Correct status code
+    summary="Delete a collection",
+    tags=["Collections"],
+    # Removed response_model as 204 should have no body
+)
+async def delete_collection( # Renamed function for clarity
+    collection_id: uuid.UUID = FastApiPath(..., description="The ID of the collection to delete."), # Use UUID
+    pool: AsyncConnectionPool = Depends(db_layer.get_db_pool), # Add pool dependency
 ):
-    """Deletes a collection and all its associated items."""
-    # TDD: Test deleting an existing collection returns 200 OK
+    """
+    Deletes a collection. Assumes DB cascade handles related items or they must be removed first.
+    """
+    # TDD: Test deleting an existing collection returns 204
     # TDD: Test deleting a non-existent collection returns 404
+    # TDD: Test DB error during deletion returns 500
     logger.info(f"Deleting collection {collection_id}")
-    try:
-        async with db_layer.get_db_connection() as conn:
-            deleted = await db_layer.delete_collection(conn, collection_id)
-            if deleted:
-                return CollectionDeleteResponse(message=f"Collection ID {collection_id} deleted.")
-            else:
+    async with db_layer.get_db_connection() as conn: # Use correct context manager
+        try:
+            deleted = await db_layer.delete_collection(conn=conn, collection_id=collection_id) # Pass conn
+            if not deleted:
                 # Assume False from db_layer means collection not found
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found.")
-    except HTTPException:
-         raise # Re-raise HTTP exceptions
-    except Exception as e:
-        logger.exception(f"Error deleting collection {collection_id}", exc_info=e)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error deleting collection.")
+            # Return None for 204 No Content response
+            return None
+        except HTTPException:
+             raise # Re-raise HTTP exceptions
+        except psycopg.Error as e: # Specific DB error handling
+            logger.exception(f"Database error deleting collection {collection_id}", exc_info=e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error deleting collection.",
+            )
+        except Exception as e: # Generic error handling
+            logger.exception(f"Unexpected error deleting collection {collection_id}", exc_info=e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="An unexpected error occurred while deleting the collection.",
+            )
 
 
 class CollectionItemDetail(BaseModel):

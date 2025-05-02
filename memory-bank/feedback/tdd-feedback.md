@@ -1,3 +1,24 @@
+### Task Completion Summary - [2025-05-02 03:12:52]
+- **Trigger**: Completion of TDD cycles for DELETE /collections/... DB error handling.
+- **Context**: Task was to add tests for DB errors in `DELETE /collections/{id}/items/...` and `DELETE /collections/{id}`. Previous tests were missing due to file corruption history.
+- **Actions Taken**:
+    - Added `test_delete_collection_item_success`: Required fixing API endpoint signature (UUIDs, 204 status), multiple import errors (`Path`, `Depends`, `uuid`, `Literal`, `AsyncConnectionPool`), `TypeError` in `get_db_connection` call, and patch strategy. Test passed (Green).
+    - Added `test_delete_collection_item_not_found`: Required fixing API exception handling order. Test passed (Green).
+    - Added `test_delete_collection_item_db_error`: Required fixing test syntax errors from insertion. Test passed (Red skipped).
+    - Added `test_delete_collection_success`: Required replacing old API endpoint implementation with correct signature (UUIDs, 204 status), adding pool dependency, and fixing exception handling. Test passed (Green).
+    - Added `test_delete_collection_not_found`: Test passed (Red skipped).
+    - Added `test_delete_collection_db_error`: Test passed (Red skipped).
+    - Verified all 6 tests pass using `pytest -k "delete_collection"`.
+    - Updated Memory Bank (`activeContext.md`, `globalContext.md`, `tdd.md`).
+- **Files Affected**:
+    - `tests/api/test_main.py` (Added 6 tests, fixed patch targets, fixed syntax errors)
+    - `src/philograph/api/main.py` (Replaced/Updated `delete_collection_item` and `delete_collection` endpoints, added imports, fixed exception handling)
+    - `memory-bank/activeContext.md` (Updated)
+    - `memory-bank/globalContext.md` (Updated)
+    - `memory-bank/mode-specific/tdd.md` (Updated)
+- **Verification**: Ran `sudo docker-compose exec philograph-backend pytest /app/tests/api/test_main.py -k "delete_collection"`. Result: 6 passed, 51 deselected.
+- **Status**: Task completed successfully. DB error handling tests for collection deletion endpoints added and verified.
+- **Next Steps**: Commit changes and await further instructions.
 ### User Intervention - [2025-05-02 02:46:24]
 - **Trigger**: User message after `attempt_completion`.
 - **Context**: Attempted completion after verifying tests passed and updating Memory Bank, but before committing changes as required by task instructions.

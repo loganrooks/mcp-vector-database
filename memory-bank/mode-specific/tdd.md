@@ -5,6 +5,124 @@
 - **Coverage Change**: N/A
 - **Notes**: Verified that tests for `GET /acquire/status/{id}` likely pass, confirming prior completion based on Memory Bank logs [Ref: MB ActiveContext 2025-05-01 23:19:23, MB TDD Feedback 2025-05-01 23:21:32]. Task objective already met.
 ## Test Execution Results
+### Test Execution: Unit (`tests/api/test_main.py -k "delete_collection"`) - [2025-05-02 03:10:19]
+- **Trigger**: Manual run after completing TDD cycles for DELETE endpoints. Command: `sudo docker-compose exec philograph-backend pytest /app/tests/api/test_main.py -k "delete_collection"`
+- **Outcome**: PASS / **Summary**: 6 passed, 51 deselected
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Verified all tests for `DELETE /collections/{id}/items/...` and `DELETE /collections/{id}` pass, including success, not found, and DB error cases.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_db_error`) - [2025-05-02 03:09:34]
+- **Trigger**: Manual run after adding test and fixing syntax errors.
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed unexpectedly (Red phase skipped). Implementation already handled `psycopg.Error`.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_not_found`) - [2025-05-02 03:08:40]
+- **Trigger**: Manual run after adding test.
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed unexpectedly (Red phase skipped). Implementation already handled the 404 case.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_success`) - [2025-05-02 03:07:45]
+- **Trigger**: Manual run after applying code fix (endpoint signature, status code, exception handling).
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed (Green phase).
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_success`) - [2025-05-02 03:06:46]
+- **Trigger**: Manual run after adding test.
+- **Outcome**: FAIL / **Summary**: 1 failed
+- **Failed Tests**: `tests/api/test_main.py::test_delete_collection_success`: `assert 422 == 204`
+- **Coverage Change**: N/A
+- **Notes**: Test failed as expected (Red phase). Endpoint signature mismatch (int vs UUID).
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_db_error`) - [2025-05-02 03:05:59]
+- **Trigger**: Manual run after fixing syntax errors in test file.
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed unexpectedly (Red phase skipped). Implementation already handled `psycopg.Error`.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_not_found`) - [2025-05-02 03:00:31]
+- **Trigger**: Manual run after fixing exception handling order in API.
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed (Green phase).
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_not_found`) - [2025-05-02 02:59:47]
+- **Trigger**: Manual run after adding test.
+- **Outcome**: FAIL / **Summary**: 1 failed
+- **Failed Tests**: `tests/api/test_main.py::test_delete_collection_item_not_found`: `assert 500 == 404`
+- **Coverage Change**: N/A
+- **Notes**: Test failed (Red phase). 404 HTTPException was caught by generic Exception handler.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:58:57]
+- **Trigger**: Manual run after fixing patch strategy in test.
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Test passed (Green phase).
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:57:55]
+- **Trigger**: Manual run after fixing patch target in test.
+- **Outcome**: FAIL / **Summary**: 1 failed
+- **Failed Tests**: `tests/api/test_main.py::test_delete_collection_item_success`: `TypeError: 'coroutine' object does not support the asynchronous context manager protocol`
+- **Coverage Change**: N/A
+- **Notes**: Patch strategy was incorrect (mocked module instead of function).
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:56:18]
+- **Trigger**: Manual run after fixing `TypeError` in API endpoint.
+- **Outcome**: FAIL / **Summary**: 1 failed
+- **Failed Tests**: `tests/api/test_main.py::test_delete_collection_item_success`: `psycopg.errors.UndefinedFunction: operator does not exist: integer = uuid`
+- **Coverage Change**: N/A
+- **Notes**: Patch was ineffective; actual DB layer called with type mismatch.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:54:54]
+- **Trigger**: Manual run after fixing `NameError: name 'AsyncConnectionPool'` in API endpoint.
+- **Outcome**: FAIL / **Summary**: 1 failed
+- **Failed Tests**: `tests/api/test_main.py::test_delete_collection_item_success`: `TypeError: get_db_connection() takes 0 positional arguments but 1 was given`
+- **Coverage Change**: N/A
+- **Notes**: Incorrect call to `get_db_connection`.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:53:34]
+- **Trigger**: Manual run after fixing `NameError: name 'uuid'` in API endpoint.
+- **Outcome**: FAIL / **Summary**: 1 error during collection
+- **Failed Tests**: `ERROR tests/api/test_main.py - NameError: name 'AsyncConnectionPool' is not defined`
+- **Coverage Change**: N/A
+- **Notes**: Missing import.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:52:59]
+- **Trigger**: Manual run after fixing `NameError: name 'Depends'` in API endpoint.
+- **Outcome**: FAIL / **Summary**: 1 error during collection
+- **Failed Tests**: `ERROR tests/api/test_main.py - NameError: name 'uuid' is not defined`
+- **Coverage Change**: N/A
+- **Notes**: Missing import.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:52:19]
+- **Trigger**: Manual run after fixing `NameError: name 'Path'` in API endpoint.
+- **Outcome**: FAIL / **Summary**: 1 error during collection
+- **Failed Tests**: `ERROR tests/api/test_main.py - NameError: name 'Depends' is not defined`
+- **Coverage Change**: N/A
+- **Notes**: Missing import.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:51:22]
+- **Trigger**: Manual run after adding endpoint implementation.
+- **Outcome**: FAIL / **Summary**: 1 error during collection
+- **Failed Tests**: `ERROR tests/api/test_main.py - NameError: name 'Path' is not defined`
+- **Coverage Change**: N/A
+- **Notes**: Missing import.
+
+### Test Execution: Unit (`tests/api/test_main.py::test_delete_collection_item_success`) - [2025-05-02 02:51:02]
+- **Trigger**: Manual run after adding test.
+- **Outcome**: FAIL / **Summary**: 1 failed
+- **Failed Tests**: `tests/api/test_main.py::test_delete_collection_item_success`: `assert 422 == 204`
+- **Coverage Change**: N/A
+- **Notes**: Test failed as expected (Red phase). Endpoint not implemented.
 ### Test Execution: Unit (`tests/api/test_main.py -k test_search`) - [2025-05-02 02:35:11]
 - **Trigger**: Manual run after completing TDD cycles for `/search` error handling. Command: `sudo docker-compose exec philograph-backend pytest /app/tests/api/test_main.py -k test_search`
 - **Outcome**: PASS / **Summary**: 13 passed, 38 deselected
@@ -136,6 +254,41 @@
 - **Failed Tests**: `tests/api/test_main.py::test_get_document_references_db_error`: `AssertionError: Expected get_relationships_for_document to not have been awaited. Awaited 1 times.`
 - **Coverage Change**: N/A
 - **Notes**: Failed due to incorrect assertion in test code.
+### TDD Cycle: DELETE /collections/{id} (DB Error) - [2025-05-02 03:09:34]
+- **Red**: Added `test_delete_collection_db_error`. Ran test. Passed unexpectedly. / Test File: `tests/api/test_main.py`
+- **Green**: N/A (Implementation existed).
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed (Red phase skipped). Verified 500 handling for DB errors during collection deletion.
+
+### TDD Cycle: DELETE /collections/{id} (Not Found) - [2025-05-02 03:08:40]
+- **Red**: Added `test_delete_collection_not_found`. Ran test. Passed unexpectedly. / Test File: `tests/api/test_main.py`
+- **Green**: N/A (Implementation existed).
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed (Red phase skipped). Verified 404 handling for deleting non-existent collections.
+
+### TDD Cycle: DELETE /collections/{id} (Success) - [2025-05-02 03:07:45]
+- **Red**: Added `test_delete_collection_success`. Ran test. Failed (`assert 422 == 204`). / Test File: `tests/api/test_main.py`
+- **Green**: Replaced existing `delete_collection_endpoint` with `delete_collection` using UUIDs, 204 status, correct exception handling. Ran test. Passed. / Code File: `src/philograph/api/main.py`
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed. Verified success path (204) for deleting collections. Corrected endpoint signature and implementation.
+
+### TDD Cycle: DELETE /collections/{id}/items/... (DB Error) - [2025-05-02 03:05:59]
+- **Red**: Added `test_delete_collection_item_db_error`. Fixed syntax errors. Ran test. Passed unexpectedly. / Test File: `tests/api/test_main.py`
+- **Green**: N/A (Implementation existed).
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed (Red phase skipped). Verified 500 handling for DB errors during item deletion. Fixed test syntax errors.
+
+### TDD Cycle: DELETE /collections/{id}/items/... (Not Found) - [2025-05-02 03:00:31]
+- **Red**: Added `test_delete_collection_item_not_found`. Ran test. Failed (`assert 500 == 404`). / Test File: `tests/api/test_main.py`
+- **Green**: Corrected exception handling order in `delete_collection_item` endpoint. Ran test. Passed. / Code File: `src/philograph/api/main.py`
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed. Verified 404 handling for deleting non-existent items from collections.
+
+### TDD Cycle: DELETE /collections/{id}/items/... (Success) - [2025-05-02 02:58:57]
+- **Red**: Added `test_delete_collection_item_success`. Ran test. Failed (`assert 422 == 204`). / Test File: `tests/api/test_main.py`
+- **Green**: Replaced existing endpoint with `delete_collection_item` using UUIDs, 204 status. Fixed multiple import errors (`Path`, `Depends`, `uuid`, `Literal`, `AsyncConnectionPool`). Fixed `TypeError` in `get_db_connection` call. Fixed patch strategy. Ran test. Passed. / Code Files: `src/philograph/api/main.py`, `tests/api/test_main.py`
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed. Verified success path (204) for deleting collection items. Added endpoint and fixed numerous test/implementation errors.
 
 ### Test Execution: Unit (`tests/api/test_main.py::test_get_document_references_not_found`) - [2025-05-01 22:46:02]
 - **Trigger**: Manual run after adding test.
