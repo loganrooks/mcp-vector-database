@@ -786,10 +786,10 @@ async def test_vector_search_chunks_success(mock_format_vector, mock_get_conn):
     assert expected_base_sql_part in executed_sql
     # Check for key JOIN parts instead of exact whitespace match
     assert "FROM chunks c" in executed_sql and "JOIN sections s ON c.section_id = s.id" in executed_sql and "JOIN documents d ON s.doc_id = d.id" in executed_sql
-    assert f"c.embedding {distance_operator} %s::vector(%s) AS distance" in executed_sql
+    assert f"c.embedding {distance_operator} %s::vector(3) AS distance" in executed_sql # Corrected assertion
     assert expected_order_limit_part in executed_sql
     assert "WHERE" not in executed_sql # No filters in this test
-    assert executed_params == (formatted_query_embedding, 3, top_k) # query_vec, dimension, limit
+    assert executed_params == (formatted_query_embedding, top_k) # query_vec, limit (dimension is in SQL string)
 
     mock_cursor.fetchall.assert_awaited_once()
 
@@ -842,7 +842,7 @@ async def test_vector_search_chunks_with_filters(mock_format_vector, mock_get_co
 
     assert expected_base_sql_part in executed_sql
     assert "FROM chunks c" in executed_sql and "JOIN sections s" in executed_sql and "JOIN documents d" in executed_sql
-    assert f"c.embedding {distance_operator} %s::vector(%s) AS distance" in executed_sql
+    assert f"c.embedding {distance_operator} %s::vector(3) AS distance" in executed_sql # Corrected assertion
     # Check WHERE clauses are present and combined with AND
     assert "WHERE" in executed_sql
     assert expected_where_part_author in executed_sql
@@ -851,12 +851,11 @@ async def test_vector_search_chunks_with_filters(mock_format_vector, mock_get_co
     assert expected_order_limit_part in executed_sql
 
     # Check parameters: query_vec, dimension, author_filter, year_filter, limit
-    assert len(executed_params) == 5
+    assert len(executed_params) == 4 # query_vec, author_filter, year_filter, limit (dimension is in SQL string)
     assert executed_params[0] == formatted_query_embedding
-    assert executed_params[1] == 3 # Dimension
-    assert executed_params[2] == f"%{filters['author']}%" # Author filter value
-    assert executed_params[3] == filters['year'] # Year filter value
-    assert executed_params[4] == top_k # Limit
+    assert executed_params[1] == f"%{filters['author']}%" # Author filter
+    assert executed_params[2] == filters['year'] # Year filter
+    assert executed_params[3] == top_k # Limit
 
     mock_cursor.fetchall.assert_awaited_once()
 @pytest.mark.asyncio
@@ -1194,6 +1193,85 @@ async def test_get_relationships_non_existent_node(mock_get_conn):
     # assert relationships[0].source_node_id == node_id # Removed: Causes IndexError on empty list
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_get_relationships_for_document_success(mock_get_conn):
+    """Tests retrieving relationships originating from chunks within a document."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    doc_id = 123
+    # Mock database response (assuming source_node_id is 'chunk:id')
+    db_rows = [
+        {'id': 1, 'source_node_id': 'chunk:101', 'target_node_id': 'doc:456', 'relation_type': 'cites', 'metadata_jsonb': {'context': 'page 5'}},
+        {'id': 2, 'source_node_id': 'chunk:102', 'target_node_id': 'concept:abc', 'relation_type': 'mentions', 'metadata_jsonb': None},
+    ]
+    mock_cursor.fetchall.return_value = db_rows
+
+    # Define the expected SQL query (adjust based on actual schema/logic)
+    # This query assumes relationships are linked via chunks belonging to sections of the target doc_id
+    expected_sql_fragment_select = "SELECT r.id, r.source_node_id, r.target_node_id, r.relation_type, r.metadata_jsonb"
+    expected_sql_fragment_from = "FROM relationships r JOIN chunks c ON r.source_node_id = 'chunk:' || c.id::text JOIN sections s ON c.section_id = s.id"
+    expected_sql_fragment_where = "WHERE s.doc_id = %s"
+    expected_params = (doc_id,)
+
+    # Call the function under test
+    relationships = await db_layer.get_relationships_for_document(mock_conn, doc_id)
+
+    # Assertions
+    # Check that execute was called with SQL containing the expected fragments and parameters
+    call_args, call_kwargs = mock_cursor.execute.call_args
+    executed_sql = call_args[0]
+    executed_params = call_args[1]
+
+    assert expected_sql_fragment_select in executed_sql
+    # Check for essential JOIN parts instead of the exact multiline fragment
+    assert "FROM relationships r" in executed_sql
+    assert "JOIN chunks c ON r.source_node_id = 'chunk:' || c.id::text" in executed_sql
+    assert "JOIN sections s ON c.section_id = s.id" in executed_sql
+    assert expected_sql_fragment_where in executed_sql
+    assert executed_params == expected_params
+
+    mock_cursor.fetchall.assert_awaited_once()
+    assert len(relationships) == 2
+    assert isinstance(relationships[0], db_layer.Relationship)
+    assert relationships[0].id == 1
+    assert relationships[0].source_node_id == 'chunk:101'
+    assert relationships[0].target_node_id == 'doc:456'
+    assert relationships[0].relation_type == 'cites'
+    assert relationships[0].metadata == {'context': 'page 5'}
+    assert isinstance(relationships[1], db_layer.Relationship)
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_get_relationships_for_document_empty(mock_get_conn):
+    """Tests retrieving relationships for a document with no relationships returns empty list."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    doc_id = 456
+    # Mock database response as empty
+    db_rows = []
+    mock_cursor.fetchall.return_value = db_rows
+
+    expected_sql_fragment_where = "WHERE s.doc_id = %s"
+    expected_params = (doc_id,)
+
+    # Call the function under test
+    relationships = await db_layer.get_relationships_for_document(mock_conn, doc_id)
+
+    # Assertions
+    call_args, call_kwargs = mock_cursor.execute.call_args
+    executed_sql = call_args[0]
+    executed_params = call_args[1]
+
+    assert expected_sql_fragment_where in executed_sql
+    assert executed_params == expected_params
+    mock_cursor.fetchall.assert_awaited_once()
+    assert relationships == []
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_collection_success(mock_get_conn):
     """Tests adding a new collection successfully."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
@@ -1401,7 +1479,10 @@ async def test_get_collection_items_success(mock_get_conn):
     expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
     expected_params = (collection_id,)
 
-    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    # Check both execute calls were made
+    assert mock_cursor.execute.await_count == 2
+    # Check the second call specifically
+    mock_cursor.execute.assert_awaited_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
     # The function currently returns raw tuples based on list_code_definition_names output
     # Adjust assertion if a data model/dict mapping is implemented later
@@ -1427,13 +1508,16 @@ async def test_get_collection_items_empty(mock_get_conn):
     expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
     expected_params = (collection_id,)
 
-    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    # Check both execute calls were made
+    assert mock_cursor.execute.await_count == 2
+    # Check the second call specifically
+    mock_cursor.execute.assert_awaited_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
     assert items == []
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_collection_items_non_existent_id(mock_get_conn):
-    """Tests retrieving items for a non-existent collection ID returns an empty list."""
+    """Tests retrieving items for a non-existent collection ID returns None."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -1441,19 +1525,21 @@ async def test_get_collection_items_non_existent_id(mock_get_conn):
 
     non_existent_collection_id = -999 # Assuming negative IDs are never valid
 
-    # Simulate fetchall returning an empty list (as if the WHERE clause found nothing)
-    mock_cursor.fetchall.return_value = []
+    # Simulate the existence check returning False
+    mock_cursor.fetchone.return_value = (False,)
 
     # Call the function under test
     items = await db_layer.get_collection_items(mock_conn, non_existent_collection_id)
 
     # Assertions
-    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
-    expected_params = (non_existent_collection_id,)
+    expected_check_sql = "SELECT EXISTS(SELECT 1 FROM collections WHERE id = %s);"
+    expected_check_params = (non_existent_collection_id,)
 
-    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
-    mock_cursor.fetchall.assert_awaited_once()
-    assert items == []
+    # Only the existence check should be executed
+    mock_cursor.execute.assert_awaited_once_with(expected_check_sql, expected_check_params)
+    mock_cursor.fetchone.assert_awaited_once()
+    mock_cursor.fetchall.assert_not_awaited() # The second query should not run
+    assert items is None # Function should return None
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_collection_items_db_error(mock_get_conn):
@@ -1465,9 +1551,20 @@ async def test_get_collection_items_db_error(mock_get_conn):
 
     collection_id = 105
 
-    # Simulate a database error during execute
+    # Simulate the existence check passing
+    mock_cursor.fetchone.return_value = (True,)
+
+    # Simulate a database error during the *second* execute call
     db_error = psycopg.Error("Simulated DB error during item retrieval")
-    mock_cursor.execute.side_effect = db_error
+
+    async def execute_side_effect(sql, params):
+        if "collection_items" in sql: # Identify the second query
+            raise db_error
+        # Allow the first query (existence check) to proceed normally
+        # (The actual return value of execute itself isn't usually checked directly)
+        return None
+
+    mock_cursor.execute.side_effect = execute_side_effect
 
     # Call the function under test and expect the error
     with pytest.raises(psycopg.Error) as excinfo:
@@ -1475,8 +1572,117 @@ async def test_get_collection_items_db_error(mock_get_conn):
 
     # Assertions
     assert excinfo.value is db_error # Check if the original error is propagated
-    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+
+    # Check calls
+    expected_check_sql = "SELECT EXISTS(SELECT 1 FROM collections WHERE id = %s);"
+    expected_check_params = (collection_id,)
+    expected_items_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    expected_items_params = (collection_id,)
+
+    assert mock_cursor.execute.await_count == 2
+    mock_cursor.execute.assert_any_await(expected_check_sql, expected_check_params)
+    mock_cursor.execute.assert_any_await(expected_items_sql, expected_items_params)
+    mock_cursor.fetchall.assert_not_awaited() # Should not be called if execute fails
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_remove_item_from_collection_success(mock_get_conn):
+    """Tests successfully removing an item from a collection."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 1
+    item_type = 'document'
+    item_id = 123
+
+    # Simulate the cursor rowcount indicating 1 row was deleted
+    mock_cursor.rowcount = 1
+
+    expected_sql = "DELETE FROM collection_items WHERE collection_id = %s AND item_type = %s AND item_id = %s;"
+    expected_params = (collection_id, item_type, item_id)
+
+    # Call the function under test
+    removed = await db_layer.remove_item_from_collection(mock_conn, collection_id, item_type, item_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_conn.commit.assert_awaited_once()
+    assert removed is True
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_remove_item_from_collection_not_found(mock_get_conn):
+    """Tests removing a non-existent item from a collection returns False."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 1
+    item_type = 'document'
+    item_id = 999 # Non-existent item
+
+    # Simulate the cursor rowcount indicating 0 rows were deleted
+    mock_cursor.rowcount = 0
+
+    expected_sql = "DELETE FROM collection_items WHERE collection_id = %s AND item_type = %s AND item_id = %s;"
+    expected_params = (collection_id, item_type, item_id)
+
+    # Call the function under test
+    removed = await db_layer.remove_item_from_collection(mock_conn, collection_id, item_type, item_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_conn.commit.assert_awaited_once()
+    assert removed is False
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_delete_collection_success(mock_get_conn):
+    """Tests successfully deleting a collection."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 1
+
+    # Simulate the cursor rowcount indicating 1 row was deleted
+    mock_cursor.rowcount = 1
+
+    # Note: The placeholder mentions deleting items too. A real implementation
+    # might need two separate queries (or rely on CASCADE DELETE).
+    # For minimal implementation, we'll just test the collection deletion.
+    expected_sql = "DELETE FROM collections WHERE id = %s;"
     expected_params = (collection_id,)
 
+    # Call the function under test
+    deleted = await db_layer.delete_collection(mock_conn, collection_id)
+
+    # Assertions
     mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
-    mock_cursor.fetchall.assert_not_awaited() # Should not be called if execute fails
+    mock_conn.commit.assert_awaited_once()
+    assert deleted is True
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_delete_collection_not_found(mock_get_conn):
+    """Tests deleting a non-existent collection returns False."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 999 # Non-existent ID
+
+    # Simulate the cursor rowcount indicating 0 rows were deleted
+    mock_cursor.rowcount = 0
+
+    expected_sql = "DELETE FROM collections WHERE id = %s;"
+    expected_params = (collection_id,)
+
+    # Call the function under test
+    deleted = await db_layer.delete_collection(mock_conn, collection_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_conn.commit.assert_awaited_once()
+    assert deleted is False

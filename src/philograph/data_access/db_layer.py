@@ -266,6 +266,13 @@ async def add_chunks_batch(conn: psycopg.AsyncConnection, chunks_data: List[Tupl
         await cur.executemany(sql, formatted_data)
         await conn.commit()
     logger.info(f"Successfully added {len(formatted_data)} chunks in batch.")
+async def get_chunk_by_id(conn: psycopg.AsyncConnection, chunk_id: int) -> Optional[Dict[str, Any]]:
+    """Placeholder: Retrieves a chunk by its ID."""
+    # TDD: Implement actual query
+    # TDD: Test success case
+    # TDD: Test not found case
+    # TDD: Test DB error case
+    pass # Minimal implementation for patching
 
 
 # --- Reference Operations ---
@@ -434,6 +441,30 @@ async def get_relationships(conn: psycopg.AsyncConnection, node_id: str, directi
         processed_results.append(Relationship(**rel_data))
     return processed_results
 
+async def get_relationships_for_document(conn: psycopg.AsyncConnection, doc_id: int) -> List[Dict[str, Any]]:
+    """Retrieves relationships originating from chunks within a specific document."""
+    # TDD: Test retrieving relationships for a document
+    # TDD: Test retrieving relationships for a document with no relationships returns empty list
+    # TDD: Test handling of different relationship types if needed
+    sql = """
+        SELECT r.id, r.source_node_id, r.target_node_id, r.relation_type, r.metadata_jsonb
+        FROM relationships r
+        JOIN chunks c ON r.source_node_id = 'chunk:' || c.id::text
+        JOIN sections s ON c.section_id = s.id
+        WHERE s.doc_id = %s;
+    """
+    params = (doc_id,)
+    async with conn.cursor() as cur:
+        await cur.execute(sql, params)
+        results = await cur.fetchall()
+
+    # Map metadata_jsonb to metadata field for Pydantic model
+    processed_results = []
+    for row in results:
+        rel_data = dict(row) # Copy the dict_row result
+        rel_data['metadata'] = rel_data.pop('metadata_jsonb', {}) or {} # Pop 'metadata_jsonb', provide default {} if None/missing
+        processed_results.append(Relationship(**rel_data)) # Use the Relationship model defined earlier
+    return processed_results
 # --- Collection Operations ---
 
 async def add_collection(conn: psycopg.AsyncConnection, name: str) -> int:
@@ -467,16 +498,58 @@ async def add_item_to_collection(conn: psycopg.AsyncConnection, collection_id: i
         await cur.execute(sql, params)
         await conn.commit()
 
-async def get_collection_items(conn: psycopg.AsyncConnection, collection_id: int) -> List[Dict[str, Any]]:
-    """Retrieves items belonging to a collection."""
+async def get_collection_items(conn: psycopg.AsyncConnection, collection_id: int) -> Optional[List[Dict[str, Any]]]:
+    """Retrieves items belonging to a collection. Returns None if collection_id does not exist."""
     # TDD: Test retrieving items from a collection
-    # TDD: Test retrieving items from non-existent collection returns empty list
-    sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    # TDD: Test retrieving items from non-existent collection returns None
+    # TDD: Test retrieving items from an empty collection returns []
+
+    # First, check if the collection exists
+    check_sql = "SELECT EXISTS(SELECT 1 FROM collections WHERE id = %s);"
     async with conn.cursor() as cur:
-        await cur.execute(sql, (collection_id,))
+        await cur.execute(check_sql, (collection_id,))
+        exists_result = await cur.fetchone()
+        collection_exists = exists_result[0] if exists_result else False
+
+    if not collection_exists:
+        logger.warning(f"Collection with ID {collection_id} not found.")
+        return None # Return None if collection does not exist
+
+    # If collection exists, retrieve items
+    items_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    params = (collection_id,)
+    async with conn.cursor(row_factory=dict_row) as cur:
+        await cur.execute(items_sql, params)
         results = await cur.fetchall()
-        # Return list of dicts directly from dict_row factory
-        return results
+        return results # Returns list of dicts (can be empty if collection has no items)
+
+async def remove_item_from_collection(conn: psycopg.AsyncConnection, collection_id: int, item_type: str, item_id: int) -> bool:
+    """Removes an item from a collection. Returns True if removed, False if not found."""
+    # TDD: Test removing an existing item returns True
+    # TDD: Test removing a non-existent item returns False
+    # TDD: Test removing item from non-existent collection returns False (or relies on FK)
+    sql = "DELETE FROM collection_items WHERE collection_id = %s AND item_type = %s AND item_id = %s;"
+    params = (collection_id, item_type, item_id)
+    async with conn.cursor() as cur:
+        await cur.execute(sql, params)
+        await conn.commit()
+        # Check if any row was actually deleted
+        return cur.rowcount > 0
+
+async def delete_collection(conn: psycopg.AsyncConnection, collection_id: int) -> bool:
+    """Deletes a collection. Returns True if deleted, False if not found.
+    Note: This currently only deletes the collection record itself.
+    Associated items in collection_items might need separate handling or CASCADE DELETE in the schema.
+    """
+    # TDD: Test deleting an existing collection returns True
+    # TDD: Test deleting a non-existent collection returns False
+    sql = "DELETE FROM collections WHERE id = %s;"
+    params = (collection_id,)
+    async with conn.cursor() as cur:
+        await cur.execute(sql, params)
+        await conn.commit()
+        # Check if any row was actually deleted
+        return cur.rowcount > 0
 
 # --- Schema Initialization (Example - Run separately or via migration tool) ---
 async def initialize_schema(conn: psycopg.AsyncConnection):
