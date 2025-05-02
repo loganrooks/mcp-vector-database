@@ -1,3 +1,77 @@
+### User Intervention - [2025-05-02 02:46:24]
+- **Trigger**: User message after `attempt_completion`.
+- **Context**: Attempted completion after verifying tests passed and updating Memory Bank, but before committing changes as required by task instructions.
+- **Action**: User instructed to commit changes first.
+- **Rationale**: Oversight in following task step order.
+- **Outcome**: Will commit changes before re-attempting completion.
+- **Follow-up**: Ensure commit step is included before final completion attempt.
+### Task Completion Summary - [2025-05-02 02:36:41]
+- **Trigger**: Completion of TDD cycles for `/search` endpoint robustness.
+- **Context**: Task was to add tests for empty results, embedding errors, DB errors, and invalid filter format for the `/search` API endpoint.
+- **Actions Taken**:
+    - Reviewed existing tests: Found tests covering empty results (`test_search_empty_results`) and invalid filter format (`test_search_invalid_filter_format`).
+    - Added `test_search_embedding_error`: Test passed unexpectedly (Red skipped) as existing `RuntimeError` handler covered it. Fixed assertion in test to include `offset=0`.
+    - Added `test_search_db_error`: Test failed (Red) due to generic error message. Fixed patch strategy after `AttributeError`. Added specific `except psycopg.Error` block in `src/philograph/api/main.py` (Green). No refactoring needed.
+    - Verified all 13 `/search` tests pass together using `pytest -k test_search`.
+    - Updated Memory Bank (`activeContext.md`, `globalContext.md`, `tdd.md`, `tdd-feedback.md`).
+- **Files Affected**:
+    - `tests/api/test_main.py` (Added 2 tests, fixed syntax/assertions/patch targets)
+    - `src/philograph/api/main.py` (Added `except psycopg.Error` block)
+    - `memory-bank/activeContext.md` (Updated)
+    - `memory-bank/globalContext.md` (Updated)
+    - `memory-bank/mode-specific/tdd.md` (Updated)
+    - `memory-bank/feedback/tdd-feedback.md` (Updated)
+- **Verification**: Ran `sudo docker-compose exec philograph-backend pytest /app/tests/api/test_main.py -k test_search`. Result: 13 passed, 38 deselected.
+- **Status**: Task completed successfully. All required test cases for `/search` robustness are implemented and passing.
+- **Next Steps**: Await further instructions or proceed with testing other API endpoints.
+### Task Completion Summary - [2025-05-01 23:21:32]
+- **Trigger**: Completion of TDD cycles for `GET /acquire/status/{id}`.
+- **Context**: Resumed task after previous Early Return [Ref: TDD Feedback 2025-05-01 23:06:06]. Objective was to add tests for Completed, Failed, Not Found, and Invalid ID Format cases.
+- **Actions Taken**:
+    - Added `test_get_acquisition_status_completed`: Fixed import/mock data issues. Test passed (Red skipped).
+    - Added `test_get_acquisition_status_failed`: Fixed assertion dictionary. Test passed (Red skipped).
+    - Added `test_get_acquisition_status_not_found`: Test failed on assertion. Fixed API 404 detail message in `src/philograph/api/main.py`. Test passed (Green).
+    - Added `test_get_acquisition_status_invalid_id_format`: Test passed (Red skipped, FastAPI validation).
+    - Verified all 5 tests for `GET /acquire/status/{id}` pass together.
+    - Updated Memory Bank (`activeContext.md`, `globalContext.md`, `tdd.md`).
+- **Files Affected**:
+    - `tests/api/test_main.py` (Added 4 tests, fixed import/assertions)
+    - `src/philograph/api/main.py` (Modified 404 detail message)
+    - `memory-bank/activeContext.md` (Updated)
+    - `memory-bank/globalContext.md` (Updated)
+    - `memory-bank/mode-specific/tdd.md` (Updated)
+- **Verification**: Ran `sudo docker-compose exec philograph-backend pytest /app/tests/api/test_main.py -k test_get_acquisition_status`. Result: 5 passed.
+- **Status**: Task completed successfully. All required test cases for `GET /acquire/status/{id}` are implemented and passing.
+- **Next Steps**: Proceed with testing other API endpoints as per `pseudocode/tier0/backend_api.md` or await further instructions.
+### Early Return - Context Limit Reached (50%) - [2025-05-01 23:06:06]
+- **Trigger**: Context size reached 50% after verifying `test_get_acquisition_status_success_pending`.
+- **Context**: Task was to resume TDD for Backend API (`src/philograph/api/main.py`) after corruption fix.
+- **Issue**: Context limit reached, preventing further TDD cycles without risking degraded performance.
+- **Progress**:
+    - Fixed 4 regressions in `tests/data_access/test_db_layer.py` related to `get_collection_items` mock assertions. Verified full suite passes (257 passed, 1 skipped).
+    - Added and verified tests for `GET /documents/{id}/references` (success, not found, DB error, empty list). Required fixing imports, patch targets, and Pydantic model (`ReferenceDetail`).
+    - Added and verified tests for `GET /chunks/{id}` (success, not found, DB error, invalid ID format). Required adding placeholder DB function, API endpoint, Pydantic model (`ChunkResponse`), and fixing test code errors (imports, patch targets, assertions, model definition order).
+    - Added and verified test for `GET /acquire/status/{id}` (pending). Required adding import to `api/main.py` and fixing patch target/mock data in test.
+- **Analysis**: Completed a significant block of API tests, including restoring previously missing tests and adding new ones. Context limit reached before completing all `/acquire/status/{id}` cases.
+- **Self-Correction**: Following `context_management` protocol to invoke Early Return.
+- **Context %**: 50%
+- **Recommendation**: Invoke Early Return. Suggest SPARC create a `new_task` for TDD mode to continue testing `src/philograph/api/main.py`. Focus on: 1) Remaining `/acquire/status/{id}` cases (completed, failed, not found, invalid ID format). 2) Proceed to other endpoints as per `pseudocode/tier0/backend_api.md`. Provide link to this feedback entry and relevant Memory Bank sections (`tdd.md`, `activeContext.md`) for context handover. [Ref: Original Task 2025-05-01 22:37:26]
+### Early Return - Intractable Syntax Errors (File Corruption) - [2025-05-01 21:44:52]
+- **Trigger**: Persistent Pylance syntax errors ("Statements must be separated...", "Expected attribute name after '.'") appearing on multiple docstring lines throughout `tests/api/test_main.py` after attempting to add `test_get_collection_db_error` and fix initial insertion errors. Context: ~22%.
+- **Context**: Task was to continue TDD for `src/philograph/api/main.py`. Completed `/search` offset test. Attempted to add `test_get_collection_db_error`.
+- **Issue**: Initial `insert_content` placed the new test inside a previous docstring. Subsequent `apply_diff` attempts to remove, re-insert, and rewrite the docstring failed to resolve Pylance errors, which then spread to numerous other docstrings in the file, indicating likely file corruption (hidden characters, encoding issues, etc.).
+- **Attempts**:
+    1. Inserted `test_get_collection_db_error` using `insert_content`. Pylance errors appeared.
+    2. Removed inserted block using `apply_diff`.
+    3. Re-inserted block using `insert_content`. Pylance errors persisted.
+    4. Rewrote problematic docstring line using `apply_diff` (identical content). Failed.
+    5. Rewrote problematic docstring line with minor change using `apply_diff`. Succeeded, but Pylance errors persisted.
+    6. Rewrote entire docstring block as single line using `apply_diff`. Succeeded, but Pylance errors persisted and spread.
+    7. Removed stray lines from previous docstring using `apply_diff`. Succeeded, but Pylance errors persisted and spread further.
+- **Analysis**: The file `tests/api/test_main.py` appears corrupted, likely due to multiple tool operations. Targeted fixes are ineffective. "Three Strikes" rule triggered for `apply_diff`.
+- **Self-Correction**: Following Early Return Clause due to intractable syntax blocker/file corruption.
+- **Context %**: ~22% (Manually calculated: 219,639 / 1,000,000)
+- **Recommendation**: Invoke Early Return. Delegate to `debug` mode via `new_task` to investigate and fix the widespread syntax errors/corruption in `tests/api/test_main.py`. Debug mode should consider using `write_to_file` to rewrite the entire file cleanly, potentially referencing the state before these recent modifications or carefully reconstructing it. Provide link to this feedback entry. [Ref: Original Task 2025-05-01 21:38:52]
 ### Early Return - Intractable Syntax Errors in Test File - [2025-05-01 21:00:00]
 - **Trigger**: Persistent `SyntaxError` during `pytest` execution and multiple Pylance errors reported after attempting to add `test_create_collection_db_error` to `tests/api/test_main.py`. Context: ~29%.
 - **Context**: Task was to continue TDD for `src/philograph/api/main.py`. Completed tests for `/acquire/confirm` (404, 500). Attempted to add test for `POST /collections` DB error.

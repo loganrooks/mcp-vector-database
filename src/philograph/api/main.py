@@ -1,3 +1,4 @@
+import philograph.acquisition.service as text_acquisition
 import logging
 import linecache
 from contextlib import asynccontextmanager
@@ -123,9 +124,10 @@ class AcquisitionStatusResponse(BaseModel):
 
 # Models for Document References
 class ReferenceDetail(BaseModel):
-    source_chunk_id: int
-    target_chunk_id: int
-    type: str
+    id: int # Added ID field based on mock data
+    source_node_id: str # Changed from source_chunk_id
+    target_node_id: str # Changed from target_chunk_id
+    relation_type: str # Changed from type
     metadata: Optional[Dict[str, Any]] = None
 
 class DocumentReferencesResponse(BaseModel):
@@ -257,6 +259,9 @@ async def handle_search_request(request: SearchRequest):
     except RuntimeError as rte: # Catch errors raised by search_service (embedding, db etc.)
         logger.error(f"Runtime error during search: {rte}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(rte))
+    except psycopg.Error as db_err: # Catch specific DB errors
+        logger.error(f"Database error during search: {db_err}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Search failed due to unexpected database error")
     except Exception as e:
         logger.exception(f"Unexpected error during search for query: {request.query[:50]}...", exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred during search.")
@@ -309,6 +314,34 @@ async def get_document_references(doc_id: int = FastApiPath(..., gt=0, descripti
          raise # Re-raise HTTP exceptions (like the 404)
     except Exception as e:
         logger.exception(f"Error retrieving references for document {doc_id}", exc_info=e)
+class ChunkResponse(BaseModel):
+    id: int
+    section_id: int
+    text_content: str
+    sequence: int
+    # Note: Embedding vector is likely too large/unnecessary for typical API response
+
+@app.get("/chunks/{chunk_id}", response_model=ChunkResponse)
+async def get_chunk(chunk_id: int = FastApiPath(..., gt=0, description="ID of the chunk to retrieve.")):
+    """
+    Retrieves details for a specific chunk.
+    """
+    # TDD: Test success case
+    # TDD: Test not found case
+    # TDD: Test DB error case
+    logger.info(f"Received request for chunk ID: {chunk_id}")
+    try:
+        async with db_layer.get_db_connection() as conn:
+            chunk_data = await db_layer.get_chunk_by_id(conn, chunk_id)
+            if chunk_data is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chunk not found.")
+            # Assuming db_layer returns a dict compatible with ChunkResponse
+            return ChunkResponse(**chunk_data)
+    except HTTPException:
+         raise # Re-raise HTTP exceptions (like the 404)
+    except Exception as e:
+        logger.exception(f"Error retrieving chunk {chunk_id}", exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving chunk.")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving document references.")
 
 
@@ -437,9 +470,15 @@ async def get_collection(collection_id: int = FastApiPath(..., gt=0, description
             # Check if collection exists first? Or just return empty list if no items found.
             # Let's assume returning empty list is acceptable if collection is empty or non-existent.
             items_raw = await db_layer.get_collection_items(conn, collection_id)
+            # Check if the collection exists. If not (assuming db_layer returns None), return 404.
+            # An empty list means the collection exists but is empty, which is a valid 200 OK response.
+            if items_raw is None:
+                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found.")
             # Convert list of dicts from db_layer to list of Pydantic models
             items = [CollectionItem(**item) for item in items_raw]
             return CollectionGetResponse(collection_id=collection_id, items=items)
+    except HTTPException:
+         raise # Re-raise HTTP exceptions (like the 404)
     except Exception as e:
         logger.exception(f"Error retrieving collection {collection_id}", exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving collection.")
@@ -517,7 +556,7 @@ async def get_acquisition_status(acquisition_id: UUID = FastApiPath(..., descrip
         # Map the dictionary to the Pydantic model
         return AcquisitionStatusResponse(**status_info)
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Acquisition ID not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Acquisition task not found.")
 
 
 # --- Main Execution (for local testing) ---
