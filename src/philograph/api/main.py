@@ -39,6 +39,7 @@ class SearchRequest(BaseModel):
     query: str = Field(..., description="The natural language search query.")
     filters: Optional[SearchFilter] = None
     limit: int = Field(default=config.SEARCH_TOP_K, gt=0, le=100, description="Maximum number of results.")
+    offset: int = Field(default=0, ge=0, description="Number of results to skip for pagination.")
 
 class SearchResultItemSourceDocument(BaseModel):
     doc_id: int
@@ -79,6 +80,8 @@ class CollectionItemAddRequest(BaseModel):
 class CollectionItemAddResponse(BaseModel):
     message: str
 
+class CollectionDeleteResponse(BaseModel):
+    message: str
 class CollectionItem(BaseModel):
     item_type: str
     item_id: int
@@ -118,6 +121,15 @@ class AcquisitionStatusResponse(BaseModel):
     philo_doc_id: Optional[int] = None
 
 
+# Models for Document References
+class ReferenceDetail(BaseModel):
+    source_chunk_id: int
+    target_chunk_id: int
+    type: str
+    metadata: Optional[Dict[str, Any]] = None
+
+class DocumentReferencesResponse(BaseModel):
+    references: List[ReferenceDetail]
 # --- FastAPI Lifespan ---
 
 # --- FastAPI Lifespan (Original, without tracemalloc) ---
@@ -235,7 +247,8 @@ async def handle_search_request(request: SearchRequest):
         results = await search_service.perform_search(
             query_text=request.query,
             top_k=request.limit,
-            filters=filters_dict
+            filters=filters_dict,
+            offset=request.offset # Pass offset to service layer
         )
         return SearchResponse(results=results)
     except ValueError as ve: # e.g., empty query, dimension mismatch
@@ -270,6 +283,33 @@ async def get_document(doc_id: int = FastApiPath(..., gt=0, description="ID of t
     except Exception as e:
         logger.exception(f"Error retrieving document {doc_id}", exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving document.")
+
+
+@app.get("/documents/{doc_id}/references", response_model=DocumentReferencesResponse)
+async def get_document_references(doc_id: int = FastApiPath(..., gt=0, description="ID of the document to retrieve references for.")):
+    """
+    Retrieves references originating from chunks within a specific document.
+    """
+    # TDD: Test retrieving references for an existing document
+    # TDD: Test retrieving references for a document with no references returns empty list
+    # TDD: Test retrieving references for a non-existent document returns 404
+    logger.info(f"Received request for references for document ID: {doc_id}")
+    try:
+        async with db_layer.get_db_connection() as conn:
+            # Check if document exists first
+            document = await db_layer.get_document_by_id(conn, doc_id)
+            if document is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found.")
+
+            references_raw = await db_layer.get_relationships_for_document(conn, doc_id)
+            # Convert list of dicts from db_layer to list of Pydantic models
+            references = [ReferenceDetail(**ref) for ref in references_raw]
+            return DocumentReferencesResponse(references=references)
+    except HTTPException:
+         raise # Re-raise HTTP exceptions (like the 404)
+    except Exception as e:
+        logger.exception(f"Error retrieving references for document {doc_id}", exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving document references.")
 
 
 @app.post("/collections", response_model=CollectionCreateResponse, status_code=status.HTTP_201_CREATED)
@@ -321,12 +361,63 @@ async def add_collection_item(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"{request.item_type.capitalize()} ID {request.item_id} already exists in collection ID {collection_id}."
         )
-    except ValueError as ve: # Catch invalid item_type from db_layer if validation added there
-         logger.warning(f"Invalid item type provided: {ve}")
-         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+# Define a simple response model for the delete operation
+class CollectionItemDeleteResponse(BaseModel):
+    message: str
+
+@app.delete("/collections/{collection_id}/items/{item_type}/{item_id}", response_model=CollectionItemDeleteResponse)
+async def remove_collection_item(
+    collection_id: int = FastApiPath(..., gt=0, description="ID of the collection."),
+    item_type: str = FastApiPath(..., description="Type of the item ('document' or 'chunk')."),
+    item_id: int = FastApiPath(..., gt=0, description="ID of the item to remove.")
+):
+    """Removes an item from a specific collection."""
+    # TDD: Test removing an existing item returns 200 OK
+    # TDD: Test removing a non-existent item returns 404
+    # TDD: Test removing from a non-existent collection returns 404
+    # TDD: Test invalid item_type returns 422
+    logger.info(f"Removing {item_type} {item_id} from collection {collection_id}")
+    try:
+        # Basic validation for item_type
+        allowed_types = ['document', 'chunk']
+        if item_type not in allowed_types:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid item_type '{item_type}'. Allowed types: {allowed_types}")
+
+        async with db_layer.get_db_connection() as conn:
+            removed = await db_layer.remove_item_from_collection(conn, collection_id, item_type, item_id)
+            if removed:
+                return CollectionItemDeleteResponse(message=f"{item_type.capitalize()} ID {item_id} removed from collection ID {collection_id}.")
+            else:
+                # Assume False from db_layer means item/collection not found
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item or collection not found.")
+    except HTTPException:
+         raise # Re-raise HTTP exceptions
     except Exception as e:
-        logger.exception(f"Error adding item to collection {collection_id}", exc_info=e)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error adding item to collection.")
+        logger.exception(f"Error removing {item_type} {item_id} from collection {collection_id}", exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error removing item from collection.")
+
+@app.delete("/collections/{collection_id}", response_model=CollectionDeleteResponse)
+async def delete_collection_endpoint(
+    collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to delete.")
+):
+    """Deletes a collection and all its associated items."""
+    # TDD: Test deleting an existing collection returns 200 OK
+    # TDD: Test deleting a non-existent collection returns 404
+    logger.info(f"Deleting collection {collection_id}")
+    try:
+        async with db_layer.get_db_connection() as conn:
+            deleted = await db_layer.delete_collection(conn, collection_id)
+            if deleted:
+                return CollectionDeleteResponse(message=f"Collection ID {collection_id} deleted.")
+            else:
+                # Assume False from db_layer means collection not found
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found.")
+    except HTTPException:
+         raise # Re-raise HTTP exceptions
+    except Exception as e:
+        logger.exception(f"Error deleting collection {collection_id}", exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error deleting collection.")
+
 
 class CollectionItemDetail(BaseModel):
     item_type: str

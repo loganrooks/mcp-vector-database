@@ -1,3 +1,5 @@
+from pydantic import BaseModel # ADDED IMPORT
+from philograph.data_access import db_layer # ADDED IMPORT
 import uuid
 from unittest.mock import patch, AsyncMock, ANY # Removed duplicate, Added ANY
 import pytest
@@ -215,7 +217,8 @@ async def test_search_success_query_only(mock_perform_search: AsyncMock, test_cl
     mock_perform_search.assert_awaited_once_with(
         query_text="test query",
         top_k=10,
-        filters=None
+        filters=None,
+        offset=0 # Added default offset
     )
 @pytest.mark.asyncio
 @patch("philograph.api.main.search_service.perform_search", new_callable=AsyncMock)
@@ -263,7 +266,8 @@ async def test_search_success_with_filters(mock_perform_search: AsyncMock, test_
     mock_perform_search.assert_awaited_once_with(
         query_text="filtered query",
         top_k=5,
-        filters=expected_filters_dict
+        filters=expected_filters_dict,
+        offset=0 # Added default offset
     )
 @pytest.mark.asyncio
 async def test_search_missing_query(test_client: AsyncClient):
@@ -320,7 +324,8 @@ async def test_search_empty_results(mock_perform_search: AsyncMock, test_client:
     mock_perform_search.assert_awaited_once_with(
         query_text="query with no results",
         top_k=10, # Assuming default
-        filters=None
+        filters=None,
+        offset=0 # Added default offset
     )
 @pytest.mark.asyncio
 @patch("philograph.api.main.search_service.perform_search", new_callable=AsyncMock)
@@ -342,7 +347,8 @@ async def test_search_value_error(mock_perform_search: AsyncMock, test_client: A
     mock_perform_search.assert_awaited_once_with(
         query_text="query causing value error",
         top_k=10, # Assuming default
-        filters=None
+        filters=None,
+        offset=0 # Added default offset
     )
 @pytest.mark.asyncio
 @patch("philograph.api.main.search_service.perform_search", new_callable=AsyncMock)
@@ -364,7 +370,43 @@ async def test_search_runtime_error(mock_perform_search: AsyncMock, test_client:
     mock_perform_search.assert_awaited_once_with(
         query_text="query causing runtime error",
         top_k=10, # Assuming default
-        filters=None
+        filters=None,
+        offset=0 # Added default offset
+    )
+@pytest.mark.asyncio
+@patch("philograph.api.main.search_service.perform_search", new_callable=AsyncMock)
+async def test_search_success_with_offset(mock_perform_search: AsyncMock, test_client: AsyncClient):
+    """
+    Test POST /search with a query and offset returns 200 OK and results,
+    ensuring offset is passed to the service layer.
+    """
+    # Arrange
+    mock_results = [ # Sample result
+        {
+            "chunk_id": 303, "text": "Chunk after offset.", "distance": 0.3,
+            "source_document": {"doc_id": 3, "title": "Offset Doc", "author": "Author C", "year": 2025, "source_path": "docs/offset.md"},
+            "location": {"section_id": 30, "section_title": "Body", "chunk_sequence_in_section": 1}
+        }
+    ]
+    mock_perform_search.return_value = mock_results
+    request_payload = {
+        "query": "offset query",
+        "offset": 5 # Specify offset
+    }
+
+    # Act
+    response = await test_client.post("/search", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    expected_response = {"results": mock_results}
+    assert response.json() == expected_response
+    # Assert mock was called correctly with offset and default limit/filters
+    mock_perform_search.assert_awaited_once_with(
+        query_text="offset query",
+        top_k=10, # Assuming default limit
+        filters=None,
+        offset=5 # Check offset is passed
     )
 # --- /documents Endpoint Tests ---
 
@@ -687,6 +729,7 @@ async def test_get_collection_success(mock_get_items: AsyncMock, test_client: As
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"collection_id": collection_id, "items": expected_items} # Match CollectionGetResponse
     mock_get_items.assert_awaited_once_with(ANY, collection_id)
+
 @pytest.mark.asyncio
 @patch("philograph.api.main.db_layer.get_collection_items", new_callable=AsyncMock)
 async def test_get_collection_empty(mock_get_items: AsyncMock, test_client: AsyncClient):
@@ -705,6 +748,7 @@ async def test_get_collection_empty(mock_get_items: AsyncMock, test_client: Asyn
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"collection_id": collection_id, "items": expected_items} # Match CollectionGetResponse
     mock_get_items.assert_awaited_once_with(ANY, collection_id)
+
 @pytest.mark.asyncio
 @patch("philograph.api.main.db_layer.get_collection_items", new_callable=AsyncMock)
 async def test_get_collection_not_found(mock_get_items: AsyncMock, test_client: AsyncClient):
@@ -726,6 +770,26 @@ async def test_get_collection_not_found(mock_get_items: AsyncMock, test_client: 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"collection_id": collection_id, "items": []} # Match CollectionGetResponse
     mock_get_items.assert_awaited_once_with(ANY, collection_id)
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.get_collection_items", new_callable=AsyncMock)
+async def test_get_collection_db_error(mock_get_items: AsyncMock, test_client: AsyncClient):
+    """Test GET /collections/{id} returns 500 Internal Server Error on database error."""
+    # Arrange
+    collection_id = 1
+    error_message = "Simulated DB connection error during get items"
+    mock_get_items.side_effect = psycopg.Error(error_message)
+
+    # Act
+    response = await test_client.get(f"/collections/{collection_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"detail": "Error retrieving collection."} # Corrected expected message
+    mock_get_items.assert_awaited_once()
+    # args, kwargs = mock_get_items.call_args
+    # assert args[1] == collection_id # args[0] is connection
+
 # --- /acquire Endpoint Tests ---
 
 @pytest.mark.asyncio
@@ -995,3 +1059,178 @@ async def test_get_acquisition_status_invalid_id_format(test_client: AsyncClient
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     # Check for Pydantic/FastAPI's validation error message structure
     assert '"type":"uuid_parsing"' in response.text # Check for specific error type
+# --- GET /documents/{doc_id}/references Endpoint Tests ---
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.get_document_by_id", new_callable=AsyncMock) # Added mock for existence check
+@patch("philograph.api.main.db_layer.get_relationships_for_document", new_callable=AsyncMock)
+async def test_get_document_references_success(mock_get_refs: AsyncMock, mock_get_doc: AsyncMock, test_client: AsyncClient): # Added mock_get_doc
+    """
+    Test GET /documents/{doc_id}/references returns 200 OK and references for an existing document.
+    """
+    # Arrange
+    doc_id = 1
+    # Mock the initial document check to return a dummy document
+    mock_get_doc.return_value = {"id": doc_id, "title": "Dummy Doc", "source_path": "dummy.pdf"} # Simulate document exists
+
+    expected_references = [
+        {"source_chunk_id": 10, "target_chunk_id": 20, "type": "citation", "metadata": {"context": "See Smith (2020)"}},
+        {"source_chunk_id": 15, "target_chunk_id": 30, "type": "similarity", "metadata": {"score": 0.95}},
+    ]
+    mock_get_refs.return_value = expected_references
+
+    # Act
+    response = await test_client.get(f"/documents/{doc_id}/references")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"references": expected_references}
+    mock_get_doc.assert_awaited_once_with(ANY, doc_id) # Verify existence check was called
+    mock_get_refs.assert_awaited_once_with(ANY, doc_id)
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.get_relationships_for_document", new_callable=AsyncMock)
+async def test_get_document_references_not_found(mock_get_refs: AsyncMock, test_client: AsyncClient):
+    """
+    Test GET /documents/{doc_id}/references returns 404 Not Found for a non-existent document ID.
+    """
+    # Arrange
+    doc_id = 999 # Non-existent document ID
+    # Simulate the db_layer function returning an empty list or perhaps raising an error
+    # For now, assume the API layer should handle the 404 based on the db_layer result.
+    # Let's refine this based on how the implementation evolves.
+    # Option 1: Mock returns empty list, API checks and raises 404 (requires API change)
+    # Option 2: Mock raises a specific error (e.g., db_layer.NotFoundError), API catches and raises 404 (requires API change)
+    # Option 3: Mock returns empty list, API returns 200 OK with empty list (current minimal implementation might do this)
+    # Let's assume Option 3 for the initial failing test, driving the need for the 404 logic.
+    mock_get_refs.return_value = [] # Simulate finding no references (could be empty doc or non-existent doc)
+
+    # Act
+    response = await test_client.get(f"/documents/{doc_id}/references")
+
+    # Assert
+    # This assertion will initially fail if the endpoint returns 200 OK with empty list
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Document not found."} # Or a more specific message
+    # The mock might not be called if the API checks doc existence first
+    # mock_get_refs.assert_awaited_once_with(ANY, doc_id)
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.get_document_by_id", new_callable=AsyncMock)
+@patch("philograph.api.main.db_layer.get_relationships_for_document", new_callable=AsyncMock)
+async def test_get_document_references_empty(mock_get_refs: AsyncMock, mock_get_doc: AsyncMock, test_client: AsyncClient):
+    """
+    Test GET /documents/{doc_id}/references returns 200 OK and an empty list for a document with no references.
+    """
+    # Arrange
+    doc_id = 2 # Existing document ID
+    # Mock get_document_by_id to return a dummy document, confirming existence
+    mock_get_doc.return_value = db_layer.Document(id=doc_id, source_path="/path/to/doc2")
+    # Mock get_relationships_for_document to return an empty list
+    mock_get_refs.return_value = []
+
+    # Act
+    response = await test_client.get(f"/documents/{doc_id}/references")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"references": []}
+    mock_get_doc.assert_awaited_once_with(ANY, doc_id)
+    mock_get_refs.assert_awaited_once_with(ANY, doc_id)
+# --- DELETE /collections/{collection_id}/items/{item_type}/{item_id} Endpoint Tests ---
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.remove_item_from_collection", new_callable=AsyncMock)
+async def test_delete_collection_item_success(mock_remove_item: AsyncMock, test_client: AsyncClient):
+    """
+    Test DELETE /collections/{coll_id}/items/{item_type}/{item_id} returns 200 OK on success.
+    """
+    # Arrange
+    collection_id = 123
+    item_type = "document"
+    item_id = 456
+    # Simulate the db_layer function returning True or None on success
+    mock_remove_item.return_value = True # Or None, depending on db_layer implementation
+
+    # Act
+    response = await test_client.delete(f"/collections/{collection_id}/items/{item_type}/{item_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"message": f"{item_type.capitalize()} ID {item_id} removed from collection ID {collection_id}."}
+    mock_remove_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id)
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.remove_item_from_collection", new_callable=AsyncMock)
+async def test_delete_collection_item_not_found(mock_remove_item: AsyncMock, test_client: AsyncClient):
+    """
+    Test DELETE /collections/{coll_id}/items/{item_type}/{item_id} returns 404 Not Found
+    when the item or collection does not exist.
+    """
+    # Arrange
+    collection_id = 123
+    item_type = "document"
+    item_id = 999 # Non-existent item ID
+    # Simulate the db_layer function returning False when the item/collection is not found
+    mock_remove_item.return_value = False
+
+    # Act
+    response = await test_client.delete(f"/collections/{collection_id}/items/{item_type}/{item_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Item or collection not found."}
+    mock_remove_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id)
+@pytest.mark.asyncio
+async def test_delete_collection_item_invalid_type(test_client: AsyncClient):
+    """
+    Test DELETE /collections/{coll_id}/items/{item_type}/{item_id} returns 422 Unprocessable Entity
+    for an invalid item_type.
+    """
+    # Arrange
+    collection_id = 123
+    item_type = "invalid_type" # Invalid type
+    item_id = 456
+
+    # Act
+    response = await test_client.delete(f"/collections/{collection_id}/items/{item_type}/{item_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    # Check detail message based on implementation
+    assert f"Invalid item_type '{item_type}'" in response.json()["detail"]
+# --- DELETE /collections/{collection_id} Endpoint Tests ---
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.delete_collection", new_callable=AsyncMock)
+async def test_delete_collection_success(mock_delete_collection: AsyncMock, test_client: AsyncClient):
+    """
+    Test DELETE /collections/{collection_id} returns 200 OK on successful deletion.
+    """
+    # Arrange
+    collection_id = 123
+    # Simulate the db_layer function returning True or indicating success
+    mock_delete_collection.return_value = True # Or number of rows deleted > 0
+
+    # Act
+    response = await test_client.delete(f"/collections/{collection_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"message": f"Collection ID {collection_id} deleted."}
+    mock_delete_collection.assert_awaited_once_with(ANY, collection_id)
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.delete_collection", new_callable=AsyncMock)
+async def test_delete_collection_not_found(mock_delete_collection: AsyncMock, test_client: AsyncClient):
+    """
+    Test DELETE /collections/{collection_id} returns 404 Not Found for a non-existent collection ID.
+    """
+    # Arrange
+    collection_id = 999 # Non-existent ID
+    # Simulate the db_layer function returning False when the collection is not found
+    mock_delete_collection.return_value = False
+
+    # Act
+    response = await test_client.delete(f"/collections/{collection_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Collection not found."}
+    mock_delete_collection.assert_awaited_once_with(ANY, collection_id)

@@ -124,6 +124,10 @@
 - **Context**: Testing `try...except` blocks around `await` calls where the awaited async function needs to raise an exception.
 - **Usage**: Use `@patch('path.to.async_func', new_callable=AsyncMock)` or ensure the mock is async. Set the `side_effect` directly to the exception instance: `mock_async_func.side_effect = MyException("Error message")`. The `AsyncMock` handles raising the exception when the mock is awaited. Avoid complex wrappers like `AsyncMock(side_effect=MyException(...))` unless needed for more advanced scenarios. Ensure test assertions only check behavior relevant to the error path (e.g., return value, logs), not steps that are skipped due to the exception.
 - **Effectiveness**: High (Resolved `test_call_grobid_extractor_api_request_error` failure).
+### Tool/Technique: `write_to_file` for Corruption Repair - [2025-05-01 21:51:43]
+- **Context**: Resolving widespread file corruption (syntax errors, structural damage) caused by failed partial modification tools (`apply_diff`, `insert_content`).
+- **Usage**: When partial fixes fail repeatedly or corruption is extensive, read the full file content (potentially in parts), manually reconstruct the correct code structure and logic in memory, and use `write_to_file` to overwrite the entire file. Requires careful analysis and reconstruction but provides a clean slate.
+- **Effectiveness**: High (Resolved Issue-ID: API-TEST-SYNTAX-CORRUPTION-20250501 twice).
 ## Debugging Tools & Techniques
 ### Tool/Technique: URL Encode Connection String Passwords - [2025-05-01 13:30:13]
 - **Context**: Database connection failures (`[Errno -2] Name or service not known`) when the password contains special characters like '@'.
@@ -141,6 +145,13 @@
 ## Environment-Specific Notes
 <!-- Append environment notes using the format below -->
 
+### Pattern: File Corruption via Diff/Insert - [2025-05-01 21:51:43]
+- **Identification**: Repeated instances of Python file corruption (`SyntaxError`, structural issues) following failed `apply_diff` or `insert_content` operations, particularly in test files during TDD.
+- **Causes**: Likely related to incorrect diff context, line number shifts after previous edits, or tool limitations in handling complex insertions/replacements.
+- **Components**: `tests/api/test_main.py` (observed twice).
+- **Resolution**: Using `write_to_file` to rewrite the entire file proved effective. Requires careful reconstruction of the intended state.
+- **Related**: [Ref: Issue-ID: API-TEST-SYNTAX-CORRUPTION-20250501]
+- **Last Seen**: [2025-05-01 21:51:43]
 ## Recurring Bug Patterns
 ### Issue: TDD-GROBID-REQ-ERR-20250428 - `test_call_grobid_extractor_api_request_error` failed assertion - [Status: Resolved] - [2025-04-28 17:04:30]
 - **Reported**: [2025-04-28 16:57:29] (via TDD Early Return / activeContext) / **Severity**: Medium / **Symptoms**: Test failed `assert result is None`. Mocked `httpx.RequestError` not caught by `call_grobid_extractor`.
@@ -162,6 +173,17 @@
 <!-- Append new patterns using the format below -->
 
 ## Issue History
+### Issue: API-TEST-SYNTAX-CORRUPTION-20250501 - Syntax Errors/Corruption in `tests/api/test_main.py` - [Status: Resolved] - [2025-05-01 21:51:43]
+- **Reported**: [2025-05-01 21:00:00] (First instance), [2025-05-01 21:45:17] (Second instance via TDD Feedback) / **Severity**: High / **Symptoms**: Persistent `SyntaxError`s / test failures blocking test collection/execution for `tests/api/test_main.py`.
+- **Investigation**:
+    - Instance 1: Read file, identified widespread corruption (duplicates, nesting). [Ref: Debug Feedback 2025-05-01 21:04:38]
+    - Instance 2: Read file, identified misplaced function definition (`test_get_collection_db_error` nested). Ran `pytest` after rewrite, identified 8 assertion/logic failures. Diagnosed mock/API/assertion errors.
+- **Root Cause**: File corruption likely caused by failed `apply_diff` or `insert_content` operations during TDD mode. Subsequent failures due to outdated assertions and API logic errors.
+- **Fix Applied**:
+    - Instance 1: Used `write_to_file` to overwrite `tests/api/test_main.py`. [Ref: Debug Feedback 2025-05-01 21:04:38]
+    - Instance 2: Used `write_to_file` to overwrite `tests/api/test_main.py`. Used `apply_diff` to fix 6 test assertions in `tests/api/test_main.py`. Used `apply_diff` to fix API logic (`UniqueViolation` handling) in `src/philograph/api/main.py`. Used `apply_diff` to add missing mock in `tests/api/test_main.py`.
+- **Verification**: Ran `sudo docker-compose exec philograph-backend pytest tests/api/test_main.py`. Result: `51 passed, 6 warnings`.
+- **Related Issues**: [Ref: TDD Feedback 2025-05-01 21:00:00], [Ref: TDD Feedback 2025-05-01 21:44:52]
 ### Issue: API-TEST-SYNTAX-CORRUPTION-20250501 - Syntax Errors/Corruption in `tests/api/test_main.py` - [Status: Resolved] - [2025-05-01 21:05:32]
 - **Reported**: [2025-05-01 21:00:00] (via TDD Feedback) / **Severity**: High / **Symptoms**: Persistent `SyntaxError`s reported by `pytest` and Pylance, blocking test collection for `tests/api/test_main.py`.
 - **Investigation**:

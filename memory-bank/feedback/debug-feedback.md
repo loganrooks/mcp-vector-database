@@ -1,3 +1,17 @@
+### Task Completion: Fixed Recurring Syntax Errors/Corruption in `tests/api/test_main.py` (Second Instance) - [2025-05-01 21:51:43]
+- **Issue**: Recurring widespread `SyntaxError`s and file corruption in `tests/api/test_main.py` blocking TDD progress [Ref: TDD Feedback 2025-05-01 21:44:52]. This is the second instance [Ref: Debug Feedback 2025-05-01 21:04:38].
+- **Diagnosis**:
+    - Read corrupted file (`read_file` lines 1-500, 501-1220). Identified misplaced function definition (`test_get_collection_db_error` nested inside `test_get_collection_empty`) causing syntax errors.
+    - Confirmed corruption pattern matches previous instance and likely caused by failed TDD `apply_diff`/`insert_content` operations.
+- **Fix**:
+    1.  Used `write_to_file` to rewrite `tests/api/test_main.py` (1220 lines) with corrected structure, incorporating intended TDD changes (`test_search_success_with_offset`, `test_get_collection_db_error`).
+    2.  Ran `pytest`, revealing 8 assertion/logic failures.
+    3.  Diagnosed failures: Missing `offset=0` in search mocks, incorrect API error handling for `UniqueViolation` in `add_collection_item`, assertion mismatch in `test_get_collection_db_error`, missing mock for `get_document_by_id` in `test_get_document_references_success`.
+    4.  Applied fixes via `apply_diff`: Updated 6 assertions in `tests/api/test_main.py`, corrected `except UniqueViolation` block in `src/philograph/api/main.py`, added missing mock in `tests/api/test_main.py`.
+- **Verification**: Ran `sudo docker-compose exec philograph-backend pytest tests/api/test_main.py`. Result: `51 passed, 6 warnings`. Confirmed syntax errors and subsequent test failures resolved.
+- **Files Affected**: `tests/api/test_main.py`, `src/philograph/api/main.py`
+- **Next Steps**: Commit fixes, use `attempt_completion`. Recommend TDD run.
+- **Related Issues**: [Ref: TDD Feedback 2025-05-01 21:44:52], [Ref: Debug Feedback 2025-05-01 21:04:38], [Ref: Issue-ID: API-TEST-SYNTAX-CORRUPTION-20250501]
 ### Task Completion: Fixed Syntax Errors in `tests/api/test_main.py` - [2025-05-01 21:04:38]
 - **Issue**: Persistent `SyntaxError`s and file corruption in `tests/api/test_main.py` blocking TDD progress [Ref: TDD Feedback 2025-05-01 21:00:00].
 - **Diagnosis**: Read file content (`read_file` lines 1-500, 501-1025). Identified widespread issues: duplicate imports, structural corruption (nested function definitions), incomplete functions, duplicate function definitions, duplicate assertions. Likely caused by previous failed `apply_diff` attempts.
