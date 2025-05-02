@@ -2,14 +2,16 @@ import json
 import pytest
 import httpx
 import typer
-import typer
+# import typer # Duplicate removed
 import click # Add click import
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock
 
 # Import the Typer app instance from your CLI module
 # Adjust the import path based on your project structure
-from philograph.cli.main import app
+from philograph.cli.main import app, search # Import search function
+# Import config for API_URL access in assertions
+from philograph import config
 
 # Fixture for the Typer CliRunner
 @pytest.fixture
@@ -248,106 +250,133 @@ def test_ingest_api_error(mock_error_console, mock_display_results, mock_make_ap
     # We don't assert mock_error_console here because the error is printed
     # *within* make_api_request, which is already tested. We just ensure
     # the command exits correctly.
-@patch('src.philograph.cli.main.make_api_request')
-@patch('src.philograph.cli.main.display_results') # Mock display to isolate command logic
-def test_search_success_query_only(mock_display_results, mock_make_api_request, runner):
+# Removed patch decorator
+# Removed display_results mock
+def test_search_success_query_only(runner): # Removed mock_display_results
     """Test the search command calls the API correctly with only a query."""
     test_query = "philosophy of time"
-    # Expect API to return a dict with a 'results' key
-    mock_api_response = {
+    expected_payload = {"query": test_query, "limit": 10}
+    mock_api_response_data = {
         "results": [
-            {"id": 1, "type": "chunk", "score": 0.9, "text": "...", "document_title": "Being and Time"},
-            {"id": 5, "type": "chunk", "score": 0.85, "text": "...", "document_title": "Phenomenology of Spirit"}
+            {"id": 1, "type": "chunk", "score": 0.9, "text": "...", "document_title": "Being and Time", "source_document": {"title": "Being and Time", "author": "Heidegger", "year": 1927, "doc_id": 1}, "chunk_id": 1, "distance": 0.1},
+            {"id": 5, "type": "chunk", "score": 0.85, "text": "...", "document_title": "Phenomenology of Spirit", "source_document": {"title": "Phenomenology of Spirit", "author": "Hegel", "year": 1807, "doc_id": 2}, "chunk_id": 5, "distance": 0.15}
         ]
     }
-    mock_make_api_request.return_value = mock_api_response
 
-    result = runner.invoke(app, ["search", test_query])
+    # Patch make_api_request directly again
+    with patch('philograph.cli.main.make_api_request') as mock_make_api_request:
+        mock_make_api_request.return_value = mock_api_response_data
 
-    assert result.exit_code == 0
-    # Check for POST request with json_data
-    mock_make_api_request.assert_called_once_with(
-        "POST",
-        "/search",
-        json_data={"query": test_query, "filters": None, "limit": 10} # Assuming default limit
-    )
-    # Check that display_results was called with the expected dict
-    mock_display_results.assert_called_once_with(mock_api_response)
-@patch('src.philograph.cli.main.make_api_request')
-@patch('src.philograph.cli.main.display_results')
-def test_search_success_with_filters(mock_display_results, mock_make_api_request, runner):
+        # Use runner.invoke again
+        result = runner.invoke(app, ["search", test_query])
+
+        # Assert exit code
+        assert result.exit_code == 0, f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+
+        # Check that make_api_request was called correctly
+        mock_make_api_request.assert_called_once_with(
+            "POST",
+            "/search",
+            json_data=expected_payload
+        )
+    # Check stdout for expected content
+    assert "Search Results" in result.stdout
+    assert "Being and Time" in result.stdout
+    assert "Phenomenology of Spirit" in result.stdout
+    assert "0.1000" in result.stdout # Check distance formatting
+    assert "0.1500" in result.stdout
+# Removed display_results mock
+def test_search_success_with_filters(runner): # Removed mock_display_results
     """Test the search command calls the API correctly with query and filters."""
     test_query = "ethics"
     test_author = "Aristotle"
     test_year = -350 # Example year
-    # Expect API to return a dict with a 'results' key
-    mock_api_response = {
+    filters_dict = {"author": test_author, "year": test_year}
+    expected_payload = {"query": test_query, "filters": filters_dict, "limit": 10}
+    mock_api_response_data = {
         "results": [
-            {"id": 10, "type": "chunk", "score": 0.7, "text": "...", "document_title": "Nicomachean Ethics"}
+            {"id": 10, "type": "chunk", "score": 0.7, "text": "...", "document_title": "Nicomachean Ethics", "source_document": {"title": "Nicomachean Ethics", "author": "Aristotle", "year": -350, "doc_id": 3}, "chunk_id": 10, "distance": 0.3}
         ]
     }
-    mock_make_api_request.return_value = mock_api_response
 
-    filters_dict = {"author": test_author, "year": test_year}
-    # filters_json = json.dumps(filters_dict) # No longer needed for params
+    # Patch make_api_request directly again
+    with patch('philograph.cli.main.make_api_request') as mock_make_api_request:
+        mock_make_api_request.return_value = mock_api_response_data
 
-    result = runner.invoke(app, [
-        "search",
-        test_query,
-        "--author", test_author,
-        "--year", str(test_year) # Pass year as string, Typer handles conversion
-    ])
+        # Use runner.invoke again
+        result = runner.invoke(app, [
+            "search",
+            test_query,
+            "--author", test_author,
+            "--year", str(test_year)
+        ])
 
-    assert result.exit_code == 0
-    # Check for POST request with json_data, filters should be dict
-    mock_make_api_request.assert_called_once_with(
-        "POST",
-        "/search",
-        json_data={"query": test_query, "filters": filters_dict, "limit": 10} # Assuming default limit
-    )
-    mock_display_results.assert_called_once_with(mock_api_response)
-@patch('src.philograph.cli.main.make_api_request')
-@patch('src.philograph.cli.main.display_results')
-@patch('src.philograph.cli.main.error_console')
-def test_search_api_error(mock_error_console, mock_display_results, mock_make_api_request, runner):
+        # Assert exit code
+        assert result.exit_code == 0, f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+
+        # Check that make_api_request was called correctly
+        mock_make_api_request.assert_called_once_with(
+            "POST",
+            "/search",
+            json_data=expected_payload
+        )
+    # Check stdout for expected content
+    assert "Search Results" in result.stdout
+    assert "Nicomachean Ethics" in result.stdout
+    assert "0.3000" in result.stdout
+# Removed patch decorator
+@patch('src.philograph.cli.main.display_results', autospec=True) # Added autospec
+@patch('src.philograph.cli.main.error_console', autospec=True) # Added autospec
+def test_search_api_error(mock_error_console, mock_display_results, runner):
     """Test the search command handles API errors gracefully."""
     test_query = "ontology"
-    # Simulate make_api_request raising typer.Exit after handling an internal error
-    mock_make_api_request.side_effect = typer.Exit(code=1)
+    expected_payload = {"query": test_query, "limit": 10}
 
-    result = runner.invoke(app, ["search", test_query])
+    # Use patch as context manager
+    with patch('philograph.cli.main.make_api_request') as mock_make_api_request:
+        # Simulate make_api_request raising typer.Exit after handling an internal error
+        mock_make_api_request.side_effect = typer.Exit(1)
 
-    assert result.exit_code == 1
-    # Remove assertion: make_api_request exits internally on 500 before mock side_effect
-    # mock_make_api_request.assert_called_once_with(
-    #     "POST",
-    #     "/search",
-    #     json_data={"query": test_query, "filters": None, "limit": 10}
-    # )
+        # Use runner.invoke and assert exit code
+        result = runner.invoke(app, ["search", test_query])
+
+        # Assert exit code is 1
+        assert result.exit_code == 1
+
+        # Check that make_api_request was called correctly *inside* the patch context
+        mock_make_api_request.assert_called_once_with(
+            "POST",
+            "/search",
+            json_data=expected_payload
+        )
     mock_display_results.assert_not_called()
-@patch('src.philograph.cli.main.make_api_request')
-@patch('src.philograph.cli.main.display_results')
-@patch('src.philograph.cli.main.console') # Mock console to check output
-def test_search_empty_results(mock_console, mock_display_results, mock_make_api_request, runner):
+    # Error printing is handled within make_api_request, no need to assert mock_error_console here
+# Removed display_results and console mocks
+def test_search_empty_results(runner): # Removed mock_console, mock_display_results
     """Test the search command handles an empty list of results from the API."""
     test_query = "nonexistent topic"
-    # API returns a dict with an empty 'results' list
-    mock_api_response = {"results": []}
-    mock_make_api_request.return_value = mock_api_response
+    expected_payload = {"query": test_query, "limit": 10}
+    mock_api_response_data = {"results": []}
 
-    result = runner.invoke(app, ["search", test_query])
+    # Patch make_api_request directly again
+    with patch('philograph.cli.main.make_api_request') as mock_make_api_request:
+        mock_make_api_request.return_value = mock_api_response_data
 
-    assert result.exit_code == 0
-    # Check for POST request with json_data
-    mock_make_api_request.assert_called_once_with(
-        "POST",
-        "/search",
-        json_data={"query": test_query, "filters": None, "limit": 10}
-    )
-    # Check that the "No results found" message was printed
-    mock_console.print.assert_called_with("No results found.")
-    # display_results should NOT be called directly when results are empty
-    mock_display_results.assert_not_called()
+        # Use runner.invoke again
+        result = runner.invoke(app, ["search", test_query])
+
+        # Assert exit code
+        assert result.exit_code == 0, f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+
+        # Check that make_api_request was called correctly
+        mock_make_api_request.assert_called_once_with(
+            "POST",
+            "/search",
+            json_data=expected_payload
+        )
+    # Check that the "No results found" message was printed to stdout
+    assert "No results found." in result.stdout
+    # display_results should NOT be called directly when results are empty (mock removed)
 # Removed test_search_filter_encoding_error as it's no longer relevant
 # after changing search to use POST and send filters as dict.
 # --- Tests for 'show' command ---
@@ -886,7 +915,7 @@ def test_acquire_missing_arguments(mock_error_console, mock_display_results, moc
     assert result.exit_code == 1 # Expecting failure exit code due to missing args check
     mock_make_api_request.assert_not_called()
     mock_display_results.assert_not_called()
-    mock_error_console.print.assert_called_once_with("Error: You must provide either --title or --author.")
+    mock_error_console.print.assert_called_once_with("Error: Must provide either --title/--author or --find-missing-threshold.")
 # --- Tests for 'status' command ---
 
 @patch('philograph.cli.main.make_api_request')
@@ -957,3 +986,267 @@ def test_status_invalid_id(mock_error_console, mock_display_results, mock_make_a
     # Check if Typer prints a usage error or if we print a specific error
     # This assertion might need adjustment based on actual output
     # assert "Invalid value" in result.stdout or "Error:" in result.stdout
+@patch('philograph.cli.main.make_api_request')
+def test_acquire_missing_texts_initial_call(mock_make_api_request, runner: CliRunner):
+    """Test the initial API call for acquire-missing-texts."""
+    # Arrange
+    mock_make_api_request.return_value = {"status": "processing", "message": "Search initiated."}
+    threshold = 7
+
+    # Act
+    result = runner.invoke(app, ["acquire", "--find-missing-threshold", str(threshold)])
+
+    # Assert
+    assert result.exit_code == 0
+    mock_make_api_request.assert_called_once_with(
+        "POST",
+        "/acquire",
+        json_data={"find_missing_threshold": threshold}
+    )
+    assert "Identifying potentially missing texts" in result.stdout
+    assert "Search initiated." in result.stdout
+@patch('philograph.cli.main.make_api_request')
+@patch('typer.prompt') # Mock user input
+def test_acquire_missing_texts_confirmation_flow(mock_prompt, mock_make_api_request, runner: CliRunner):
+    """Test the confirmation flow for acquire-missing-texts."""
+    # Arrange
+    acquisition_id = "test-acq-id-123"
+    options = [
+        {"title": "Book A", "author": "Author X", "year": 2020, "extension": "pdf", "size": "1MB", "internal_id": "opt1"},
+        {"title": "Book B", "author": "Author Y", "year": 2021, "extension": "epub", "size": "2MB", "internal_id": "opt2"},
+    ]
+    initial_response = {
+        "status": "needs_confirmation",
+        "acquisition_id": acquisition_id,
+        "options": options
+    }
+    confirm_response = {"status": "complete", "message": "Acquisition confirmed and processing."}
+
+    # Mock the sequence of API calls and user input
+    mock_make_api_request.side_effect = [initial_response, confirm_response]
+    mock_prompt.return_value = 1 # Simulate user selecting the first option
+
+    # Act
+    result = runner.invoke(app, ["acquire", "--find-missing-threshold", "5"]) # Threshold doesn't matter here
+
+    # Assert
+    assert result.exit_code == 0
+
+    # Check output for prompt and confirmation message
+    assert "Potential matches found." in result.stdout
+    assert "Confirming acquisition for: 'Book A'" in result.stdout # Check confirmation message
+
+    # Check that typer.prompt was called
+    mock_prompt.assert_called_once()
+
+    # Check API calls
+    assert mock_make_api_request.call_count == 2
+    # Check first call (initial acquire)
+    call1_args, call1_kwargs = mock_make_api_request.call_args_list[0]
+    assert call1_args == ("POST", "/acquire")
+    assert call1_kwargs['json_data'] == {"find_missing_threshold": 5}
+
+    # Check second call (confirm)
+    call2_args, call2_kwargs = mock_make_api_request.call_args_list[1]
+    assert call2_args == ("POST", "/acquire/confirm")
+    assert call2_kwargs['json_data'] == {
+        "acquisition_id": acquisition_id,
+        "selected_book_details": options[0] # User selected option 1
+    }
+
+    # Check final output
+    assert "Acquisition confirmed and processing." in result.stdout
+@patch('philograph.cli.main.make_api_request')
+@patch('typer.prompt') # Mock user input
+def test_acquire_missing_texts_confirmation_cancel(mock_prompt, mock_make_api_request, runner: CliRunner):
+    """Test cancelling the confirmation flow for acquire-missing-texts."""
+    # Arrange
+    acquisition_id = "test-acq-id-456"
+    options = [
+        {"title": "Book C", "author": "Author Z", "year": 2022, "extension": "pdf", "size": "3MB", "internal_id": "opt3"},
+    ]
+    initial_response = {
+        "status": "needs_confirmation",
+        "acquisition_id": acquisition_id,
+        "options": options
+    }
+
+    # Mock the initial API call and user input (cancelling)
+    mock_make_api_request.return_value = initial_response
+    mock_prompt.return_value = 0 # Simulate user entering 0 to cancel
+
+    # Act
+    result = runner.invoke(app, ["acquire", "--find-missing-threshold", "5"])
+
+    # Assert
+    assert result.exit_code == 0
+
+    # Check output for prompt and cancellation message
+    assert "Potential matches found." in result.stdout
+    assert "Acquisition cancelled." in result.stdout
+
+    # Check that typer.prompt was called
+    mock_prompt.assert_called_once()
+
+    # Check that only the initial API call was made
+    mock_make_api_request.assert_called_once_with(
+        "POST",
+        "/acquire",
+        json_data={"find_missing_threshold": 5}
+    )
+@patch('philograph.cli.main.make_api_request')
+def test_acquire_missing_texts_initial_api_error(mock_make_api_request, runner: CliRunner):
+    """Test acquire-missing-texts when the initial API call fails."""
+    # Arrange
+    mock_make_api_request.side_effect = typer.Exit(code=1) # Simulate make_api_request raising Exit on error
+
+    # Act
+    result = runner.invoke(app, ["acquire", "--find-missing-threshold", "5"])
+
+    # Assert
+    assert result.exit_code == 1 # Expecting exit code 1 due to the raised Exit
+    mock_make_api_request.assert_called_once_with(
+        "POST",
+        "/acquire",
+        json_data={"find_missing_threshold": 5}
+    )
+    # Error message is printed by make_api_request, no need to assert stdout here
+@patch('philograph.cli.main.make_api_request')
+def test_acquire_missing_texts_confirmation_missing_data(mock_make_api_request, runner: CliRunner):
+    """Test acquire-missing-texts confirmation flow with missing options/ID."""
+    # Arrange
+    # Case 1: Missing options
+    initial_response_missing_options = {
+        "status": "needs_confirmation",
+        "acquisition_id": "test-acq-id-789",
+        "options": [] # Empty options list
+    }
+    mock_make_api_request.return_value = initial_response_missing_options
+
+    # Act 1
+    result1 = runner.invoke(app, ["acquire", "--find-missing-threshold", "5"])
+
+    # Assert 1
+    assert result1.exit_code == 1
+    # Cannot reliably assert stderr with CliRunner and rich, relying on exit code
+    mock_make_api_request.assert_called_once_with("POST", "/acquire", json_data={"find_missing_threshold": 5})
+
+    # Arrange Case 2: Missing acquisition_id
+    mock_make_api_request.reset_mock()
+    initial_response_missing_id = {
+        "status": "needs_confirmation",
+        "acquisition_id": None, # Missing ID
+        "options": [{"title": "Book D"}]
+    }
+    mock_make_api_request.return_value = initial_response_missing_id
+
+    # Act 2
+    result2 = runner.invoke(app, ["acquire", "--find-missing-threshold", "5"])
+
+    # Assert 2
+    assert result2.exit_code == 1
+    # Cannot reliably assert stderr with CliRunner and rich, relying on exit code
+    mock_make_api_request.assert_called_once_with("POST", "/acquire", json_data={"find_missing_threshold": 5})
+@patch('philograph.cli.main.make_api_request')
+@patch('typer.prompt') # Mock user input, should not be called
+def test_acquire_missing_texts_auto_confirm_yes(mock_prompt, mock_make_api_request, runner: CliRunner):
+    """Test the --yes flag auto-confirms when only one option is available."""
+    # Arrange
+    acquisition_id = "test-acq-id-yes"
+    options = [
+        {"title": "Book E", "author": "Author A", "year": 2023, "extension": "pdf", "size": "4MB", "internal_id": "opt5"},
+    ] # Only one option
+    initial_response = {
+        "status": "needs_confirmation",
+        "acquisition_id": acquisition_id,
+        "options": options
+    }
+    confirm_response = {"status": "complete", "message": "Acquisition auto-confirmed."}
+
+    # Mock the sequence of API calls
+    mock_make_api_request.side_effect = [initial_response, confirm_response]
+
+    # Act
+    result = runner.invoke(app, ["acquire", "--find-missing-threshold", "5", "--yes"])
+
+    # Assert
+    assert result.exit_code == 0
+
+    # Check output for auto-confirmation message
+    assert "Found 1 match. Auto-confirming acquisition" in result.stdout
+    assert "Book E" in result.stdout
+    assert "(--yes used)" in result.stdout
+
+    # Check that typer.prompt was NOT called
+    mock_prompt.assert_not_called()
+
+    # Check API calls
+    assert mock_make_api_request.call_count == 2
+    # Check first call (initial acquire)
+    call1_args, call1_kwargs = mock_make_api_request.call_args_list[0]
+    assert call1_args == ("POST", "/acquire")
+    assert call1_kwargs['json_data'] == {"find_missing_threshold": 5}
+
+    # Check second call (confirm)
+    call2_args, call2_kwargs = mock_make_api_request.call_args_list[1]
+    assert call2_args == ("POST", "/acquire/confirm")
+    assert call2_kwargs['json_data'] == {
+        "acquisition_id": acquisition_id,
+        "selected_book_details": options[0] # Auto-selected the only option
+    }
+
+    # Check final output
+    assert "Acquisition auto-confirmed." in result.stdout
+@patch('philograph.cli.main.make_api_request')
+@patch('typer.prompt') # Mock user input
+def test_acquire_specific_text_confirmation_flow(mock_prompt, mock_make_api_request, runner: CliRunner):
+    """Test the acquire command with title/author and confirmation flow."""
+    # Arrange
+    title = "Specific Book Title"
+    author = "Specific Author"
+    acquisition_id = "test-acq-id-spec-789"
+    options = [
+        {"title": title, "author": author, "year": 2024, "extension": "epub", "size": "1.5MB", "internal_id": "opt-spec-1"},
+    ]
+    initial_response = {
+        "status": "needs_confirmation",
+        "acquisition_id": acquisition_id,
+        "options": options
+    }
+    confirm_response = {"status": "complete", "message": "Specific acquisition confirmed."}
+
+    # Mock the sequence of API calls and user input
+    mock_make_api_request.side_effect = [initial_response, confirm_response]
+    mock_prompt.return_value = 1 # Simulate user selecting the first option
+
+    # Act
+    result = runner.invoke(app, ["acquire", "--title", title, "--author", author])
+
+    # Assert
+    assert result.exit_code == 0
+
+    # Check output
+    assert f"Searching for text: Title='{title}', Author='{author}'" in result.stdout
+    assert "Potential matches found." in result.stdout
+    assert f"Confirming acquisition for: '{title}'" in result.stdout
+
+    # Check that typer.prompt was called
+    mock_prompt.assert_called_once()
+
+    # Check API calls
+    assert mock_make_api_request.call_count == 2
+    # Check first call (initial acquire with details)
+    call1_args, call1_kwargs = mock_make_api_request.call_args_list[0]
+    assert call1_args == ("POST", "/acquire")
+    assert call1_kwargs['json_data'] == {"text_details": {"title": title, "author": author}}
+
+    # Check second call (confirm)
+    call2_args, call2_kwargs = mock_make_api_request.call_args_list[1]
+    assert call2_args == ("POST", "/acquire/confirm")
+    assert call2_kwargs['json_data'] == {
+        "acquisition_id": acquisition_id,
+        "selected_book_details": options[0]
+    }
+
+    # Check final output
+    assert "Specific acquisition confirmed." in result.stdout

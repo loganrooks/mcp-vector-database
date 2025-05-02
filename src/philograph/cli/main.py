@@ -266,98 +266,109 @@ def collection_list_items(
 
 @app.command()
 def acquire(
-    title: Optional[str] = typer.Option(None, "--title", "-t", help="Title of the text to acquire."),
-    author: Optional[str] = typer.Option(None, "--author", "-a", help="Author of the text to acquire."),
+    title: Optional[str] = typer.Option(None, "--title", "-t", help="Title of the text to acquire (use with --author)."),
+    author: Optional[str] = typer.Option(None, "--author", "-a", help="Author of the text to acquire (use with --title)."),
+    find_missing_threshold: Optional[int] = typer.Option(None, "--find-missing-threshold", "--threshold", help="Minimum citation count to find missing texts (use instead of --title/--author)."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Automatically confirm acquisition if only one option is found."),
-    # threshold: Optional[int] = typer.Option(None, "--threshold", help="Minimum citation count to find missing texts (alternative).")
 ):
     """
-    Attempt to acquire and ingest a missing text via zlibrary-mcp.
-    Provide --title and/or --author to search for a specific text.
-    (Finding missing texts by threshold is not yet implemented in CLI).
+    Attempt to acquire and ingest a text via zlibrary-mcp.
+
+    Use EITHER --title/--author OR --find-missing-threshold.
     """
-    # TDD: Test calling API /acquire endpoint (initial search trigger)
+    # TDD: Test calling API /acquire endpoint (initial search trigger - threshold)
+    # TDD: Test calling API /acquire endpoint (initial search trigger - title/author)
     # TDD: Test handling API response requiring confirmation
     # TDD: Test prompting user for confirmation
     # TDD: Test calling API /acquire/confirm after user confirmation
     # TDD: Test handling API errors during acquisition process
     logger.info(f"CLI: Starting acquisition process...")
 
-    if title or author:
+    # Argument validation
+    search_by_details = bool(title or author)
+    search_by_threshold = find_missing_threshold is not None
+
+    if search_by_details and search_by_threshold:
+        error_console.print("Error: Cannot use --title/--author and --find-missing-threshold together.")
+        raise typer.Exit(code=1)
+    if not search_by_details and not search_by_threshold:
+        error_console.print("Error: Must provide either --title/--author or --find-missing-threshold.")
+        raise typer.Exit(code=1)
+
+    # Prepare payload based on mode
+    if search_by_details:
         text_details = {"title": title, "author": author}
         payload = {"text_details": text_details}
         console.print(f"Searching for text: Title='{title}', Author='{author}'...")
-        initial_response = make_api_request("POST", "/acquire", json_data=payload)
+    else: # search_by_threshold
+        payload = {"find_missing_threshold": find_missing_threshold}
+        console.print(f"Identifying potentially missing texts (threshold: {find_missing_threshold})...")
 
-        if initial_response.get('status') == 'needs_confirmation':
-            acquisition_id = initial_response.get('acquisition_id')
-            options = initial_response.get('options', [])
-            if not options or not acquisition_id:
-                error_console.print("Error: API returned confirmation status but no options or ID.")
-                raise typer.Exit(code=1)
+    initial_response = make_api_request("POST", "/acquire", json_data=payload)
 
-            # Auto-confirm if --yes is used and only one option exists
-            if yes and len(options) == 1:
-                selected_book = options[0]
-                console.print(f"Found 1 match. Auto-confirming acquisition for: '{selected_book.get('title')}' (--yes used).")
-                # Directly proceed to confirmation API call
+    # --- Confirmation Flow (Common Logic) ---
+    # --- Confirmation Flow or Direct Result ---
+    if initial_response.get('status') == 'needs_confirmation':
+        # --- Confirmation Flow Logic ---
+        acquisition_id = initial_response.get('acquisition_id')
+        options = initial_response.get('options', [])
+        if not options or not acquisition_id:
+            error_console.print("Error: API returned confirmation status but no options or ID.")
+            raise typer.Exit(code=1)
+
+        # Auto-confirm if --yes is used and only one option exists
+        if yes and len(options) == 1:
+            selected_book = options[0]
+            console.print(f"Found 1 match. Auto-confirming acquisition for: '{selected_book.get('title')}' (--yes used).")
+            confirm_payload = {
+                "acquisition_id": acquisition_id,
+                "selected_book_details": selected_book
+            }
+            confirm_response = make_api_request("POST", "/acquire/confirm", json_data=confirm_payload)
+            display_results(confirm_response)
+            return # Exit after auto-confirmation
+
+        # If not auto-confirmed, proceed with manual selection
+        console.print("\n[bold yellow]Potential matches found. Select a book to acquire (enter number) or 0 to cancel:[/bold yellow]")
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("#", style="dim", width=3)
+        table.add_column("Title")
+        table.add_column("Author", style="cyan")
+        table.add_column("Year", style="green")
+        table.add_column("Format", style="yellow")
+        table.add_column("Size", style="blue")
+
+        for i, book in enumerate(options):
+            table.add_row(
+                str(i+1),
+                book.get('title', 'N/A'),
+                book.get('author', 'N/A'),
+                str(book.get('year', 'N/A')),
+                book.get('extension', 'N/A'),
+                book.get('size', 'N/A')
+            )
+        console.print(table)
+
+        try:
+            selection = typer.prompt("Enter selection number (or 0 to cancel)", type=int, default=0)
+            if selection > 0 and selection <= len(options):
+                selected_book = options[selection - 1]
+                console.print(f"Confirming acquisition for: '{selected_book.get('title')}'...")
                 confirm_payload = {
                     "acquisition_id": acquisition_id,
                     "selected_book_details": selected_book
                 }
                 confirm_response = make_api_request("POST", "/acquire/confirm", json_data=confirm_payload)
                 display_results(confirm_response)
-                return # Exit after auto-confirmation
+            else:
+                console.print("Acquisition cancelled.")
+        except ValueError:
+            error_console.print("Invalid input. Please enter a number.")
+            raise typer.Exit(code=1)
+        # --- End Confirmation Flow Logic ---
 
-            # If not auto-confirmed, proceed with manual selection
-            console.print("\n[bold yellow]Potential matches found. Select a book to acquire (enter number) or 0 to cancel:[/bold yellow]")
-            table = Table(show_header=True, header_style="bold magenta")
-            table.add_column("#", style="dim", width=3)
-            table.add_column("Title")
-            table.add_column("Author", style="cyan")
-            table.add_column("Year", style="green")
-            table.add_column("Format", style="yellow")
-            table.add_column("Size", style="blue")
-
-            for i, book in enumerate(options):
-                table.add_row(
-                    str(i+1),
-                    book.get('title', 'N/A'),
-                    book.get('author', 'N/A'),
-                    str(book.get('year', 'N/A')),
-                    book.get('extension', 'N/A'),
-                    book.get('size', 'N/A')
-                )
-            console.print(table)
-
-            try:
-                selection = typer.prompt("Enter selection number (or 0 to cancel)", type=int, default=0)
-                if selection > 0 and selection <= len(options):
-                    selected_book = options[selection - 1]
-                    console.print(f"Confirming acquisition for: '{selected_book.get('title')}'...")
-                    # Step 2: Confirm selection with backend
-                    confirm_payload = {
-                        "acquisition_id": acquisition_id,
-                        "selected_book_details": selected_book
-                    }
-                    confirm_response = make_api_request("POST", "/acquire/confirm", json_data=confirm_payload)
-                    # Display final status (might be 'complete' or 'error')
-                    display_results(confirm_response)
-                else:
-                    console.print("Acquisition cancelled.")
-            except ValueError:
-                error_console.print("Invalid input. Please enter a number.")
-                raise typer.Exit(code=1)
-
-        else: # Handle initial errors or unexpected status from /acquire
-            display_results(initial_response) # Will likely show an error message
-
-    # elif threshold is not None:
-    #     error_console.print("Error: Finding missing texts by threshold is not yet implemented in the CLI.")
-    #     raise typer.Exit(code=1)
-    else:
-        error_console.print("Error: You must provide either --title or --author.")
-        raise typer.Exit(code=1)
+    else: # Handle initial errors or non-confirmation status
+        display_results(initial_response) # Display the direct result/error
 
 
 # --- Main Execution ---

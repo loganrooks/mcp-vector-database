@@ -54,10 +54,16 @@ async def get_query_embedding(text: str) -> List[float]:
 
         embedding = response_data['data'][0]['embedding']
 
+        # Truncate embedding if it's longer than the target dimension (Workaround for MRL issue)
+        if len(embedding) > config.TARGET_EMBEDDING_DIMENSION:
+            logger.warning(f"Received embedding with dimension {len(embedding)}, truncating to {config.TARGET_EMBEDDING_DIMENSION}.")
+            embedding = embedding[:config.TARGET_EMBEDDING_DIMENSION]
+
         # Validate embedding dimension
         if len(embedding) != config.TARGET_EMBEDDING_DIMENSION:
-            logger.error(f"Query embedding dimension mismatch. Expected {config.TARGET_EMBEDDING_DIMENSION}, got {len(embedding)}.")
-            raise ValueError(f"Received query embedding with incorrect dimension ({len(embedding)})")
+            logger.error(f"Query embedding dimension mismatch after potential truncation. Expected {config.TARGET_EMBEDDING_DIMENSION}, got {len(embedding)}.")
+            # Keep the original error message reflecting the received dimension before truncation for clarity
+            raise ValueError(f"Received query embedding with incorrect dimension ({response_data['data'][0]['embedding']})") # Report original length
 
         return embedding
 

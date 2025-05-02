@@ -1,8 +1,8 @@
 import uuid
-from unittest.mock import patch, AsyncMock, ANY # Added ANY
+from unittest.mock import patch, AsyncMock, ANY # Removed duplicate, Added ANY
 import pytest
 import pytest_asyncio
-from unittest.mock import patch, AsyncMock # Import mocking tools
+# Removed duplicate: from unittest.mock import patch, AsyncMock
 import psycopg # Import psycopg for error mocking
 from httpx import AsyncClient
 from fastapi import FastAPI, status # Import status
@@ -418,6 +418,26 @@ async def test_get_document_not_found(mock_get_doc: AsyncMock, test_client: Asyn
     assert response.json() == {"detail": "Document not found"}
     # Check mock was called
     mock_get_doc.assert_awaited_once()
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.get_document_by_id", new_callable=AsyncMock)
+async def test_get_document_db_error(mock_get_doc: AsyncMock, test_client: AsyncClient):
+    """
+    Test GET /documents/{doc_id} returns 500 Internal Server Error on database error.
+    """
+    # Arrange
+    doc_id = 5
+    error_message = "Simulated DB error"
+    # Mock the db_layer function to raise a generic psycopg error
+    mock_get_doc.side_effect = psycopg.Error(error_message)
+
+    # Act
+    response = await test_client.get(f"/documents/{doc_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"detail": "Error retrieving document."}
+    # Check mock was called
+    mock_get_doc.assert_awaited_once()
 # --- /collections Endpoint Tests ---
 
 @pytest.mark.asyncio
@@ -454,6 +474,16 @@ async def test_create_collection_missing_name(test_client: AsyncClient):
     """
     # Arrange
     request_payload = {} # Missing 'name'
+
+    # Act
+    response = await test_client.post("/collections", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    # Optionally check detail:
+    # assert "Field required" in response.text
+    # assert "'name'" in response.text
+
 @pytest.mark.asyncio
 @patch("philograph.api.main.db_layer.add_collection", new_callable=AsyncMock)
 async def test_create_collection_duplicate_name(mock_add_collection: AsyncMock, test_client: AsyncClient):
@@ -476,8 +506,27 @@ async def test_create_collection_duplicate_name(mock_add_collection: AsyncMock, 
     assert response.json() == {"detail": f"Collection name '{collection_name}' already exists."}
     mock_add_collection.assert_awaited_once()
 
-    # assert "Field required" in response.text
-    # assert "'name'" in response.text
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.add_collection", new_callable=AsyncMock)
+async def test_create_collection_db_error(mock_add_collection: AsyncMock, test_client: AsyncClient):
+    """
+    Test POST /collections returns 500 Internal Server Error on database error
+    (other than duplicate name).
+    """
+    # Arrange
+    collection_name = "Collection with DB Error"
+    error_message = "Simulated generic DB error during add"
+    mock_add_collection.side_effect = psycopg.Error(error_message)
+    request_payload = {"name": collection_name}
+
+    # Act
+    response = await test_client.post("/collections", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"detail": "Error creating collection."}
+    mock_add_collection.assert_awaited_once()
+
 @pytest.mark.asyncio
 @patch("philograph.api.main.db_layer.add_item_to_collection", new_callable=AsyncMock)
 async def test_add_collection_item_document_success(mock_add_item: AsyncMock, test_client: AsyncClient):
@@ -673,6 +722,7 @@ async def test_get_collection_not_found(mock_get_items: AsyncMock, test_client: 
 
     # Assert
     # Current API logic returns 200 OK with empty list for non-existent collection
+    # TODO: Update API logic to check if collection exists before returning items, then update test to expect 404
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {"collection_id": collection_id, "items": []} # Match CollectionGetResponse
     mock_get_items.assert_awaited_once_with(ANY, collection_id)
@@ -806,6 +856,7 @@ async def test_acquire_confirm_not_found(mock_confirm: AsyncMock, test_client: A
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": error_message}
     mock_confirm.assert_awaited_once_with(valid_but_nonexistent_id, request_payload["selected_book_details"])
+
 @pytest.mark.asyncio
 @patch("philograph.api.main.acquisition_service.confirm_and_trigger_download", new_callable=AsyncMock)
 async def test_acquire_confirm_service_runtime_error(mock_confirm: AsyncMock, test_client: AsyncClient):
@@ -828,6 +879,7 @@ async def test_acquire_confirm_service_runtime_error(mock_confirm: AsyncMock, te
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert response.json() == {"detail": f"Failed to confirm acquisition: {error_message}"}
     mock_confirm.assert_awaited_once_with(acquisition_id, request_payload["selected_book_details"])
+
 # --- /acquire/status Endpoint Tests ---
 
 @pytest.mark.asyncio
@@ -902,6 +954,13 @@ async def test_get_acquisition_status_failed(mock_get_status: AsyncMock, test_cl
 
     # Act
     response = await test_client.get(f"/acquire/status/{acquisition_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == mock_status_data
+    mock_get_status.assert_awaited_once()
+    assert mock_get_status.await_args.args[0] == acquisition_id
+
 @pytest.mark.asyncio
 @patch("philograph.api.main.acquisition_service.get_acquisition_status", new_callable=AsyncMock)
 async def test_get_acquisition_status_not_found(mock_get_status: AsyncMock, test_client: AsyncClient):
@@ -921,10 +980,6 @@ async def test_get_acquisition_status_not_found(mock_get_status: AsyncMock, test
     mock_get_status.assert_awaited_once()
     assert mock_get_status.await_args.args[0] == acquisition_id
 
-    # Assert
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    mock_get_status.assert_awaited_once()
-    assert mock_get_status.await_args.args[0] == acquisition_id
 @pytest.mark.asyncio
 async def test_get_acquisition_status_invalid_id_format(test_client: AsyncClient):
     """

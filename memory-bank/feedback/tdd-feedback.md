@@ -1,3 +1,47 @@
+### Early Return - Intractable Syntax Errors in Test File - [2025-05-01 21:00:00]
+- **Trigger**: Persistent `SyntaxError` during `pytest` execution and multiple Pylance errors reported after attempting to add `test_create_collection_db_error` to `tests/api/test_main.py`. Context: ~29%.
+- **Context**: Task was to continue TDD for `src/philograph/api/main.py`. Completed tests for `/acquire/confirm` (404, 500). Attempted to add test for `POST /collections` DB error.
+- **Issue**: `insert_content` and subsequent `apply_diff` attempts to add/fix `test_create_collection_db_error` resulted in widespread `SyntaxError`s reported by Pylance across numerous docstrings (lines 484, 523, 544, etc.) and confirmed by `pytest` collection failure (`SyntaxError: invalid syntax` at line 485). The file appears corrupted.
+- **Attempts**:
+    1. Added `test_create_collection_db_error` using `insert_content`. `pytest` failed with `SyntaxError`.
+    2. Attempted `apply_diff` to rewrite the docstring (lines 484-487). Failed (`identical content`).
+    3. Attempted `apply_diff` to rewrite the docstring with slightly different text (line 484). `apply_diff` succeeded, but Pylance errors persisted, and `pytest` still failed with `SyntaxError`.
+    4. Attempted `apply_diff` to rewrite the entire function block (lines 481-497). `apply_diff` succeeded, but Pylance errors persisted.
+- **Analysis**: The file `tests/api/test_main.py` seems to have widespread syntax issues, possibly related to line endings or hidden characters introduced by file modifications, that are not being resolved by targeted `apply_diff` operations. "Three Strikes" rule triggered for `apply_diff`.
+- **Self-Correction**: Following Early Return Clause due to intractable syntax blocker.
+- **Context %**: ~29% (Manually calculated: 291,970 / 1,000,000)
+- **Recommendation**: Invoke Early Return. Delegate to `debug` mode via `new_task` to investigate and fix the widespread syntax errors in `tests/api/test_main.py`. The file needs to be cleaned up before TDD can resume. Provide link to this feedback entry. [Ref: Original Task 2025-05-01 20:50:18]
+
+---
+### Early Return - Intractable CLI Test Mocking Blocker - [2025-05-01 19:54:41]
+- **Trigger**: Persistent failure of `tests/cli/test_cli_main.py::test_search_*` tests despite multiple mocking strategies. Context at 46%.
+- **Context**: Task was to fix failing CLI search tests related to mocking API calls (`make_api_request`) and handling exit codes, assuming backend fixes were successful.
+- **Issue**: Tests consistently fail to verify calls to mocked `make_api_request` ("Called 0 times") or related display functions when using `CliRunner.invoke`. Attempts to control `API_URL` via patching (`config` object, `config.API_URL` attribute) or `env` parameter were ineffective. Additionally, `test_search_api_error` fails `assert result.exit_code == 1` when `make_api_request` is mocked with `side_effect=typer.Exit(1)`, suggesting `CliRunner` doesn't map this exception to exit code 1.
+- **Attempts**:
+    1. Patched `make_api_request` directly; mock not called.
+    2. Patched `httpx.Client` + `config`; URL mismatch.
+    3. Patched `httpx.Client` + `config.API_URL`; URL mismatch.
+    4. Patched `httpx.Client` + `env={"API_URL": ...}`; URL mismatch, display/console mocks not called.
+    5. Reverted to patching `make_api_request` directly with corrected payload assertions; mock not called.
+    6. Changed patch target string for `make_api_request` to fully qualified path; mock not called.
+- **Analysis**: The root cause appears to be an incompatibility or complex interaction between `unittest.mock.patch`, the Typer/Click application structure, and the `CliRunner.invoke` execution context, preventing mocks from being applied correctly or configuration overrides from taking effect. The exit code handling for `typer.Exit` within `CliRunner` also seems problematic. "Three Strikes" rule triggered.
+- **Self-Correction**: Following Early Return Clause due to intractable mocking blocker and context limit approaching.
+- **Context %**: 46% (Manually calculated: 458,804 / 1,000,000)
+- **Recommendation**: Invoke Early Return. Delegate to `debug` mode via `new_task` to investigate the mocking and `CliRunner` interaction issues in `tests/cli/test_cli_main.py`. Specifically focus on why `@patch('philograph.cli.main.make_api_request')` (or other targets) fails to intercept calls during `runner.invoke` and why `typer.Exit(1)` results in `result.exit_code == 0`. Consider alternative testing approaches if necessary (e.g., directly testing command functions without `CliRunner`). Provide link to this feedback entry. [Ref: Original Task 2025-05-01 19:39:46]
+
+---
+### Early Return - Regression Test Failure (Embedding Error) - [2025-05-01 13:36:27]
+- **Trigger**: Full `pytest` suite execution completed with 3 failures after DB connection fix [Ref: Issue-ID: PYTEST-SIGKILL-DB-CONN-20250430]. Context: ~12%.
+- **Context**: Task was to run full regression test suite to verify system health after DB fix and environment migration.
+- **Issue**: 3 CLI tests failed (`test_search_success_query_only`, `test_search_success_with_filters`, `test_search_empty_results`) due to the backend API `/search` endpoint returning `500 - {"detail":"Search failed due to unexpected embedding error"}`.
+- **Attempts**:
+    1. Ran `sudo docker-compose exec philograph-backend pytest`. Result: 244 passed, 3 failed, 1 skipped.
+- **Analysis**: The regression test confirms the DB connection fix is stable (no `SIGKILL` or connection errors). However, the persistent 500 error on `/search` related to embedding generation [Ref: Issue-ID: CLI-API-500-ERRORS] remains a blocker for full test suite success.
+- **Self-Correction**: Following Early Return Clause as the task objective (verify DB fix via regression) is complete, but a known, separate blocker prevents full success.
+- **Context %**: ~12% (Manually calculated: 124,670 / 1,000,000)
+- **Recommendation**: Invoke Early Return. Delegate to `debug` mode via `new_task` to investigate the root cause of the `500 - {"detail":"Search failed due to unexpected embedding error"}` originating from the `/search` API endpoint. Provide link to this feedback entry, the `pytest` output, and relevant Memory Bank sections (`tdd.md`, `activeContext.md`). [Ref: Issue-ID: CLI-API-500-ERRORS]
+
+---
 ### Early Return - Persistent SIGKILL Blocker &amp; Context Limit - [2025-04-30 07:15:15]
 - **Trigger**: Third consecutive `execute_command` attempt to run `pytest` within the `philograph-backend` container terminated with `SIGKILL` (signal 9), even when targeting a single test. Context size reached 41%.
 - **Context**: Task was to verify fixes applied by `debug` mode (fixture scope change, 2GB memory limit) intended to resolve previous `SIGKILL` errors during `pytest` execution.

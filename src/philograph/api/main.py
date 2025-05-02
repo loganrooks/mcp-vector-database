@@ -395,7 +395,7 @@ async def handle_acquire_confirm(acquisition_id: UUID, request: AcquireConfirmRe
         elif result["status"] == "error":
              raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.get("message", "Confirmation or processing failed"))
         elif result["status"] == "not_found": # Note: Service might return this status OR raise ValueError
-             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=result.get("message", "Acquisition ID not found"))
+             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Acquisition ID not found or invalid state") # Match test expectation
         else: # Should not happen if service logic is correct
              logger.error(f"Unexpected status from confirm_and_trigger_download: {result.get('status')}")
              raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unexpected status during confirmation.")

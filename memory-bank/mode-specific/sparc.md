@@ -1,7 +1,42 @@
 # SPARC Orchestrator Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-05-01 20:21:00] Intervention: SPARC Handover Received (New Instance - Context Limit)
+- **Trigger**: `new_task` received from previous SPARC instance due to its context limit (57%).
+- **Context**: Previous instance received Early Return from `debug` mode [Ref: Debug Early Return 2025-05-01 20:18:59] which resolved the CLI test mocking blocker in `tests/cli/test_cli_main.py` by asserting stdout.
+- **Action Taken**: Initialized Memory Bank (activeContext, globalContext, sparc.md, sparc-feedback.md, tdd-feedback.md, debug-feedback.md). Reviewed handover context. Preparing to delegate TDD task for verification and continuation.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` by previous instance. Continuing workflow post-blocker resolution.
+- **Outcome**: Handover accepted. Ready to delegate TDD task.
+- **Follow-up**: Delegate TDD task as per handover instructions. Monitor context.
+### [2025-05-01 19:55:48] Intervention: SPARC Handover (DELEGATE CLAUSE - Context Limit 68%)
+- **Trigger**: SPARC Self-Monitoring - Context Limit Exceeded (68%).
+- **Context**: Received Early Return from `tdd` mode [Ref: TDD Feedback 2025-05-01 19:54:41] due to intractable CLI test mocking blocker. Context size exceeds threshold.
+- **Action Taken**: Updated delegation log for the failed `tdd` task. Preparing handover message for new SPARC instance via `new_task`.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` in `general.context_management` rules to prevent performance degradation.
+- **Outcome**: Handover initiated.
+- **Follow-up**: New SPARC instance to resume orchestration based on handover message, focusing on the CLI test mocking blocker.
+### [2025-05-01 13:34:16] Intervention: SPARC Handover (DELEGATE CLAUSE - Previous Instance Context Limit)
+- **Trigger**: `new_task` received from previous SPARC instance.
+- **Context**: Previous SPARC instance reached context limit (reported 98%) after Debug mode resolved DB connection issue [Ref: Issue-ID: PYTEST-SIGKILL-DB-CONN-20250430]. Handover initiated to continue workflow.
+- **Action Taken**: Initialized Memory Bank (activeContext, globalContext, sparc.md, sparc-feedback.md). Reviewed handover context. Preparing to delegate TDD task.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` by previous instance. Continuing workflow.
+- **Outcome**: Handover accepted. Ready to delegate TDD task.
+- **Follow-up**: Delegate TDD task as per handover instructions. Monitor context.
 ## Intervention Log
+### [2025-05-01 20:19:10] Intervention: SPARC Handover (DELEGATE CLAUSE - Context Limit 57%)
+- **Trigger**: SPARC Self-Monitoring - Context Limit Exceeded (57%).
+- **Context**: Received Early Return from `debug` mode [Ref: Debug Early Return 2025-05-01 20:18:59]. Debug resolved CLI test mocking blocker in `tests/cli/test_cli_main.py` by asserting stdout. SPARC context size exceeds threshold.
+- **Action Taken**: Updated `activeContext.md`. Preparing handover message for new SPARC instance via `new_task`.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` in `general.context_management` rules to prevent performance degradation.
+- **Outcome**: Handover initiated.
+- **Follow-up**: New SPARC instance to resume orchestration based on handover message, likely delegating to TDD for regression checks or continued CLI testing.
+### [2025-05-01 19:57:10] Intervention: SPARC Handover (New Instance - Context Limit)
+- **Trigger**: `new_task` received from previous SPARC instance due to its context limit (68%).
+- **Context**: Previous instance received Early Return from `tdd` mode [Ref: TDD Feedback 2025-05-01 19:54:41] reporting intractable CLI test mocking blocker in `tests/cli/test_cli_main.py`.
+- **Action Taken**: Initialized Memory Bank (activeContext, globalContext, sparc.md, tdd-feedback.md, debug-feedback.md). Reviewed handover context. Preparing to delegate Debug task.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` by previous instance. Continuing workflow to address the identified blocker.
+- **Outcome**: Handover accepted. Ready to delegate Debug task.
+- **Follow-up**: Delegate Debug task as per handover instructions. Monitor context.
 <!-- Append intervention details using the format below -->
 ### [2025-04-29 04:29:45] Intervention: SPARC Handover (DELEGATE CLAUSE)
 - **Trigger**: SPARC Self-Monitoring - Context Limit Exceeded (~100% / ~200k tokens).
@@ -14,10 +49,10 @@
 ## Workflow State
 # Workflow State (Current - Overwrite this section)
 - Current phase: Refinement (Testing)
-- Phase start: [Timestamp needed - Check previous logs if critical, otherwise use current] 2025-04-29 00:00:00 (Estimate)
-- Current focus: TDD for Backend API (`src/philograph/api/main.py`)
-- Next actions: Re-delegate TDD task to complete `/collections` (duplicate name) test cycle.
-- Last Updated: [2025-04-29 02:37:50]
+- Phase start: 2025-05-01 20:19:00 (Estimate after Debug fix)
+- Current focus: CLI Testing (`tests/cli/test_cli_main.py`) - Mocking blocker resolved.
+- Next actions: Delegate TDD task for regression check on `test_cli_main.py` and continue CLI TDD.
+- Last Updated: 2025-05-01 20:19:45
 - Outcome: Completed tests for parse_references and call_anystyle_parser in text_processing.py. Minor fixes applied (await). All tests passing (1 skipped).
 - Link to Progress Entry: [See globalContext.md entry 2025-04-28 19:06:05]
 ### [2025-04-28 16:57:29] Task: Debug test_call_grobid_extractor_api_request_error
@@ -37,31 +72,103 @@
 - Status: failed (Early Return - Context 50%)
 - Completion time: [2025-04-29 04:28:25]
 - Outcome: Completed TDD cycles for `collection add` (invalid IDs - passed unexpectedly), `collection list` (success, empty, not found). Context limit reached before testing `collection list` API error or `acquire`/`status`. [Ref: TDD Feedback 2025-04-29 04:28:25]
+### [2025-05-01 13:34:30] Task: Full Regression Test Suite Execution
+- Assigned to: tdd
+- Description: Execute full `pytest` suite after DB connection fix [Ref: Issue-ID: PYTEST-SIGKILL-DB-CONN-20250430] to check for regressions.
+- Expected deliverable: Report on test suite status (pass/fail), analysis of failures, updated `tdd-feedback.md`.
+- Status: failed (Early Return)
+- Completion time: 2025-05-01 13:37:09
+- Outcome: Early Return invoked. Regression test failed: 244 passed, 3 failed, 1 skipped. Failures due to persistent API 500 error on `/search` endpoint (`{"detail":"Search failed due to unexpected embedding error"}`) [Ref: Issue-ID: CLI-API-500-ERRORS]. DB connection fix confirmed. [See TDD Feedback 2025-05-01 13:36:27]
+- Link to Progress Entry: [See activeContext.md entry 2025-05-01 13:36:27]
 - Link to Progress Entry: [See globalContext.md entry TBD]
+### [2025-05-01 19:57:25] Task: Investigate CLI Test Mocking/Runner Issues
+- Assigned to: debug
+- Description: Diagnose and resolve intractable issues mocking API calls (`make_api_request`) and asserting exit codes (`typer.Exit(1)`) within `typer.testing.CliRunner` for tests in `tests/cli/test_cli_main.py`. [Ref: TDD Feedback 2025-05-01 19:54:41]
+- Expected deliverable: Fixed tests or clear diagnosis.
+- Status: completed (via Early Return - Context 46.8%)
+- Completion time: 2025-05-01 20:18:59
+- Outcome: Resolved blocker by changing test strategy in `tests/cli/test_cli_main.py` to assert `result.stdout` instead of mocking output functions (`display_results`, `console.print`). Mocking `make_api_request` and asserting `result.exit_code == 1` for error cases remains valid. [Ref: Debug Early Return 2025-05-01 20:18:59]
+- Link to Progress Entry: [See globalContext.md entry 2025-05-01 20:18:59]
 - Description: Debug persistent failure in `tests/data_access/test_db_layer.py::test_get_db_pool_failure` related to mocking psycopg connection errors in async context. See `memory-bank/feedback/tdd-feedback.md` for details.
 - Expected deliverable: Fixed test or clear diagnosis of the mocking issue.
 - Status: completed
 - Completion time: 2025-04-28 13:13:54
+### [2025-05-01 13:37:25] Task: Investigate and Resolve API /search Embedding Error
+- Assigned to: debug
+- Description: Diagnose and fix the 500 embedding error on the `/search` API endpoint [Ref: Issue-ID: CLI-API-500-ERRORS].
+- Expected deliverable: Fixed code, verification via tests (`tests/cli/test_cli_main.py::test_search_*`), updated `debug-feedback.md`.
+### [2025-05-01 20:21:17] Task: Verify CLI Test Fix & Resume TDD
+- Assigned to: tdd
+- Description: Verify fix in `tests/cli/test_cli_main.py` (assert stdout) and resume TDD for CLI module, starting after `status` command tests [Ref: TDD Feedback 2025-04-29 04:48:59].
+- Expected deliverable: Verified fix, completed TDD cycles for next CLI commands (e.g., acquire), updated tests, passing test suite for CLI.
+- Status: completed (Externally by User/Agent)
+- Completion time: 2025-05-01 20:49:39 (Approx.)
+- Outcome: Verified CLI test fix. Completed TDD cycles for `acquire-missing-texts` command. Refactored `acquire` and `acquire-missing-texts` into a single `acquire` command with `--find-missing-threshold` option. Updated tests. All 45 tests in `tests/cli/test_cli_main.py` pass.
+- Link to Progress Entry: [See User Message 2025-05-01 20:49:39]
+- Status: failed (Early Return)
+- Completion time: 2025-05-01 15:44:43
+- Outcome: Early Return invoked due to high context (75%) and syntax errors introduced in `src/philograph/search/service.py` while attempting to add logging. Investigation confirmed error linked to real GCP credentials but syntax errors prevent further verification/resolution. [See Debug Feedback 2025-05-01 15:43:00]
+- Link to Progress Entry: [See activeContext.md entry 2025-05-01 15:43:00]
 - Outcome: Fixed test_get_db_pool_failure by correcting async mocking strategy (commit e5dfc68).
 - Link to Progress Entry: [See globalContext.md entry 2025-04-28 10:34:52]
 ## Delegations Log
 ### [2025-04-29 03:09:03] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API /acquire Endpoints (Post-Context Limit #16)
 - Assigned to: tdd
+### [2025-05-01 15:45:00] Task: Fix Syntax Errors in Search Service
+### [2025-05-01 20:50:01] Task: Resume TDD for Backend API
+- Assigned to: tdd
+- Description: Continue implementing unit tests for `src/philograph/api/main.py` starting after `/acquire/status/{id}` tests.
+- Expected deliverable: Completed TDD cycles for next API endpoints (e.g., `/search`, `/documents/{doc_id}/references`).
+- Status: failed (Early Return)
+- Completion time: 2025-05-01 21:00:39
+- Outcome: Blocked by persistent `SyntaxError`s in `tests/api/test_main.py` encountered while adding `test_create_collection_db_error`. Multiple `apply_diff` attempts failed to fix the syntax. [Ref: TDD Feedback 2025-05-01 21:00:00]
+- Link to Progress Entry: [See TDD Feedback 2025-05-01 21:00:00]
+- Assigned to: code
+- Description: Correct syntax errors in `src/philograph/search/service.py` introduced during previous debug session [Ref: Debug Feedback 2025-05-01 15:43:00].
+- Expected deliverable: Syntactically correct `src/philograph/search/service.py`, commit with fix, updated `code-feedback.md`.
+- Status: completed
+- Completion time: 2025-05-01 15:47:58
+- Outcome: Successfully corrected syntax errors (imports, indentation, try/except) related to logging attempt. Code parses correctly. Commit: `4c29298`. [See Code Feedback 2025-05-01 15:46:53]
+- Link to Progress Entry: [See Active Context 2025-05-01 15:47:14]
 - Description: Resume TDD for `src/philograph/api/main.py`. Previous session completed tests for `POST /acquire` (success, missing query) and `POST /acquire/confirm` (success), invoking Early Return (Context 51%) [Ref: TDD Feedback 2025-04-29 03:08:33]. Resume testing with error handling for `POST /acquire/confirm` and all cases for `GET /acquire/status/{id}`.
 - Expected deliverable: Completed tests for remaining `/acquire` endpoints in `tests/api/test_main.py`.
 - Status: failed (Early Return - Context 51%)
 - Completion time: 2025-04-29 03:08:33
 - Outcome: Completed TDD cycles for `POST /acquire` (Success, Missing Query) and `POST /acquire/confirm` (Success). Context limit reached before testing error handling and `GET /acquire/status/{id}`. [Ref: TDD Feedback 2025-04-29 03:08:33]
+### [2025-05-01 15:48:17] Task: Resume Investigation of API /search Embedding Error
+- Assigned to: debug
+- Description: Continue diagnosing and fix the 500 embedding error on the `/search` API endpoint [Ref: Issue-ID: CLI-API-500-ERRORS], following syntax fix (commit `4c29298`).
+- Expected deliverable: Fixed code/config, verification via tests, updated `debug-feedback.md`.
+- Status: failed (Early Return)
+- Completion time: 2025-05-01 19:29:53
+- Outcome: Early Return invoked due to high context (89%). Resolved initial `httpx.ConnectError` (network/DNS issue). New blocker identified: `ValueError: Received query embedding with incorrect dimension (Expected 768, got 3072)` in `search/service.py`. [Ref: Debug Feedback 2025-05-01 19:28:03] [Ref: Issue-ID: CLI-API-500-ERRORS-DIMENSION]
+- Link to Progress Entry: [See activeContext.md entry 2025-05-01 19:28:03]
 - Link to Progress Entry: [See globalContext.md entry TBD]
 ### [2025-04-29 00:40:30] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API (Post-Context Limit #15)
 - Assigned to: tdd
 ### [2025-04-29 02:27:15] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API (Post-Docker Workaround)
 - Assigned to: tdd
+### [2025-05-01 19:30:10] Task: Resolve Embedding Dimension Mismatch in /search Endpoint
+- Assigned to: debug
+- Description: Diagnose and fix the `ValueError` for embedding dimension mismatch [Ref: Issue-ID: CLI-API-500-ERRORS-DIMENSION].
+- Expected deliverable: Fixed code/config, verification via tests, updated `debug-feedback.md`.
+- Status: failed (Early Return)
+- Completion time: 2025-05-01 19:39:12
+- Outcome: Early Return invoked due to context limit (47%) and shift in blocker. Fixed dimension mismatch via truncation workaround in `search/service.py` and fixed DB query formatting in `db_layer.py`. Backend errors resolved, but CLI tests (`tests/cli/test_cli_main.py::test_search_*`) now fail due to test suite issues (mocking/exit codes). [Ref: Debug Feedback 2025-05-01 19:37:24]
+- Link to Progress Entry: [See activeContext.md entry 2025-05-01 19:37:24]
 - Description: Resume TDD for `src/philograph/api/main.py` after Docker workaround. Verify env, test `/documents` 404, `/collections`, `/acquire`.
 - Expected deliverable: Completed tests for specified endpoints.
 - Status: failed (Early Return - Context 54%)
 - Completion time: 2025-04-29 02:35:51
 - Outcome: Fixed test env (`PYTHONPATH`, mock data). Verified `test_get_document_success`. Completed TDD for `/documents` 404, `/collections` success/validation. Added failing test for duplicate collection name. Returned early due to context.
+### [2025-05-01 19:39:31] Task: Fix Failing CLI Search Tests
+- Assigned to: tdd
+- Description: Resolve failures in CLI search tests (`tests/cli/test_cli_main.py::test_search_*`) related to mocking/assertions after backend fixes.
+- Expected deliverable: Fixed tests in `tests/cli/test_cli_main.py`, commit with fix, updated `tdd-feedback.md`.
+- Status: failed (Early Return)
+- Completion time: 2025-05-01 19:55:33
+- Outcome: Early Return invoked due to context limit (47%) and intractable blocker. Unable to reliably mock `make_api_request` or assert `typer.Exit(1)` using `CliRunner`. Multiple strategies failed. [Ref: TDD Feedback 2025-05-01 19:54:41]
+- Link to Progress Entry: [See activeContext.md entry 2025-05-01 19:54:41]
 - Link to Progress Entry: [See globalContext.md entry 2025-04-29 02:35:51]
 - Description: Resume TDD for `src/philograph/api/main.py`. Previous session blocked by Docker build issue (`COPY tests` failing) and context limit (~51%). Resume by debugging Dockerfile, verifying test execution in container, then continue testing API endpoints.
 - Expected deliverable: Fixed Dockerfile, verified test execution, completed tests for `/search`, `/documents`, `/collections`, `/acquire`.

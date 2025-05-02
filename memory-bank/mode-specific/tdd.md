@@ -1,18 +1,80 @@
+### Test Execution: Regression (`tests/cli/test_cli_main.py`) - [2025-05-01 20:22:37]
+- **Trigger**: Manual run post-Debug fix for CLI test mocking [Ref: GlobalContext 2025-05-01 20:17:00]. Command: `sudo docker-compose exec philograph-backend pytest tests/cli/test_cli_main.py`
+- **Outcome**: PASS / **Summary**: 38 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed the fix applied by Debug mode (asserting `result.stdout` instead of mocking output functions) is effective for all tests in `tests/cli/test_cli_main.py`.
+### Test Execution: Regression (Full Suite) - [2025-05-01 13:35:58]
+- **Trigger**: Manual run post-DB connection fix [Ref: Issue-ID: PYTEST-SIGKILL-DB-CONN-20250430]. Command: `sudo docker-compose exec philograph-backend pytest`
+- **Outcome**: FAIL / **Summary**: 244 passed, 3 failed, 1 skipped
+### TDD Cycle: CLI `acquire-missing-texts` (Initial Call) - [2025-05-01 20:24:24]
+- **Red**: Added `test_acquire_missing_texts_initial_call`. Ran test. Failed (Exit code 2 - command not found). / Test File: `tests/cli/test_cli_main.py`
+- **Green**: Added basic `acquire_missing_texts` command implementation calling `make_api_request` with threshold and `display_results`. Ran test. Passed. / Code File: `src/philograph/cli/main.py`
+- **Refactor**: No refactoring needed.
+- **Outcome**: Cycle completed. Verified initial API call path for `acquire-missing-texts` command.
+- **Failed Tests**:
+    - `tests/cli/test_cli_main.py::test_search_success_query_only`: `AssertionError: assert 1 == 0` (Exit code 1 due to API 500 error)
+    - `tests/cli/test_cli_main.py::test_search_success_with_filters`: `AssertionError: assert 1 == 0` (Exit code 1 due to API 500 error)
+### TDD Cycle: CLI `acquire-missing-texts` (Confirmation Flow) - [2025-05-01 20:26:30]
+- **Red**: Added `test_acquire_missing_texts_confirmation_flow`. Ran test. Failed (`AssertionError` on stdout check). / Test File: `tests/cli/test_cli_main.py`
+- **Green**: Implemented confirmation logic in `acquire_missing_texts` (check status, display options, prompt user, call confirm API). Corrected test assertions to be less brittle regarding `rich` table output. Ran test. Passed. / Code File: `src/philograph/cli/main.py`, Test File: `tests/cli/test_cli_main.py`
+- **Refactor**: No refactoring needed.
+- **Outcome**: Cycle completed. Verified confirmation flow logic for `acquire-missing-texts` command.
+    - `tests/cli/test_cli_main.py::test_search_empty_results`: `AssertionError: assert 1 == 0` (Exit code 1 due to API 500 error)
+- **Coverage Change**: N/A
+- **Notes**: Failures caused by backend API `/search` returning `500 - {"detail":"Search failed due to unexpected embedding error"}`. Confirms DB connection stability but highlights persistent embedding issue [Ref: Issue-ID: CLI-API-500-ERRORS].
+### TDD Cycle: CLI `acquire-missing-texts` (Confirmation Cancel) - [2025-05-01 20:27:23]
+- **Red**: Added `test_acquire_missing_texts_confirmation_cancel`. Ran test. Passed unexpectedly. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A. Implementation already handles cancellation (selection == 0).
+- **Refactor**: No refactoring needed.
+- **Outcome**: Cycle completed. Verified cancellation flow logic for `acquire-missing-texts` command.
 ### Test Execution: Regression Verification (`tests/api/test_main.py::test_get_document_success`) - [2025-04-30 07:14:58]
 - **Trigger**: Manual run targeting single test after previous SIGKILL.
 - **Outcome**: FAIL / **Summary**: 0 passed, 1 error (SIGKILL)
+### TDD Cycle: CLI `acquire-missing-texts` (Initial API Error) - [2025-05-01 20:28:18]
+- **Red**: Added `test_acquire_missing_texts_initial_api_error`. Ran test. Passed unexpectedly. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A. Implementation relies on `make_api_request` error handling.
+- **Refactor**: No refactoring needed.
+- **Outcome**: Cycle completed. Verified initial API error handling for `acquire-missing-texts` command.
 - **Failed Tests**: `tests/api/test_main.py::test_get_document_success` (Terminated by SIGKILL)
 - **Notes**: Confirmed SIGKILL occurs even when running only one test, pointing to fixture/app initialization OOM.
 
+### TDD Cycle: CLI `acquire-missing-texts` (Confirmation Missing Data) - [2025-05-01 20:28:59]
+- **Red**: Added `test_acquire_missing_texts_confirmation_missing_data`. Ran test. Failed on stderr assertion, but passed on exit code assertion. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A. Implementation correctly handles missing data and exits with code 1. Test failure related to `CliRunner` not capturing `rich.Console(stderr=True)` output in `result.stderr`.
+- **Refactor**: No refactoring needed.
+- **Outcome**: Cycle completed. Verified error handling for missing confirmation data in `acquire-missing-texts` command. Noted test limitation regarding stderr capture.
 ### Test Execution: Regression Verification (`tests/api/test_main.py`) - [2025-04-30 07:14:23]
 - **Trigger**: Manual run after `debug` mode increased container memory limit to 2GB.
 - **Outcome**: FAIL / **Summary**: 14 passed, 1 error (SIGKILL)
+### TDD Cycle: CLI `acquire-missing-texts` (--yes Auto-Confirm) - [2025-05-01 20:29:38]
+- **Red**: Added `test_acquire_missing_texts_auto_confirm_yes`. Ran test. Passed unexpectedly. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A. Implementation already handles auto-confirmation with `--yes` flag.
+- **Refactor**: No refactoring needed.
+- **Outcome**: Cycle completed. Verified `--yes` flag auto-confirmation logic for `acquire-missing-texts` command.
 - **Failed Tests**: `tests/api/test_main.py::test_get_document_success` (Terminated by SIGKILL after this test passed)
 - **Notes**: Increased memory limit (2GB) was insufficient to prevent OOM SIGKILL.
 ### Test Execution: Unit (`tests/cli/test_main.py::test_status_invalid_id`) - [2025-04-29 04:48:39]
+### TDD Cycle: CLI `acquire` (Title/Author Confirmation Flow) - [2025-05-01 20:30:44]
+- **Red**: Added `test_acquire_specific_text_confirmation_flow` targeting the `acquire` command (defined line 268). Ran test. Passed unexpectedly. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A. Implementation already handles confirmation flow for title/author invocation.
+- **Refactor**: No refactoring needed for this cycle. Noted potential duplication/confusion between `acquire` and `acquire-missing-texts` commands.
+- **Outcome**: Cycle completed. Verified confirmation flow logic for the `acquire` command when invoked with title/author.
 - **Trigger**: Manual run after modifying test to expect API error handling via `make_api_request`.
 - **Outcome**: PASS / **Summary**: 1 passed (32 total passed, 6 failed due to backend issues)
 ### Test Execution: [CLI - /search connectivity] - [2025-04-29 09:19:13]
+### TDD Cycle: CLI `acquire` (Refactoring) - [2025-05-01 20:37:01]
+- **Red**: N/A (Refactoring step).
+- **Green**: N/A (Refactoring step).
+- **Refactor**: Consolidated `acquire` and `acquire-missing-texts` commands into a single `acquire` command in `src/philograph/cli/main.py`. Added `--find-missing-threshold` option and logic to handle mutually exclusive arguments (`--title`/`--author` vs `--find-missing-threshold`). Updated tests in `tests/cli/test_cli_main.py` to use the refactored command and option name. Fixed resulting test failures related to `UnboundLocalError`, incorrect error messages, and stderr assertions. / Files Changed: `src/philograph/cli/main.py`, `tests/cli/test_cli_main.py`
+- **Outcome**: Refactoring complete. Command structure simplified and aligned better with pseudocode intent.
+
+### Test Execution: Regression (`tests/cli/test_cli_main.py`) - [2025-05-01 20:37:01]
+- **Trigger**: Manual run post-refactoring of `acquire` command and test fixes. Command: `sudo docker-compose exec philograph-backend pytest tests/cli/test_cli_main.py`
+- **Outcome**: PASS / **Summary**: 45 passed
+- **Failed Tests**: None
+- **Coverage Change**: N/A
+- **Notes**: Confirmed refactoring of `acquire` command and associated test fixes were successful. All CLI tests pass.
 - **Trigger**: Manual verification post-proxy fix.
 - **Outcome**: FAIL / **Summary**: 3 tests failed
 - **Failed Tests**:

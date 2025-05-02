@@ -1,3 +1,90 @@
+### Task Completion: Fixed Syntax Errors in `tests/api/test_main.py` - [2025-05-01 21:04:38]
+- **Issue**: Persistent `SyntaxError`s and file corruption in `tests/api/test_main.py` blocking TDD progress [Ref: TDD Feedback 2025-05-01 21:00:00].
+- **Diagnosis**: Read file content (`read_file` lines 1-500, 501-1025). Identified widespread issues: duplicate imports, structural corruption (nested function definitions), incomplete functions, duplicate function definitions, duplicate assertions. Likely caused by previous failed `apply_diff` attempts.
+- **Fix**: Used `write_to_file` to overwrite the entire `tests/api/test_main.py` with reconstructed, corrected content (985 lines). Fixes included removing duplicates, correcting structure, and completing function definitions.
+- **Verification**: Ran `sudo docker-compose exec philograph-backend pytest tests/api/test_main.py`. Result: `41 passed, 6 warnings`. Confirmed syntax errors resolved and tests are collectible.
+- **Files Affected**: `tests/api/test_main.py`
+- **Next Steps**: Commit fix, use `attempt_completion`. Recommend TDD run.
+- **Related Issues**: [Ref: TDD Feedback 2025-05-01 21:00:00], [Ref: Issue-ID: API-TEST-SYNTAX-CORRUPTION-20250501]
+### Early Return: Context Limit &amp; CLI Test Blocker - [2025-05-01 19:37:24]
+- **Trigger**: Context size reached 45%, approaching the ~40-50% threshold for Early Return, and the remaining blocker is within the CLI test suite.
+- **Blocker**: CLI tests (`tests/cli/test_cli_main.py::test_search_*`) are failing due to issues with mocking (`make_api_request` not called) and exit code handling (`SystemExit(1)` not resulting in exit code 1 in the test runner).
+- **Progress**:
+    - Applied workaround in `src/philograph/search/service.py` to truncate embeddings received from LiteLLM proxy, resolving the `ValueError: Received query embedding with incorrect dimension`.
+    - Fixed SQL query in `src/philograph/data_access/db_layer.py` to use a literal for the vector dimension cast (`::vector(768)`), resolving the `Database search failed: type modifiers must be simple constants or identifiers` error.
+    - Verification via `pytest` shows backend errors are resolved, but CLI tests now fail.
+- **Analysis**: The original backend bug [Ref: Issue-ID: CLI-API-500-ERRORS-DIMENSION] appears fixed. The remaining failures are specific to the CLI test suite's interaction with `typer.testing.CliRunner` and `unittest.mock`.
+- **Self-Correction**: N/A (Followed structured diagnosis, context limit reached).
+- **Context %**: 45% (Manually calculated: ~453k / 1,000,000)
+- **Recommendations**:
+    1.  **Invoke Early Return Clause.**
+    2.  **Delegate via `new_task` to `tdd` mode**: Objective: "Fix failing CLI search tests in `tests/cli/test_cli_main.py` related to mocking and exit code handling. [Ref: Debug Feedback 2025-05-01 19:37:24]".
+    3.  **Next Steps for TDD**:
+        *   Investigate why `make_api_request` mock is not being called in success/empty tests. Check if the command exits prematurely within the `runner.invoke` context.
+        *   Investigate why `SystemExit(1)` raised by the mock in `test_search_api_error` results in `result.exit_code == 0`. Explore alternative ways to assert expected error exits with `typer.testing.CliRunner`.
+        *   Refactor tests as needed to correctly mock dependencies and assert behavior.
+### Early Return: Context Limit Exceeded - 2025-05-01 19:28:03
+- **Trigger**: Context size reached 99% (994,773 tokens), exceeding the ~40-50% threshold for Early Return.
+- **Blocker**: High context size prevents further reliable tool use and analysis.
+- **Progress**:
+    - Resumed investigation of [Issue-ID: CLI-API-500-ERRORS].
+    - Confirmed syntax errors in `src/philograph/search/service.py` were fixed.
+    - Restarted Docker services (`sudo docker-compose down && sudo docker-compose up -d --build`).
+    - Re-ran failing tests (`pytest tests/cli/test_cli_main.py -k test_search_`), which still failed but with a different error: `500 - {"detail":"Embedding generation failed (Processing Error)"}`.
+    - Checked `philograph-backend` logs, confirmed `httpx.ConnectError` was gone, but a new `ValueError: Received query embedding with incorrect dimension (3072)` appeared in `src/philograph/search/service.py`.
+    - Checked `litellm-proxy` logs, showing successful startup but no incoming requests initially.
+    - Tested network connectivity (`ping`, `nc`) from `philograph-backend` to `litellm-proxy`, confirming basic network and TCP port reachability.
+    - Hypothesized a Python/`httpx`-specific DNS resolution issue.
+    - Tested hypothesis by temporarily changing `LITELLM_PROXY_URL` in `src/philograph/config.py` to use the IP address (`172.23.0.3`).
+    - Restarted services and re-ran tests. The `ConnectError` was resolved, but the `ValueError` (dimension mismatch) persisted.
+    - Reverted the IP address change in `src/philograph/config.py`.
+- **Analysis**: The root cause shifted from a connection error to an embedding dimension mismatch. `litellm-proxy` is returning 3072 dimensions, while the backend expects 768. Potential causes: `litellm_config.yaml` misconfiguration, LiteLLM/Vertex AI dimension handling issue, or backend validation logic error.
+- **Self-Correction**: N/A (Issue evolved, previous steps were logical).
+- **Context %**: 99%
+- **Recommendations**:
+    1.  **Delegate via `new_task`**: Create a new task for `debug` mode with the objective: "Investigate and fix the embedding dimension mismatch (Expected 768, Got 3072) related to `litellm-proxy` and `philo-embed` model [Ref: Issue-ID: CLI-API-500-ERRORS, Debug Feedback 2025-05-01 19:28:03]".
+    2.  **Next Steps for New Task**:
+        *   Check `litellm_config.yaml` for the `philo-embed` model definition and dimension settings. (File path likely `/app/litellm_config.yaml` inside the `litellm-proxy` container, or mounted from the host).
+        *   Verify the dimension check logic in `src/philograph/search/service.py` (around line 60).
+        *   Check `litellm-proxy` logs again for errors related to the embedding request processing itself (`sudo docker-compose logs litellm-proxy`).
+        *   If necessary, inspect the `litellm` library code or documentation regarding Vertex AI dimension handling.
+### Early Return - High Context (74%) & Syntax Error - [2025-05-01 15:43:00]
+- **Trigger**: Context size reached 74% after `insert_content` operation resulted in Pylance syntax errors.
+- **Context**: Investigating `500 - {"detail":"Search failed due to unexpected embedding error"}` [Ref: Issue-ID: CLI-API-500-ERRORS]. Confirmed error is linked to using real GCP credentials (`/home/loganrooks/.secrets/philograph-gcp-key.json`) vs dummy key. Attempted to add logging to `src/philograph/search/service.py` (around line 40) to inspect `litellm-proxy` response.
+- **Issue**: The `insert_content` operation introduced syntax errors (indentation, try/except structure) reported by Pylance. Context limit (74%) prevents safely applying fixes and continuing verification.
+- **Attempts**:
+    1. Analyzed API (`api/main.py`) and Service (`search/service.py`) code.
+    2. Checked `litellm-proxy` logs (showed 200 OK).
+    3. Verified `.env` and `litellm_config.yaml`.
+    4. Switched `.env` between dummy and real GCP key, confirming the error change and linking the issue to the real key/mount.
+    5. Attempted `insert_content` to add logging to `search_service.py`.
+- **Analysis**: The root cause of the original "unexpected embedding error" is highly likely related to the real GCP credentials file access, validity, or permissions within the `litellm-proxy` container. The immediate blocker is the syntax error introduced by `insert_content` and the critical context level.
+- **Self-Correction**: Invoking Early Return Clause due to context limit and inability to proceed with fixing the introduced syntax error.
+- **Context %**: 74% (Manually calculated: ~744k / 1,000,000)
+- **Recommendation**: Invoke Early Return. Delegate to `debug` (new instance) or `code` mode via `new_task` to:
+    1.  **Fix Syntax Errors:** Correct the syntax errors in `src/philograph/search/service.py` around line 40, ensuring the added logging (`logger.debug(f"LiteLLM raw response status: {response.status_code}")`, `logger.debug(f"LiteLLM raw response text: {response.text}")`, etc.) is correctly placed within the `try` block before the `response.json()` call.
+    2.  **Restart Services:** Run `sudo docker-compose down && sudo docker-compose up -d --build`.
+    3.  **Reproduce & Verify:** Run the failing search tests: `sudo docker-compose exec philograph-backend pytest tests/cli/test_cli_main.py -k test_search_`.
+    4.  **Analyze Logs:** Check `philograph-backend` logs for the newly added debug output from `search_service.py` and re-check `litellm-proxy` logs (`sudo docker-compose logs litellm-proxy`) for any subtle errors related to authentication or the specific request.
+    5.  **Implement Final Fix:** Based on log analysis (e.g., specific error from Vertex AI within the response text, permission error), implement the necessary fix. This might involve adjusting the GCP key file mounting/permissions, correcting LiteLLM configuration, or refining error handling in `search_service.py`.
+    6.  **Verify Fix:** Re-run the search tests to confirm they pass.
+    7.  **Update Memory Bank & Complete:** Document the final fix and verification in the Memory Bank and use `attempt_completion`.
+    Provide link to this feedback entry. [Ref: Issue-ID: CLI-API-500-ERRORS]
+
+---
+### Debug Task Summary - DB Connection Fix - [2025-05-01 13:31:41]
+- **Issue**: Persistent DB connection failure from `philograph-backend` to `db` container, manifesting as `[Errno -2] Name or service not known` or `PoolTimeout`, leading to `SIGKILL`. [Ref: Issue-ID: PYTEST-SIGKILL-DB-CONN-20250430]
+- **Diagnostics**:
+    - Added `postgresql-client` to `Dockerfile`.
+    - Enabled `psycopg` DEBUG logging via `src/philograph/config.py`.
+    - Ran isolation test (`docker compose exec ... python -c "..."`).
+    - Analyzed logs: Identified `failed to resolve host 'Lsr@db'` error.
+    - Checked `.env`: Confirmed `DB_PASSWORD="190297@Lsr"`.
+- **Root Cause**: Unencoded special character ('@') in `DB_PASSWORD` caused `psycopg` to misinterpret the hostname in the connection URL.
+- **Fix**: Modified `src/philograph/config.py` to URL-encode the password using `urllib.parse.quote_plus`.
+- **Verification**: Re-ran isolation test, which passed successfully, confirming connection establishment.
+- **Commit**: 537e2d7
+- **Files Affected**: `Dockerfile`, `src/philograph/config.py`
 ### Intervention Log - [2025-04-30 13:47:41]
 - **Trigger**: User feedback on `attempt_completion` message.
 - **Context**: Debug mode invoked Early Return due to intractable DB blocker. User previously noted discrepancy in context reporting.

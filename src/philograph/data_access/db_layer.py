@@ -310,16 +310,20 @@ async def vector_search_chunks(conn: psycopg.AsyncConnection, query_embedding: L
     # Using L2 distance (<=>) here as a default, adjust if needed based on embedding model characteristics
     distance_operator = "<=>"
 
+    # Format the dimension directly into the SQL string for the vector type cast
+    # PostgreSQL requires the dimension to be a literal constant in the type cast.
+    vector_cast = f"::vector({config.TARGET_EMBEDDING_DIMENSION})"
     base_sql = f"""
         SELECT c.id as chunk_id, c.text_content, c.sequence, s.id as section_id, s.title as section_title,
                d.id as doc_id, d.title as doc_title, d.author as doc_author, d.year as doc_year, d.source_path,
-               c.embedding {distance_operator} %s::vector(%s) AS distance
+               c.embedding {distance_operator} %s{vector_cast} AS distance
         FROM chunks c
         JOIN sections s ON c.section_id = s.id
         JOIN documents d ON s.doc_id = d.id
     """
     where_clauses = []
-    params: List[Any] = [format_vector_for_pgvector(query_embedding), config.TARGET_EMBEDDING_DIMENSION]
+    # Remove dimension from params, only pass the formatted embedding vector
+    params: List[Any] = [format_vector_for_pgvector(query_embedding)]
 
     if filters:
         # TDD: Test filter construction for various valid filter types
