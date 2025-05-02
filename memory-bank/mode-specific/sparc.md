@@ -127,30 +127,86 @@
 - Description: Correct syntax errors in `src/philograph/search/service.py` introduced during previous debug session [Ref: Debug Feedback 2025-05-01 15:43:00].
 - Expected deliverable: Syntactically correct `src/philograph/search/service.py`, commit with fix, updated `code-feedback.md`.
 - Status: completed
+### [2025-05-01 21:00:57] Task: Fix Syntax Errors in API Test File
+- Assigned to: debug
+- Description: Investigate and fix widespread `SyntaxError`s in `tests/api/test_main.py` blocking TDD. [Ref: TDD Feedback 2025-05-01 21:00:00]
+- Expected deliverable: Corrected `tests/api/test_main.py` file with no syntax errors, verified by `pytest` collection.
+- Status: completed
+- Completion time: 2025-05-01 21:06:23
+- Outcome: Diagnosed widespread syntax errors/corruption likely from failed `apply_diff`. Rewrote `tests/api/test_main.py` using `write_to_file`. Verified fix via `pytest tests/api/test_main.py` (41 tests passed). Commit `6cd6b8c`. [Ref: Debug Feedback 2025-05-01 21:04:38]
+- Link to Progress Entry: [See Debug Feedback 2025-05-01 21:04:38]
 - Completion time: 2025-05-01 15:47:58
 - Outcome: Successfully corrected syntax errors (imports, indentation, try/except) related to logging attempt. Code parses correctly. Commit: `4c29298`. [See Code Feedback 2025-05-01 15:46:53]
 - Link to Progress Entry: [See Active Context 2025-05-01 15:47:14]
 - Description: Resume TDD for `src/philograph/api/main.py`. Previous session completed tests for `POST /acquire` (success, missing query) and `POST /acquire/confirm` (success), invoking Early Return (Context 51%) [Ref: TDD Feedback 2025-04-29 03:08:33]. Resume testing with error handling for `POST /acquire/confirm` and all cases for `GET /acquire/status/{id}`.
+### [2025-05-01 21:06:42] Task: Resume TDD for Backend API (Post-Syntax Fix)
+- Assigned to: tdd
+- Description: Continue TDD for `src/philograph/api/main.py` starting with `test_create_collection_db_error`. [Ref: Debug Feedback 2025-05-01 21:04:38]
+- Expected deliverable: Completed TDD cycles for next API endpoints (e.g., `/search`, `/documents/{doc_id}/references`, collection CRUD).
+- Status: failed (Early Return - Context Limit)
+- Completion time: 2025-05-01 21:27:01
+- Outcome: Verified `POST /collections` DB error handling. Completed TDD cycles for `GET /documents/{id}/references` (Success, Not Found, Empty), `DELETE /collections/{id}/items/{type}/{item_id}` (Success, Not Found, Invalid Type), and `DELETE /collections/{id}` (Success, Not Found). Added placeholders to `db_layer.py`. Context reached 41%. [Ref: TDD Early Return 2025-05-01 21:27:01]
+- Link to Progress Entry: [See TDD Early Return 2025-05-01 21:27:01]
 - Expected deliverable: Completed tests for remaining `/acquire` endpoints in `tests/api/test_main.py`.
 - Status: failed (Early Return - Context 51%)
 - Completion time: 2025-04-29 03:08:33
 - Outcome: Completed TDD cycles for `POST /acquire` (Success, Missing Query) and `POST /acquire/confirm` (Success). Context limit reached before testing error handling and `GET /acquire/status/{id}`. [Ref: TDD Feedback 2025-04-29 03:08:33]
+### [2025-05-01 21:27:17] Task: Resume TDD for Backend API (Post-Context Limit)
+- Assigned to: tdd
+- Description: Continue TDD for API or implement placeholder DB functions. [Ref: TDD Early Return 2025-05-01 21:27:01]
+- Expected deliverable: Completed TDD cycles for next API endpoints or implemented DB functions.
+- Status: completed
+- Completion time: 2025-05-01 21:38:24
+- Outcome: Focused on DB layer. Completed TDD cycles for placeholder functions `get_relationships_for_document`, `remove_item_from_collection`, and `delete_collection` in `src/philograph/data_access/db_layer.py` and `tests/data_access/test_db_layer.py`. [Ref: TDD Completion 2025-05-01 21:38:24]
+- Link to Progress Entry: [See TDD Completion 2025-05-01 21:38:24]
 ### [2025-05-01 15:48:17] Task: Resume Investigation of API /search Embedding Error
 - Assigned to: debug
 - Description: Continue diagnosing and fix the 500 embedding error on the `/search` API endpoint [Ref: Issue-ID: CLI-API-500-ERRORS], following syntax fix (commit `4c29298`).
 - Expected deliverable: Fixed code/config, verification via tests, updated `debug-feedback.md`.
+### [2025-05-01 21:38:38] Task: Resume TDD for Backend API (Post-DB Placeholders)
+- Assigned to: tdd
+- Description: Continue TDD for API endpoints like `/search` or `/acquire`. [Ref: TDD Completion 2025-05-01 21:38:24]
+- Expected deliverable: Completed TDD cycles for next API endpoints.
+- Status: failed (Early Return - File Corruption)
+- Completion time: 2025-05-01 21:45:49
+- Outcome: Completed TDD cycle for `/search` offset parameter. Blocked by recurring syntax errors/corruption in `tests/api/test_main.py` when adding `test_get_collection_db_error`. Failed `apply_diff` attempts. [Ref: TDD Feedback 2025-05-01 21:44:52]
+- Link to Progress Entry: [See TDD Feedback 2025-05-01 21:44:52]
 - Status: failed (Early Return)
 - Completion time: 2025-05-01 19:29:53
 - Outcome: Early Return invoked due to high context (89%). Resolved initial `httpx.ConnectError` (network/DNS issue). New blocker identified: `ValueError: Received query embedding with incorrect dimension (Expected 768, got 3072)` in `search/service.py`. [Ref: Debug Feedback 2025-05-01 19:28:03] [Ref: Issue-ID: CLI-API-500-ERRORS-DIMENSION]
 - Link to Progress Entry: [See activeContext.md entry 2025-05-01 19:28:03]
+### [2025-05-01 21:46:03] Task: Fix Recurring Syntax Errors/Corruption in API Test File
+- Assigned to: debug
+- Description: Investigate and fix recurring corruption in `tests/api/test_main.py`. [Ref: TDD Feedback 2025-05-01 21:44:52], [Ref: Debug Feedback 2025-05-01 21:04:38]
+- Expected deliverable: Corrected `tests/api/test_main.py` file with no syntax errors, verified by `pytest` collection.
+- Status: completed
+- Completion time: 2025-05-01 21:53:51
+- Outcome: Rewrote `tests/api/test_main.py` using `write_to_file`. Fixed 8 subsequent test failures (5 search assertions, 1 API logic `409` error, 1 assertion message, 1 missing mock). Verified all 51 tests pass. Noted recurring corruption pattern. [Ref: Debug Feedback 2025-05-01 21:53:51]
+- Link to Progress Entry: [See Debug Feedback 2025-05-01 21:53:51]
 - Link to Progress Entry: [See globalContext.md entry TBD]
 ### [2025-04-29 00:40:30] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API (Post-Context Limit #15)
 - Assigned to: tdd
 ### [2025-04-29 02:27:15] Task: Resume PhiloGraph Tier 0 MVP Testing - Backend API (Post-Docker Workaround)
+### [2025-05-01 21:54:05] Task: Resume TDD for Backend API (Post-Corruption Fix #2)
+- Assigned to: tdd
+- Description: Continue TDD for API, verifying full suite first. [Ref: Debug Feedback 2025-05-01 21:53:51]
+- Expected deliverable: Completed TDD cycles for next API endpoints.
+- Status: completed
+- Completion time: 2025-05-01 22:11:35
+- Outcome: Fixed 6 regressions in DB layer tests/code. Completed TDD cycles for `/search` limit, `GET /collections/{id}` 404, `GET /documents/{id}/references` 404. All 272 tests passing (1 skipped). No file corruption observed. Context at 40%. [Ref: TDD Completion 2025-05-01 22:11:35]
+- Link to Progress Entry: [See TDD Completion 2025-05-01 22:11:35]
 - Assigned to: tdd
 ### [2025-05-01 19:30:10] Task: Resolve Embedding Dimension Mismatch in /search Endpoint
 - Assigned to: debug
 - Description: Diagnose and fix the `ValueError` for embedding dimension mismatch [Ref: Issue-ID: CLI-API-500-ERRORS-DIMENSION].
+### [2025-05-01 22:11:49] Task: Resume TDD for Backend API (Stable)
+- Assigned to: tdd
+- Description: Continue TDD for API, starting with remaining `/search` or `/acquire` endpoints. [Ref: TDD Completion 2025-05-01 22:11:35]
+- Expected deliverable: Completed TDD cycles for next API endpoints.
+- Status: failed (Early Return - File Corruption #3)
+- Completion time: 2025-05-01 22:28:10
+- Outcome: Completed TDD cycles for `/acquire` service error, `GET /documents/{id}` invalid format, `/search` invalid limit/offset, `GET /collections/{id}` DB error. Blocked by recurring corruption (Pylance syntax errors, possible hidden chars) in `tests/api/test_main.py` when adding `test_get_document_references_db_error`. [Ref: TDD Feedback 2025-05-01 22:27:38]
+- Link to Progress Entry: [See TDD Feedback 2025-05-01 22:27:38]
 - Expected deliverable: Fixed code/config, verification via tests, updated `debug-feedback.md`.
 - Status: failed (Early Return)
 - Completion time: 2025-05-01 19:39:12

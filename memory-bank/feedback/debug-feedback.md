@@ -1,3 +1,20 @@
+### Task Completion: Fixed Recurring Corruption in `tests/api/test_main.py` (Third Instance) - [2025-05-01 22:36:06]
+- **Issue**: Recurring widespread `SyntaxError`s and file corruption in `tests/api/test_main.py` blocking TDD progress [Ref: TDD Feedback 2025-05-01 21:44:52]. This is the third instance [Ref: Debug Feedback 2025-05-01 21:51:43, 2025-05-01 21:04:38].
+- **Diagnosis**:
+    - Read corrupted file (`read_file` lines 1-600, 601-1410). Identified duplicate `@pytest.mark.asyncio` decorator and misplaced code block/comment from `test_get_acquisition_status_invalid_id_format` within `test_get_document_references_db_error`.
+    - Confirmed corruption pattern matches previous instances and likely caused by failed TDD `apply_diff`/`insert_content` operations.
+- **Fix**:
+    1.  Used `write_to_file` to rewrite `tests/api/test_main.py` (905 lines), restoring it to the state before the last corruption attempt (up to `test_get_collection_db_error`).
+    2.  Ran `pytest`, revealing failure in `test_get_collection_empty` (404 instead of 200).
+    3.  Diagnosed API logic error: `get_collection` in `src/philograph/api/main.py` incorrectly returned 404 for empty collections. Fixed by changing `if not items_raw:` to `if items_raw is None:`.
+    4.  Ran `pytest`, revealing failure in `test_get_collection_not_found` (200 instead of 404).
+    5.  Diagnosed DB layer logic error: `get_collection_items` in `src/philograph/data_access/db_layer.py` returned `[]` for non-existent collections instead of distinguishing them. Fixed by adding an existence check and returning `None` if the collection doesn't exist.
+    6.  Ran `pytest`, revealing failure in `test_get_collection_not_found` (200 instead of 404).
+    7.  Diagnosed test mock error: `test_get_collection_not_found` was mocking `get_collection_items` to return `[]` instead of the new expected `None`. Fixed mock to return `None`.
+- **Verification**: Ran `sudo docker-compose exec philograph-backend pytest tests/api/test_main.py`. Result: `36 passed, 6 warnings`. Confirmed corruption and subsequent logic/test errors resolved.
+- **Files Affected**: `tests/api/test_main.py`, `src/philograph/api/main.py`, `src/philograph/data_access/db_layer.py`
+- **Next Steps**: Update other Memory Bank files, use `attempt_completion`. Recommend TDD run.
+- **Related Issues**: [Ref: TDD Feedback 2025-05-01 21:44:52], [Ref: Debug Feedback 2025-05-01 21:51:43], [Ref: Debug Feedback 2025-05-01 21:04:38], [Ref: Issue-ID: API-TEST-SYNTAX-CORRUPTION-20250501]
 ### Task Completion: Fixed Recurring Syntax Errors/Corruption in `tests/api/test_main.py` (Second Instance) - [2025-05-01 21:51:43]
 - **Issue**: Recurring widespread `SyntaxError`s and file corruption in `tests/api/test_main.py` blocking TDD progress [Ref: TDD Feedback 2025-05-01 21:44:52]. This is the second instance [Ref: Debug Feedback 2025-05-01 21:04:38].
 - **Diagnosis**:
