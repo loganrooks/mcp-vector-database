@@ -101,17 +101,17 @@ graph TD
 ## 2. Component Responsibilities
 
 *   **User Interfaces (Local):**
-    *   **CLI Client:** Provides command-line access for ingestion, search, basic management, and **text acquisition** tasks. Interacts with the Backend API.
-    *   **PhiloGraph MCP Server:** Exposes PhiloGraph functionality (ingestion, search, **acquisition**) as tools for AI agents (e.g., RooCode). Interacts with the Backend API.
+    *   **CLI Client:** Provides command-line access for ingestion, search, basic management, and **flexible text acquisition discovery and confirmation** tasks. Interacts with the Backend API.
+    *   **PhiloGraph MCP Server:** Exposes PhiloGraph functionality (ingestion, search, **acquisition discovery/confirmation**) as tools for AI agents (e.g., RooCode). Interacts with the Backend API.
 *   **Backend Service (Docker - Flask/FastAPI):**
-    *   **Backend API:** Exposes REST endpoints for UI/MCP interaction (e.g., `/ingest`, `/search`, `/acquire`). Orchestrates calls to internal services and external MCP servers (`zlibrary-mcp`).
+    *   **Backend API:** Exposes REST endpoints for UI/MCP interaction (e.g., `/ingest`, `/search`, `POST /acquire/discover`, `POST /acquire/confirm/{discovery_id}`). Orchestrates calls to internal services and external MCP servers (`zlibrary-mcp`).
     *   **Ingestion Service:** Manages the document processing pipeline for *provided* source files and *acquired* processed files. Coordinates text extraction, chunking, embedding requests (via LiteLLM Proxy), and database indexing.
-    *   **Search Service:** Handles search queries. Generates query embeddings (via LiteLLM Proxy), performs vector and metadata searches against the database.
-    *   **Relationship Service (Basic):** Manages storage and retrieval of explicit relationships (primarily citations) in the database using SQL. Identifies potentially missing cited texts.
-    *   **Bibliography Service (Basic):** Manages user collections and provides basic citation formatting support.
-    *   **Text Acquisition Service:** Orchestrates the workflow for acquiring missing texts. Interacts with the `zlibrary-mcp` server via `use_mcp_tool` to search, download, and process texts. Handles user confirmation (Tier 0) and triggers ingestion of the processed file.
+    *   **Search Service:** Handles search queries. Generates query embeddings (via LiteLLM Proxy), performs vector and metadata searches against the database. Also potentially used by Acquisition Service for discovery criteria involving semantic similarity.
+    *   **Relationship Service (Basic):** Manages storage and retrieval of explicit relationships (primarily citations) in the database using SQL. Provides data for acquisition discovery criteria (e.g., citation counts, cited-by links). Identifies potentially missing cited texts.
+    *   **Bibliography Service (Basic):** Manages user collections (which can be used as a filter in acquisition discovery) and provides basic citation formatting support.
+    *   **Text Acquisition Service:** Orchestrates the **flexible workflow** for discovering and acquiring missing texts. Handles `POST /acquire/discover` requests by interacting with Relationship/Search/DB services based on criteria. Manages discovery sessions (using `discovery_id`). Handles `POST /acquire/confirm/{discovery_id}` requests by initiating `zlibrary-mcp` calls (`search_books`, `download_book_to_file`) for confirmed candidates via `use_mcp_tool`. Triggers ingestion of successfully processed files.
 *   **Text Processing Utilities (Docker / within Backend):**
-    *   **GROBID (CPU):** Parses PDFs for structure, metadata, text content, and bibliography. Runs as a separate container or integrated library.
+    *   **GROBID (CPU):** Parses PDFs for structure, metadata, text content, and bibliography (providing citation data for discovery). Runs as a separate container or integrated library.
     *   **PyMuPDF/ebooklib:** Extracts text and structure from EPUB files.
     *   **semchunk (CPU):** Performs semantic chunking of extracted text.
     *   **AnyStyle (Optional):** Parses citation strings if GROBID output needs refinement. Runs as a separate container or integrated library.
@@ -183,7 +183,7 @@ sequenceDiagram
     API-->>CLI: Search Results
 ```
 
-### 3.3 Text Acquisition Workflow (via zlibrary-mcp)
+### 3.3 Text Acquisition Workflow (Discovery & Confirmation)
 
 ```mermaid
 sequenceDiagram
@@ -191,38 +191,56 @@ sequenceDiagram
     participant CLI as CLI/MCP
     participant API as Backend API
     participant AcqSvc as Acquisition Service
+    participant RelSvc as Relationship Service
+    participant SearchSvc as Search Service
+    participant DB as PostgreSQL+pgvector
     participant ZLibMCP as zlibrary-mcp Server
     participant IngestSvc as Ingestion Service
 
-    User->>CLI: Trigger Acquisition (e.g., for missing citation)
-    CLI->>API: POST /acquire (text_details)
-    API->>AcqSvc: Start Acquisition(text_details)
-    AcqSvc->>ZLibMCP: use_mcp_tool('search_books', {query: ...})
-    ZLibMCP-->>AcqSvc: Search Results (bookDetails list)
-    AcqSvc->>API: Present Results for Confirmation
-    API->>CLI: Display Results
-    User->>CLI: Confirm Selection (selected bookDetails)
-    CLI->>API: POST /acquire/confirm (selected bookDetails)
-    API->>AcqSvc: Confirm Download(bookDetails)
-    AcqSvc->>ZLibMCP: use_mcp_tool('download_book_to_file', {bookDetails: ..., process_for_rag: true})
-    ZLibMCP-->>AcqSvc: { success: true, processed_path: "/path/to/processed_rag_output/file.txt" }
-    AcqSvc->>API: Report Download/Processing Status
-    API->>CLI: Update User
-    AcqSvc->>IngestSvc: Trigger Ingestion(processed_path)
-    Note over IngestSvc: Ingestion proceeds similar to 3.1, reading from ZLibProcessed path.
-    IngestSvc-->>AcqSvc: Ingestion Status
-    AcqSvc-->>API: Final Acquisition Status
-    API-->>CLI: Final Status
+    User->>CLI: Trigger Discovery (e.g., find missing cited > 5 times by Author X)
+    CLI->>API: POST /acquire/discover (criteria={...})
+    API->>AcqSvc: Discover Candidates(criteria)
+    AcqSvc->>RelSvc: Query Relationships(criteria)
+    RelSvc->>DB: Fetch citation data, etc.
+    DB-->>RelSvc: Relationship data
+    RelSvc-->>AcqSvc: Potential candidates based on relationships
+    opt Semantic Criteria
+        AcqSvc->>SearchSvc: Query based on discourse/tags
+        SearchSvc->>DB: Vector/Metadata Search
+        DB-->>SearchSvc: Search results
+        SearchSvc-->>AcqSvc: Potential candidates based on search
+    end
+    AcqSvc->>AcqSvc: Consolidate & Filter Candidates (exclude existing)
+    AcqSvc->>API: Return Candidates(discovery_id, candidates)
+    API->>CLI: Display Candidates for Review
+
+    User->>CLI: Confirm Selection (discovery_id, confirmed_candidate_ids)
+    CLI->>API: POST /acquire/confirm/{discovery_id} (confirmations=[...])
+    API->>AcqSvc: Trigger Acquisition(discovery_id, confirmations)
+    loop For Each Confirmed Candidate
+        AcqSvc->>ZLibMCP: use_mcp_tool('search_books', {query: refined_details})
+        ZLibMCP-->>AcqSvc: Search Results (bookDetails list)
+        AcqSvc->>AcqSvc: Select Best Match (or require further confirmation)
+        AcqSvc->>ZLibMCP: use_mcp_tool('download_book_to_file', {bookDetails: selected_match, process_for_rag: true})
+        ZLibMCP-->>AcqSvc: { success: true/false, processed_path: "...", job_id: "..." }
+        opt Download Successful
+            AcqSvc->>IngestSvc: Trigger Ingestion(processed_path)
+            Note over IngestSvc: Ingestion proceeds similar to 3.1, reading from ZLibProcessed path.
+            IngestSvc-->>AcqSvc: Ingestion Status
+        end
+        AcqSvc->>API: Report Acquisition Status (job_id, candidate_id, status)
+    end
+    API->>CLI: Update User on Progress/Completion
 ```
 
 ## 4. Data Flow & Communication Protocols
 
-*   **Internal Communication:** Primarily RESTful HTTP calls between the UI/MCP layer and the Backend API, and between Backend services (if split into separate containers, though likely monolithic initially) or between the Backend and dedicated Text Processing containers (e.g., GROBID).
+*   **Internal Communication:** Primarily RESTful HTTP calls between the UI/MCP layer and the Backend API, and between Backend services (Acquisition, Search, Relationship, etc.).
 *   **Embedding Requests:** Backend services (Ingestion, Search) make HTTP POST requests to the **LiteLLM Proxy's OpenAI-compatible endpoint** (`http://{{LITELLM_HOST}}:{{LITELLM_PORT}}/embeddings`), specifying the internal model name (`philo-embed`) which LiteLLM maps to `vertex_ai/text-embedding-large-exp-03-07`.
 *   **Text Acquisition Requests:** The Backend Service (Acquisition Service) communicates with the **`zlibrary-mcp` Server** using the Model Context Protocol (MCP) via `use_mcp_tool` calls, likely over stdio.
 *   **External API Calls:** The **LiteLLM Proxy** is the *only* component making direct calls to external cloud services (Vertex AI API) via HTTPS.
-*   **Database Interaction:** Backend services interact with PostgreSQL using standard SQL queries via a Python DB driver (e.g., `psycopg2`). Vector searches utilize `pgvector`'s specific operators (e.g., `<=>` for L2 distance, `<#>` for negative inner product, `<->` for cosine distance).
-*   **Data Format:** JSON is the primary format for API request/response bodies and MCP tool arguments/results. Text data is processed as UTF-8 strings. Embeddings are stored as `vector` types in PostgreSQL (Recommended dimension: **768**, pending validation, e.g., `vector(768)`).
+*   **Database Interaction:** Backend services interact with PostgreSQL using standard SQL queries via a Python DB driver (e.g., `psycopg`). Vector searches utilize `pgvector`'s specific operators (e.g., `<=>` for L2 distance, `<#>` for negative inner product, `<->` for cosine distance). Relationship queries use JOINs or CTEs.
+*   **Data Format:** JSON is the primary format for API request/response bodies and MCP tool arguments/results. Text data is processed as UTF-8 strings. Embeddings are stored as `vector` types in PostgreSQL (Recommended dimension: **768**, pending validation, e.g., `vector(768)`). Discovery sessions are tracked using UUIDs (`discovery_id`).
 
 ## 5. Modularity & Tier 1 Migration Considerations
 

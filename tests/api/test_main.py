@@ -4,6 +4,7 @@ from pydantic import BaseModel # ADDED IMPORT
 from unittest.mock import AsyncMock, patch, ANY
 from philograph.data_access import db_layer # ADDED IMPORT
 import uuid
+import time
 from unittest.mock import patch, AsyncMock, ANY # Removed duplicate, Added ANY
 import pytest
 import pytest_asyncio
@@ -713,7 +714,7 @@ async def test_get_document_references_db_error(
     response = await test_client.get(f"/documents/{doc_id}/references")
 
     assert response.status_code == 500
-    assert response.json() == {"detail": "Error retrieving document references."}
+    assert response.json() == {"detail": "Internal server error retrieving document references."}
 
     # Verify mocks
     mock_get_doc.assert_awaited_once()
@@ -806,115 +807,7 @@ async def test_get_chunk_invalid_id_format(test_client: AsyncClient):
 # --- Tests for /acquire/status/{acquisition_id} ---
 
 @pytest.mark.asyncio
-@patch('philograph.acquisition.service.get_acquisition_status') # Corrected function name
-async def test_get_acquisition_status_success_pending(mock_get_status: AsyncMock, test_client: AsyncClient):
-    """Tests retrieving status for a pending acquisition."""
-    test_uuid = uuid.uuid4()
-    # Expected data based on AcquisitionStatusResponse model for 'pending' state
-    expected_status_data = {
-        "status": "pending",
-        "details": None, # Or some relevant details if applicable for pending
-        "selected_book": None,
-        "error_message": None,
-        "processed_path": None,
-        "philo_doc_id": None
-    }
-    mock_get_status.return_value = expected_status_data
-
-    response = await test_client.get(f"/acquire/status/{test_uuid}")
-
-    assert response.status_code == 200
-    # Use AcquisitionStatusResponse to validate structure if needed, or direct dict comparison
-    assert response.json() == expected_status_data
-
-    # Verify mock call
-    mock_get_status.assert_awaited_once_with(test_uuid)
-    # Verify mock call - Not needed as validation happens before endpoint call
-@pytest.mark.asyncio
-@patch("philograph.api.main.acquisition_service.get_acquisition_status", new_callable=AsyncMock)
-async def test_get_acquisition_status_completed(mock_get_status: AsyncMock, test_client: AsyncClient):
-    """Test getting acquisition status when the task is completed."""
-    test_uuid = uuid.uuid4()
-    # Mock data as a dictionary compatible with AcquisitionStatusResponse
-    mock_status_data = {
-        "status": "completed",
-        "details": {"message": "Download and processing finished."},
-        "selected_book": {"title": "Example Book Title"}, # Example data
-        "error_message": None,
-        "processed_path": "/app/processed/example.pdf", # Example data
-        "philo_doc_id": 123 # Example data
-    }
-    mock_get_status.return_value = mock_status_data
-
-    response = await test_client.get(f"/acquire/status/{test_uuid}")
-
-    assert response.status_code == 200
-    # Expected response should match the AcquisitionStatusResponse model fields
-    expected_response = {
-        "status": "completed",
-        "details": {"message": "Download and processing finished."},
-        "selected_book": {"title": "Example Book Title"},
-        "error_message": None,
-        "processed_path": "/app/processed/example.pdf",
-        "philo_doc_id": 123
-    }
-    assert response.json() == expected_response
-    mock_get_status.assert_awaited_once_with(test_uuid)
-@pytest.mark.asyncio
-@pytest.mark.asyncio
-@patch("philograph.api.main.acquisition_service.get_acquisition_status", new_callable=AsyncMock)
-async def test_get_acquisition_status_failed(mock_get_status: AsyncMock, test_client: AsyncClient):
-    """Test getting acquisition status when the task has failed."""
-    test_uuid = uuid.uuid4()
-    # Mock data as a dictionary compatible with AcquisitionStatusResponse
-    mock_status_data = {
-        "status": "failed",
-        "details": {"reason": "Download timed out."},
-        "selected_book": {"title": "Failed Book"},
-        "error_message": "Download failed after 3 attempts.",
-        "processed_path": None,
-        "philo_doc_id": None
-    }
-    mock_get_status.return_value = mock_status_data
-
-    response = await test_client.get(f"/acquire/status/{test_uuid}")
-
-    assert response.status_code == 200
-    # Expected response should match the AcquisitionStatusResponse model fields
-    expected_response = {
-        "status": "failed",
-        "details": {"reason": "Download timed out."},
-        "selected_book": {"title": "Failed Book"},
-        "error_message": "Download failed after 3 attempts.",
-        "processed_path": None,
-        "philo_doc_id": None
-    }
-    assert response.json() == expected_response
-    mock_get_status.assert_awaited_once_with(test_uuid)
-
-@pytest.mark.asyncio
-@patch("philograph.api.main.acquisition_service.get_acquisition_status", new_callable=AsyncMock)
-async def test_get_acquisition_status_not_found(mock_get_status: AsyncMock, test_client: AsyncClient):
-    """Test getting acquisition status for a non-existent task ID returns 404."""
-    test_uuid = uuid.uuid4()
-    mock_get_status.return_value = None # Simulate service returning None for not found
-
-    response = await test_client.get(f"/acquire/status/{test_uuid}")
-
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Acquisition task not found."}
-    mock_get_status.assert_awaited_once_with(test_uuid)
-@pytest.mark.asyncio
-async def test_get_acquisition_status_invalid_id_format(test_client: AsyncClient):
-    """Test getting acquisition status with an invalid UUID format returns 422."""
-    invalid_uuid = "not-a-uuid"
-
-    response = await test_client.get(f"/acquire/status/{invalid_uuid}")
-
-    assert response.status_code == 422
-    # Optionally check the detail message structure if needed
-    assert "detail" in response.json()
-    assert response.json()["detail"][0]["type"] == "uuid_parsing"
+# --- Old /acquire/status/{acquisition_id} tests removed (ADR 009) ---
 @patch('philograph.api.main.db_layer.get_chunk_by_id')
 async def test_get_chunk_db_error(mock_get_chunk: AsyncMock, test_client: AsyncClient):
     """Tests that a DB error during chunk retrieval returns 500."""
@@ -934,6 +827,8 @@ async def test_get_chunk_db_error(mock_get_chunk: AsyncMock, test_client: AsyncC
     assert mock_get_chunk.await_args[0][1] == chunk_id
     mock_get_chunk.assert_awaited_once()
     assert mock_get_chunk.await_args[0][1] == chunk_id
+@pytest.mark.asyncio
+@patch('philograph.api.main.db_layer.add_collection')
 async def test_create_collection_success(mock_add_collection: AsyncMock, test_client: AsyncClient):
     """
     Test POST /collections creates a new collection and returns 201 Created.
@@ -1026,10 +921,10 @@ async def test_add_collection_item_document_success(mock_add_item: AsyncMock, te
     Test POST /collections/{collection_id}/items successfully adds a document item.
     """
     # Arrange
-    collection_id = 123
-    item_id = 456
+    collection_id = uuid.uuid4() # Use UUID
+    item_id = uuid.uuid4() # Use UUID
     item_type = "document"
-    request_payload = {"item_type": item_type, "item_id": item_id}
+    request_payload = {"item_type": item_type, "item_id": str(item_id)} # Send as string in payload
     # Mock the db layer to simulate success (no return value needed, just no exception)
     mock_add_item.return_value = None
 
@@ -1047,10 +942,10 @@ async def test_add_collection_item_chunk_success(mock_add_item: AsyncMock, test_
     Test POST /collections/{collection_id}/items successfully adds a chunk item.
     """
     # Arrange
-    collection_id = 123
-    item_id = 789 # Different ID for chunk
+    collection_id = uuid.uuid4() # Use UUID
+    item_id = uuid.uuid4() # Use UUID
     item_type = "chunk"
-    request_payload = {"item_type": item_type, "item_id": item_id}
+    request_payload = {"item_type": item_type, "item_id": str(item_id)} # Send as string in payload
     mock_add_item.return_value = None # Simulate success
 
     # Act
@@ -1085,10 +980,10 @@ async def test_add_collection_item_collection_not_found(mock_add_item: AsyncMock
     Test POST /collections/{collection_id}/items returns 404 when collection_id does not exist.
     """
     # Arrange
-    collection_id = 999 # Non-existent ID
-    item_id = 456
+    collection_id = uuid.uuid4() # Use UUID for non-existent ID
+    item_id = uuid.uuid4() # Use UUID
     item_type = "document"
-    request_payload = {"item_type": item_type, "item_id": item_id}
+    request_payload = {"item_type": item_type, "item_id": str(item_id)} # Send as string in payload
     # Mock the db layer to raise ForeignKeyViolation
     mock_add_item.side_effect = psycopg.errors.ForeignKeyViolation("insert or update on table \"collection_items\" violates foreign key constraint \"collection_items_collection_id_fkey\"")
 
@@ -1106,10 +1001,10 @@ async def test_add_collection_item_item_not_found(mock_add_item: AsyncMock, test
     Test POST /collections/{collection_id}/items returns 404 when item_id does not exist.
     """
     # Arrange
-    collection_id = 123
-    item_id = 999 # Non-existent item ID
+    collection_id = uuid.uuid4() # Use UUID
+    item_id = uuid.uuid4() # Use UUID for non-existent ID
     item_type = "chunk"
-    request_payload = {"item_type": item_type, "item_id": item_id}
+    request_payload = {"item_type": item_type, "item_id": str(item_id)} # Send as string in payload
     # Mock the db layer to raise ForeignKeyViolation (could be item or collection FK)
     mock_add_item.side_effect = psycopg.errors.ForeignKeyViolation("insert or update on table \"collection_items\" violates foreign key constraint \"collection_items_chunk_id_fkey\"") # Example for chunk
 
@@ -1127,10 +1022,10 @@ async def test_add_collection_item_duplicate_item(mock_add_item: AsyncMock, test
     Test POST /collections/{collection_id}/items returns 409 Conflict when adding the same item twice.
     """
     # Arrange
-    collection_id = 123
-    item_id = 456
+    collection_id = uuid.uuid4() # Use UUID
+    item_id = uuid.uuid4() # Use UUID
     item_type = "document"
-    request_payload = {"item_type": item_type, "item_id": item_id}
+    request_payload = {"item_type": item_type, "item_id": str(item_id)} # Send as string in payload
 
     # Configure mock: Success on first call, UniqueViolation on second
     mock_add_item.side_effect = [
@@ -1154,7 +1049,49 @@ async def test_add_collection_item_duplicate_item(mock_add_item: AsyncMock, test
     # Assert mock calls
     assert mock_add_item.await_count == 2
     mock_add_item.assert_any_await(ANY, collection_id, item_type, item_id)
+@pytest.mark.asyncio
+async def test_add_collection_item_missing_fields(test_client: AsyncClient):
+    """
+    Test POST /collections/{id}/items returns 422 when required fields are missing.
+    """
+    # Arrange
+    collection_id = uuid.uuid4()
+    request_payload = {
+        "item_type": "document" # Missing item_id
+        # Assuming 'item_id' is required by the Pydantic model
+    }
+
+    # Act
+    response = await test_client.post(f"/collections/{collection_id}/items", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    # Optionally check detail for specific field error
+    assert "Field required" in response.text
+    assert '"item_id"' in response.text
 # --- GET /collections/{collection_id} Endpoint Tests ---
+@pytest.mark.asyncio
+@patch("philograph.api.main.db_layer.add_item_to_collection", new_callable=AsyncMock)
+async def test_add_collection_item_db_error(mock_add_item: AsyncMock, test_client: AsyncClient):
+    """
+    Test POST /collections/{id}/items returns 500 when a database error occurs.
+    """
+    # Arrange
+    collection_id = uuid.uuid4()
+    item_id = uuid.uuid4() # Use UUID
+    item_type = "document"
+    request_payload = {"item_type": item_type, "item_id": str(item_id)} # Send as string
+
+    # Mock the DB layer to raise a generic psycopg error
+    mock_add_item.side_effect = psycopg.Error("Simulated database error")
+
+    # Act
+    response = await test_client.post(f"/collections/{collection_id}/items", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert response.json() == {"detail": "Database error adding item to collection."} # Expect specific message
+    mock_add_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id) # Check mock was called with UUID
 
 @pytest.mark.asyncio
 @patch("philograph.api.main.db_layer.get_collection_items", new_callable=AsyncMock)
@@ -1392,3 +1329,319 @@ async def test_delete_collection_db_error(mock_get_conn, mock_delete_collection,
         conn=mock_conn,
         collection_id=collection_id
     )
+# --- Tests for Updated Acquisition Workflow (ADR 009) ---
+# TODO: Review and remove/update old /acquire and /acquire/status tests later
+
+# --- POST /acquire/discover ---
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.handle_discovery_request", new_callable=AsyncMock)
+async def test_acquire_discover_success(mock_handle_discovery: AsyncMock, test_client: AsyncClient):
+    """Test POST /acquire/discover success with filters."""
+    # Arrange
+    filters = {"author": "Test Author"}
+    discovery_id = uuid.uuid4()
+    candidates = [{"id": "zlib1", "title": "Found Book"}]
+    mock_handle_discovery.return_value = {
+        "status": "success",
+        "discovery_id": str(discovery_id),
+        "candidates": candidates
+    }
+    request_payload = {"filters": filters}
+
+    # Act
+    response = await test_client.post("/acquire/discover", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "discovery_id": str(discovery_id),
+        "candidates": candidates
+    }
+    mock_handle_discovery.assert_awaited_once_with(filters) # Use positional arg
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.handle_discovery_request", new_callable=AsyncMock)
+async def test_acquire_discover_no_candidates(mock_handle_discovery: AsyncMock, test_client: AsyncClient): # Renamed test
+    """Test POST /acquire/discover when service finds no candidates."""
+    # Arrange
+    filters = {"title": "Obscure"}
+    discovery_id = uuid.uuid4()
+    mock_handle_discovery.return_value = {
+        "status": "no_candidates",
+        "discovery_id": str(discovery_id),
+        "candidates": []
+    }
+    request_payload = {"filters": filters}
+
+    # Act
+    response = await test_client.post("/acquire/discover", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK # API returns 200 even if no candidates
+    assert response.json() == {
+        "discovery_id": str(discovery_id),
+        "candidates": []
+    }
+    mock_handle_discovery.assert_awaited_once_with(filters) # Use positional arg
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.handle_discovery_request", new_callable=AsyncMock)
+async def test_acquire_discover_service_error(mock_handle_discovery: AsyncMock, test_client: AsyncClient):
+    """Test POST /acquire/discover when acquisition service returns an error status."""
+    # Arrange
+    filters = {"title": "Error"}
+    error_message = "MCP search failed"
+    mock_handle_discovery.return_value = {
+        "status": "error",
+        "message": error_message
+    }
+    request_payload = {"filters": filters}
+
+    # Act
+    response = await test_client.post("/acquire/discover", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR # Map service error to 500
+    assert response.json() == {"detail": error_message}
+    mock_handle_discovery.assert_awaited_once_with(filters) # Use positional arg
+
+@pytest.mark.asyncio
+async def test_acquire_discover_validation_error(test_client: AsyncClient):
+    """Test POST /acquire/discover with invalid request body (e.g., missing filters)."""
+    # Arrange
+    request_payload = {} # Missing 'filters'
+
+    # Act
+    response = await test_client.post("/acquire/discover", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert "Field required" in response.text
+    assert '"filters"' in response.text # Use double quotes
+
+# --- POST /acquire/confirm/{discovery_id} ---
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.handle_confirmation_request", new_callable=AsyncMock)
+async def test_acquire_confirm_success(mock_handle_confirm: AsyncMock, test_client: AsyncClient):
+    """Test POST /acquire/confirm/{discovery_id} success returns 202."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    selected_items = [{"md5": "confirm_md5", "title": "Confirmed Book"}]
+    mock_handle_confirm.return_value = {"status": "processing_started"}
+    request_payload = {"selected_items": selected_items}
+
+    # Act
+    response = await test_client.post(f"/acquire/confirm/{discovery_id}", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_202_ACCEPTED
+    # Manually construct expected URL path
+    expected_url_path = f"/acquire/status/{discovery_id}"
+    # Correct the expected message and URL format based on the actual API response
+    assert response.json() == {
+        "message": "Acquisition confirmed. Download and processing initiated.", # Corrected message
+        "status_url": expected_url_path # Use relative path as returned by API
+    }
+    mock_handle_confirm.assert_awaited_once_with(str(discovery_id), selected_items)
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.handle_confirmation_request", new_callable=AsyncMock)
+async def test_acquire_confirm_not_found(mock_handle_confirm: AsyncMock, test_client: AsyncClient): # Renamed test
+    """Test POST /acquire/confirm/{discovery_id} with invalid/expired ID returns 404."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    selected_items = [{"md5": "any_md5"}]
+    error_message = "Discovery session not found or expired."
+    mock_handle_confirm.return_value = {
+        "status": "not_found",
+        "message": error_message
+    }
+    request_payload = {"selected_items": selected_items}
+
+    # Act
+    response = await test_client.post(f"/acquire/confirm/{discovery_id}", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": error_message}
+    mock_handle_confirm.assert_awaited_once_with(str(discovery_id), selected_items)
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.handle_confirmation_request", new_callable=AsyncMock)
+async def test_acquire_confirm_invalid_items(mock_handle_confirm: AsyncMock, test_client: AsyncClient):
+    """Test POST /acquire/confirm/{discovery_id} with invalid selected items returns 400."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    invalid_items = ["invalid_item_id_format"] # Example invalid item
+    error_message = "No valid items selected."
+    error_details = "ID 'invalid_item_id_format' not found in candidates."
+    mock_handle_confirm.return_value = {
+        "status": "invalid_selection",
+        "message": error_message,
+        "details": error_details
+    }
+    request_payload = {"selected_items": invalid_items}
+
+    # Act
+    response = await test_client.post(f"/acquire/confirm/{discovery_id}", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    # Match the actual API error detail format
+    assert response.json() == {"detail": f"Invalid items selected: {error_details}"}
+    mock_handle_confirm.assert_awaited_once_with(str(discovery_id), invalid_items)
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.handle_confirmation_request", new_callable=AsyncMock)
+async def test_acquire_confirm_service_error(mock_handle_confirm: AsyncMock, test_client: AsyncClient):
+    """Test POST /acquire/confirm/{discovery_id} when service returns an error status."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    selected_items = [{"md5": "error_md5"}]
+    error_message = "Download rate limit exceeded."
+    mock_handle_confirm.return_value = {
+        "status": "error",
+        "message": error_message
+    }
+    request_payload = {"selected_items": selected_items}
+
+    # Act
+    response = await test_client.post(f"/acquire/confirm/{discovery_id}", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR # Map service error to 500
+    assert response.json() == {"detail": error_message}
+    mock_handle_confirm.assert_awaited_once_with(str(discovery_id), selected_items)
+
+@pytest.mark.asyncio
+async def test_acquire_confirm_validation_error(test_client: AsyncClient):
+    """Test POST /acquire/confirm/{discovery_id} with invalid request body."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    request_payload = {} # Missing 'selected_items'
+
+    # Act
+    response = await test_client.post(f"/acquire/confirm/{discovery_id}", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert "Field required" in response.text
+    assert '"selected_items"' in response.text # Use double quotes
+
+# --- GET /acquire/status/{discovery_id} ---
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.get_status", new_callable=AsyncMock)
+async def test_get_acquire_status_pending(mock_get_status: AsyncMock, test_client: AsyncClient):
+    """Test GET /acquire/status/{discovery_id} for pending state."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    mock_status_data = {
+        "status": "pending_confirmation",
+        "created_at": time.time(),
+        "candidates": [{"id": "zlib1"}],
+        "selected_items": None,
+        "processed_items": None,
+        "error_message": None
+    }
+    mock_get_status.return_value = mock_status_data
+
+    # Act
+    response = await test_client.get(f"/acquire/status/{discovery_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    # Response should match StatusResponse model structure
+    assert response.json() == mock_status_data
+    mock_get_status.assert_awaited_once_with(str(discovery_id))
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.get_status", new_callable=AsyncMock)
+async def test_get_acquire_status_processing(mock_get_status: AsyncMock, test_client: AsyncClient):
+    """Test GET /acquire/status/{discovery_id} for processing state."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    mock_status_data = {
+        "status": "processing",
+        "created_at": time.time(),
+        "candidates": None, # Candidates might be cleared after confirmation
+        "selected_items": [{"md5": "md5_1"}],
+        "processed_items": [{"id": "md5_1", "status": "downloading", "error": None}],
+        "error_message": None
+    }
+    mock_get_status.return_value = mock_status_data
+
+    # Act
+    response = await test_client.get(f"/acquire/status/{discovery_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == mock_status_data
+    mock_get_status.assert_awaited_once_with(str(discovery_id))
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.get_status", new_callable=AsyncMock)
+async def test_get_acquire_status_complete(mock_get_status: AsyncMock, test_client: AsyncClient):
+    """Test GET /acquire/status/{discovery_id} for complete state."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    mock_status_data = {
+        "status": "complete",
+        "created_at": time.time(),
+        "candidates": None,
+        "selected_items": [{"md5": "md5_c"}],
+        "processed_items": [{"id": "md5_c", "status": "ingested", "document_id": "doc_c", "error": None}],
+        "error_message": None
+    }
+    mock_get_status.return_value = mock_status_data
+
+    # Act
+    response = await test_client.get(f"/acquire/status/{discovery_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == mock_status_data
+    mock_get_status.assert_awaited_once_with(str(discovery_id))
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.get_status", new_callable=AsyncMock)
+async def test_get_acquire_status_error(mock_get_status: AsyncMock, test_client: AsyncClient):
+    """Test GET /acquire/status/{discovery_id} for error state."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    error_msg = "Download failed"
+    mock_status_data = {
+        "status": "error",
+        "created_at": time.time(),
+        "candidates": None,
+        "selected_items": [{"md5": "md5_e"}],
+        "processed_items": [{"id": "md5_e", "status": "download_failed", "error": error_msg}],
+        "error_message": error_msg # Overall session error message
+    }
+    mock_get_status.return_value = mock_status_data
+
+    # Act
+    response = await test_client.get(f"/acquire/status/{discovery_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_200_OK # Still 200, body contains error status
+    assert response.json() == mock_status_data
+    mock_get_status.assert_awaited_once_with(str(discovery_id))
+
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.get_status", new_callable=AsyncMock)
+async def test_get_acquire_status_not_found(mock_get_status: AsyncMock, test_client: AsyncClient):
+    """Test GET /acquire/status/{discovery_id} with invalid ID returns 404."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    mock_get_status.return_value = None # Service returns None for not found
+
+    # Act
+    response = await test_client.get(f"/acquire/status/{discovery_id}")
+
+    # Assert
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Discovery session not found or expired."}
+    mock_get_status.assert_awaited_once_with(str(discovery_id))

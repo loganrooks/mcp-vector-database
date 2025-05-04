@@ -1,8 +1,8 @@
-import philograph.acquisition.service as text_acquisition
+from ..acquisition import service as acquisition_service # Standardized import
 import logging
 import linecache
 from contextlib import asynccontextmanager
-from typing import Any, Dict, List, Optional, Literal
+from typing import Any, Dict, List, Optional, Literal, Union # Added Union
 from uuid import UUID
 import uuid
 
@@ -78,7 +78,7 @@ class CollectionCreateResponse(BaseModel):
 
 class CollectionItemAddRequest(BaseModel):
     item_type: str = Field(..., pattern="^(document|chunk)$") # Validate allowed types
-    item_id: int
+    item_id: UUID # Standardized type hint
 
 class CollectionItemAddResponse(BaseModel):
     message: str
@@ -87,13 +87,39 @@ class CollectionDeleteResponse(BaseModel):
     message: str
 class CollectionItem(BaseModel):
     item_type: str
-    item_id: int
+    item_id: int # Changed back to int
 
 class CollectionGetResponse(BaseModel):
-    collection_id: int
+    collection_id: int # Changed back to int
     items: List[CollectionItem]
+    # TODO removed - Verified db_layer returns int, models expect int. [Ref: Debug Task 2025-05-04 15:42:45]
 
-# Models for the new /acquire initiation flow based on test_acquire_success
+# --- Acquisition Models (New Workflow - ADR 009) ---
+
+class DiscoveryRequest(BaseModel):
+    filters: Dict[str, Any] = Field(..., description="Filters for discovering missing texts (e.g., {'threshold': 5, 'author': 'Kant', 'tags': ['ethics']}).")
+
+class DiscoveryResponse(BaseModel):
+    discovery_id: UUID = Field(..., description="ID for this discovery session.")
+    candidates: List[Dict[str, Any]] = Field(..., description="List of potential book candidates found.")
+
+class ConfirmationRequest(BaseModel):
+    selected_items: List[Union[str, Dict[str, Any]]] = Field(..., description="List of candidate IDs (md5 or index_*) or full book details objects selected for acquisition.")
+
+class ConfirmationResponse(BaseModel):
+    message: str = Field(..., description="Status message indicating processing has started.")
+    status_url: str = Field(..., description="URL to check the status of the acquisition process.")
+
+class StatusResponse(BaseModel):
+    status: str = Field(..., description="Current status of the discovery session (e.g., pending_confirmation, processing, complete, complete_with_errors, error).")
+    created_at: float = Field(..., description="Timestamp when the session was created.")
+    candidates: Optional[List[Dict[str, Any]]] = Field(None, description="List of candidates found during discovery (cleared after confirmation).")
+    selected_items: Optional[List[Dict[str, Any]]] = Field(None, description="List of items selected for confirmation.")
+    processed_items: Optional[List[Dict[str, Any]]] = Field(None, description="Status details for each processed item.")
+    error_message: Optional[str] = Field(None, description="Error message if the session failed.")
+
+
+# --- Deprecated Acquisition Models ---
 class AcquireInitiateRequest(BaseModel):
     query: str = Field(..., description="Search query for the text.")
     search_type: str = Field(default="book_meta", description="Type of search (e.g., 'book_meta', 'full_text').") # Assuming default based on test
@@ -102,8 +128,6 @@ class AcquireInitiateRequest(BaseModel):
 class AcquireInitiateResponse(BaseModel):
     message: str
     acquisition_id: str
-
-# Models for /acquire/confirm and /acquire/status remain
 
 class AcquireConfirmRequest(BaseModel):
     # acquisition_id is now a path parameter
@@ -314,8 +338,9 @@ async def get_document_references(doc_id: int = FastApiPath(..., gt=0, descripti
             return DocumentReferencesResponse(references=references)
     except HTTPException:
          raise # Re-raise HTTP exceptions (like the 404)
-    except Exception as e:
+    except Exception as e: # Catch other potential errors
         logger.exception(f"Error retrieving references for document {doc_id}", exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error retrieving document references.")
 class ChunkResponse(BaseModel):
     id: int
     section_id: int
@@ -344,7 +369,7 @@ async def get_chunk(chunk_id: int = FastApiPath(..., gt=0, description="ID of th
     except Exception as e:
         logger.exception(f"Error retrieving chunk {chunk_id}", exc_info=e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving chunk.")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving document references.")
+        # Removed duplicate raise
 
 
 @app.post("/collections", response_model=CollectionCreateResponse, status_code=status.HTTP_201_CREATED)
@@ -370,7 +395,7 @@ async def create_collection(request: CollectionCreateRequest):
 @app.post("/collections/{collection_id}/items", response_model=CollectionItemAddResponse, status_code=status.HTTP_200_OK)
 async def add_collection_item(
     request: CollectionItemAddRequest,
-    collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to add item to.")
+    collection_id: UUID = FastApiPath(..., description="ID of the collection to add item to.") # Standardized type hint
 ):
     """Adds an item (document or chunk) to a specific collection."""
     # TDD: Test adding a valid document item to a collection
@@ -396,6 +421,12 @@ async def add_collection_item(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"{request.item_type.capitalize()} ID {request.item_id} already exists in collection ID {collection_id}."
         )
+    except psycopg.Error as db_err: # Catch generic DB errors
+        logger.exception(f"Database error adding item to collection {collection_id}", exc_info=db_err)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Database error adding item to collection."
+        )
 # Define a simple response model for the delete operation
 class CollectionItemDeleteResponse(BaseModel):
     message: str
@@ -407,9 +438,9 @@ class CollectionItemDeleteResponse(BaseModel):
     tags=["Collections"],
 )
 async def delete_collection_item(
-    collection_id: uuid.UUID = FastApiPath(..., description="The ID of the collection"),
+    collection_id: UUID = FastApiPath(..., description="The ID of the collection"), # Standardized type hint
     item_type: Literal["document", "chunk"] = FastApiPath(..., description="The type of the item to remove ('document' or 'chunk')"),
-    item_id: uuid.UUID = FastApiPath(..., description="The ID of the item to remove"),
+    item_id: UUID = FastApiPath(..., description="The ID of the item to remove"), # Standardized type hint
     pool: AsyncConnectionPool = Depends(db_layer.get_db_pool),
 ):
     """
@@ -463,7 +494,7 @@ async def delete_collection_item(
     # Removed response_model as 204 should have no body
 )
 async def delete_collection( # Renamed function for clarity
-    collection_id: uuid.UUID = FastApiPath(..., description="The ID of the collection to delete."), # Use UUID
+    collection_id: UUID = FastApiPath(..., description="The ID of the collection to delete."), # Standardized type hint
     pool: AsyncConnectionPool = Depends(db_layer.get_db_pool), # Add pool dependency
 ):
     """
@@ -499,16 +530,14 @@ async def delete_collection( # Renamed function for clarity
 
 class CollectionItemDetail(BaseModel):
     item_type: str
-    item_id: int
+    item_id: UUID # Changed to UUID for consistency
     added_at: str # Assuming DB returns string representation
 
 # Removed duplicate endpoint definition. The definition below is the correct one.
 
 @app.get("/collections/{collection_id}", response_model=CollectionGetResponse)
-async def get_collection(collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to retrieve.")):
+async def get_collection(collection_id: int = FastApiPath(..., gt=0, description="ID of the collection to retrieve.")): # Changed back to int
     """Retrieves items within a specific collection."""
-    # TDD: Test retrieving items for an existing collection
-    # TDD: Test retrieving items for a non-existent collection returns 404 (or empty list?)
     logger.info(f"Retrieving items for collection {collection_id}")
     try:
         async with db_layer.get_db_connection() as conn:
@@ -529,79 +558,122 @@ async def get_collection(collection_id: int = FastApiPath(..., gt=0, description
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error retrieving collection.")
 
 
-@app.post("/acquire", response_model=AcquireInitiateResponse, status_code=status.HTTP_202_ACCEPTED)
-async def initiate_acquisition_endpoint(request: AcquireInitiateRequest):
+# --- Acquisition Endpoints (New Workflow - ADR 009) ---
+
+@app.post("/acquire/discover", response_model=DiscoveryResponse, status_code=status.HTTP_200_OK)
+async def handle_discover_request_endpoint(request: DiscoveryRequest):
     """
-    Initiates the text acquisition process by searching for a text.
-    (Minimal implementation for TDD Green phase)
+    Initiates the discovery phase of text acquisition based on provided filters.
+    Finds potential candidates and searches for them using the zlibrary-mcp server.
     """
-    logger.info(f"Received acquisition initiation request: query='{request.query}', type='{request.search_type}', download={request.download}")
+    logger.info(f"Received discovery request with filters: {request.filters}")
     try:
-        # Call the acquisition service function (mocked in the test)
-        acq_id = await acquisition_service.initiate_acquisition(
-            query=request.query,
-            search_type=request.search_type,
-            download=request.download
-        )
-        return AcquireInitiateResponse(message="Acquisition initiated.", acquisition_id=acq_id)
-    except Exception as e:
-        # Basic error handling for now
-        logger.exception(f"Error initiating acquisition for query: {request.query}", exc_info=e)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to initiate acquisition: {e}")
+        result = await acquisition_service.handle_discovery_request(request.filters)
 
-
-@app.post("/acquire/confirm/{acquisition_id}", response_model=AcquireConfirmResponse) # Added path parameter
-async def handle_acquire_confirm(acquisition_id: UUID, request: AcquireConfirmRequest): # Added path parameter to signature
-    """
-    Confirms the selection of a book for download and triggers the download/processing/ingestion.
-    """
-    # TDD: Test confirming download with valid acquisition_id and bookDetails -> complete/processing
-    # TDD: Test confirming with invalid acquisition_id returns 404
-    # TDD: Test response indicating download/processing started/completed
-    # TDD: Test handling errors from text_acquisition service during confirmation/download trigger
-    logger.info(f"Received acquisition confirmation for ID: {acquisition_id}") # Use path parameter
-    try:
-        result = await acquisition_service.confirm_and_trigger_download(
-            acquisition_id, request.selected_book_details # Use path parameter
-        )
-
-        if result["status"] == "complete":
-             return AcquireConfirmResponse(**result)
-        elif result["status"] == "error":
-             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.get("message", "Confirmation or processing failed"))
-        elif result["status"] == "not_found": # Note: Service might return this status OR raise ValueError
-             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Acquisition ID not found or invalid state") # Match test expectation
-        else: # Should not happen if service logic is correct
-             logger.error(f"Unexpected status from confirm_and_trigger_download: {result.get('status')}")
-             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unexpected status during confirmation.")
-    except ValueError as e: # Catch ValueError for not found case
-        logger.warning(f"Acquisition task not found for ID {acquisition_id}: {e}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        if result['status'] == 'success':
+            # Convert discovery_id string from service to UUID for response model
+            return DiscoveryResponse(
+                discovery_id=UUID(result['discovery_id']),
+                candidates=result['candidates']
+            )
+        elif result['status'] == 'no_candidates':
+             # Convert discovery_id string from service to UUID for response model
+             return DiscoveryResponse(
+                discovery_id=UUID(result['discovery_id']),
+                candidates=[]
+            )
+        elif result['status'] == 'error':
+            logger.error(f"Discovery request failed: {result.get('message')}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.get('message', "Discovery failed"))
+        else:
+            logger.error(f"Unexpected status from handle_discovery_request: {result.get('status')}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unexpected error during discovery.")
 
     except HTTPException:
         raise # Re-raise HTTP exceptions
     except Exception as e:
-        logger.exception(f"Unexpected error during acquisition confirmation for ID: {acquisition_id}", exc_info=e) # Use path parameter
-        # Align detail message with test expectation
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to confirm acquisition: {e}")
+        logger.exception("Unexpected error during acquisition discovery endpoint", exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred during discovery.")
 
 
-@app.get("/acquire/status/{acquisition_id}", response_model=Optional[AcquisitionStatusResponse])
-async def get_acquisition_status(acquisition_id: UUID = FastApiPath(..., description="ID of the acquisition process.")): # Changed type hint to UUID
+@app.post("/acquire/confirm/{discovery_id}", response_model=ConfirmationResponse, status_code=status.HTTP_202_ACCEPTED)
+async def handle_confirm_request_endpoint(
+    request: ConfirmationRequest,
+    discovery_id: UUID = FastApiPath(..., description="ID of the discovery session to confirm.")
+):
     """
-    Retrieves the current status of an acquisition process (uses in-memory store for Tier 0).
+    Confirms the selection of items from a discovery session, triggering download,
+    processing, and ingestion via the acquisition service.
     """
-    # TDD: Test retrieving status for ongoing acquisition
-    # TDD: Test retrieving status for completed acquisition
-    # TDD: Test retrieving status for failed acquisition
-    # TDD: Test retrieving status for invalid acquisition_id returns 404
-    logger.debug(f"Getting status for acquisition ID: {acquisition_id}")
-    status_info = await acquisition_service.get_acquisition_status(acquisition_id)
+    logger.info(f"Received confirmation request for discovery ID: {discovery_id}")
+    try:
+        # Pass discovery_id as string to service layer
+        result = await acquisition_service.handle_confirmation_request(str(discovery_id), request.selected_items)
+
+        if result['status'] == 'processing_started':
+            status_url = app.url_path_for("get_acquisition_status_endpoint", discovery_id=str(discovery_id))
+            return ConfirmationResponse(
+                message="Acquisition confirmed. Download and processing initiated.",
+                status_url=status_url
+            )
+        elif result['status'] == 'not_found':
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Discovery session not found or expired.")
+        elif result['status'] == 'invalid_state':
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Discovery session is not awaiting confirmation.")
+        elif result['status'] == 'invalid_selection':
+             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid items selected: {result.get('details', '')}")
+        elif result['status'] == 'error': # Catch generic errors from service
+             logger.error(f"Confirmation request failed for {discovery_id}: {result.get('message')}")
+             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.get('message', "Confirmation failed"))
+        else:
+            logger.error(f"Unexpected status from handle_confirmation_request: {result.get('status')}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unexpected error during confirmation.")
+
+    except HTTPException:
+        raise # Re-raise HTTP exceptions
+    except Exception as e:
+        logger.exception(f"Unexpected error during acquisition confirmation endpoint for ID: {discovery_id}", exc_info=e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred during confirmation.")
+
+
+@app.get("/acquire/status/{discovery_id}", response_model=Optional[StatusResponse], name="get_acquisition_status_endpoint") # Renamed path param, added name
+async def get_acquisition_status_endpoint(discovery_id: UUID = FastApiPath(..., description="ID of the discovery session.")): # Renamed path param
+    """
+    Retrieves the current status of an acquisition discovery session.
+    """
+    logger.debug(f"Getting status for discovery ID: {discovery_id}")
+    # Pass discovery_id as string to service layer
+    status_info = await acquisition_service.get_status(str(discovery_id))
     if status_info:
         # Map the dictionary to the Pydantic model
-        return AcquisitionStatusResponse(**status_info)
+        return StatusResponse(**status_info)
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Acquisition task not found.")
+        # Return 404 if session not found or expired
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Discovery session not found or expired.")
+
+
+# --- Deprecated Acquisition Endpoints ---
+
+@app.post("/acquire", response_model=AcquireInitiateResponse, status_code=status.HTTP_202_ACCEPTED, deprecated=True)
+async def initiate_acquisition_endpoint(request: AcquireInitiateRequest):
+    """
+    (DEPRECATED - Use /acquire/discover instead)
+    Initiates the text acquisition process by searching for a text.
+    """
+    logger.warning("Deprecated endpoint /acquire called. Use /acquire/discover instead.")
+    # Minimal implementation just to avoid breaking old clients immediately
+    return AcquireInitiateResponse(message="This endpoint is deprecated. Use /acquire/discover.", acquisition_id=str(uuid.uuid4()))
+
+
+@app.post("/acquire/confirm/{acquisition_id}", response_model=AcquireConfirmResponse, deprecated=True)
+async def handle_acquire_confirm(acquisition_id: UUID, request: AcquireConfirmRequest):
+    """
+    (DEPRECATED - Use /acquire/confirm/{discovery_id} instead)
+    Confirms the selection of a book for download and triggers the download/processing/ingestion.
+    """
+    logger.warning(f"Deprecated endpoint /acquire/confirm/{acquisition_id} called. Use /acquire/confirm/{{discovery_id}} instead.")
+    # Minimal implementation
+    raise HTTPException(status_code=status.HTTP_410_GONE, detail="This endpoint is deprecated. Use /acquire/confirm/{discovery_id} instead.")
 
 
 # --- Main Execution (for local testing) ---

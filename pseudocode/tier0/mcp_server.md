@@ -135,79 +135,88 @@ FUNCTION handle_search_tool(arguments):
     RETURN response_data.get("results", [])
 END FUNCTION
 
-// --- Tool Definition: philograph_acquire_missing ---
+// --- Tool Definition: philograph_acquire ---
+// Renamed from philograph_acquire_missing to reflect broader scope (discovery + confirmation)
 @mcp_server.tool(
-    name="philograph_acquire_missing",
-    description="Attempt to identify, acquire via zlibrary-mcp, and ingest missing texts based on citation frequency or specific details.",
+    name="philograph_acquire",
+    description="Discover potential missing texts based on filters, or confirm acquisition for a previous discovery session.",
     input_schema={
         "type": "object",
         "properties": {
-            "threshold": {
-                "type": "integer",
-                "description": "Minimum citation count to trigger automatic search (if text_details not provided).",
-                "default": 5
-            },
-            "text_details": {
+            "filters": {
                 "type": "object",
-                "description": "Specific details of the text to acquire (e.g., {'title': '...', 'author': '...'}). If provided, threshold is ignored.",
+                "description": "Filters for discovering missing texts (e.g., {'threshold': 5, 'author': 'Kant', 'tags': ['ethics']}). Used for discovery phase.",
                 "additionalProperties": True
             },
-            "acquisition_id": {
+            "discovery_id": {
                 "type": "string",
-                "description": "ID of an ongoing acquisition process (used for confirmation)."
+                "description": "ID of a previous discovery session. Required for confirmation phase."
             },
-            "selected_book_details": {
-                "type": "object",
-                "description": "The full book details object selected by the user/agent for download (used for confirmation)."
+            "selected_items": {
+                "type": "array",
+                "description": "List of candidate IDs or full book details objects selected for acquisition. Required for confirmation phase.",
+                "items": {
+                    "oneOf": [
+                        {"type": "string", "description": "Candidate ID"},
+                        {"type": "object", "description": "Full book details object"}
+                    ]
+                }
             }
         },
-        // No single required field, logic depends on combination
+        // Logic requires either 'filters' (for discovery) OR ('discovery_id' AND 'selected_items') (for confirmation)
+        // This complex validation might need to be handled within the tool function if not supported by schema directly.
     }
 )
 FUNCTION handle_acquire_tool(arguments):
-    // TDD: Test initial call with threshold triggers backend /acquire (find & search)
-    // TDD: Test initial call with text_details triggers backend /acquire (direct search)
-    // TDD: Test confirmation call with acquisition_id and selected_book_details triggers backend /acquire/confirm
-    // TDD: Test handling of 'needs_confirmation' response from backend
-    // TDD: Test handling of processing/completion/error responses from backend
-    // TDD: Test call with invalid argument combination raises MCPValidationError
+    // TDD: Test discovery call with 'filters' triggers backend /acquire/discover
+    // TDD: Test discovery call returns candidates and discovery_id
+    // TDD: Test confirmation call with 'discovery_id' and 'selected_items' triggers backend /acquire/confirm/{discovery_id}
+    // TDD: Test confirmation call returns processing status
+    // TDD: Test handling of backend errors for both discovery and confirmation
+    // TDD: Test call with invalid argument combination (e.g., filters + discovery_id) raises MCPValidationError
+    // TDD: Test call missing required args for either phase raises MCPValidationError
 
-    logging.info(f"MCP Tool: Received 'philograph_acquire_missing' call with args: {arguments}")
+    logging.info(f"MCP Tool: Received 'philograph_acquire' call with args: {arguments}")
 
-    acquisition_id = arguments.get("acquisition_id")
-    selected_book_details = arguments.get("selected_book_details")
-    text_details = arguments.get("text_details")
-    threshold = arguments.get("threshold", 5)
+    discovery_id = arguments.get("discovery_id")
+    selected_items = arguments.get("selected_items")
+    filters = arguments.get("filters")
 
-    IF acquisition_id AND selected_book_details:
-        // This is a confirmation call
-        logging.info(f"MCP Tool: Confirming acquisition {acquisition_id}")
-        payload = {
-            "acquisition_id": acquisition_id,
-            "selected_book_details": selected_book_details
-        }
-        response_data = call_backend_api("POST", "/acquire/confirm", json_data=payload)
+    // --- Input Validation ---
+    is_discovery = filters is not None
+    is_confirmation = discovery_id is not None and selected_items is not None
+
+    IF is_discovery AND is_confirmation:
+        RAISE MCPValidationError("Cannot provide both 'filters' and ('discovery_id', 'selected_items'). Use 'filters' for discovery or ('discovery_id', 'selected_items') for confirmation.")
+    IF NOT is_discovery AND NOT is_confirmation:
+        RAISE MCPValidationError("Must provide either 'filters' for discovery or ('discovery_id' AND 'selected_items') for confirmation.")
+    IF is_confirmation AND not isinstance(selected_items, list):
+         RAISE MCPValidationError("'selected_items' must be a list.")
+    // Add more specific validation for filter contents if needed
+
+    // --- API Call Logic ---
+    IF is_confirmation:
+        // Confirmation Phase
+        logging.info(f"MCP Tool: Confirming acquisition for discovery session {discovery_id}")
+        payload = {"selected_items": selected_items}
+        endpoint = f"/acquire/confirm/{discovery_id}"
+        response_data = call_backend_api("POST", endpoint, json_data=payload)
         // Return backend response (e.g., {"message": "...", "status_url": "..."})
         RETURN response_data
 
-    ELSE IF text_details:
-        // This is an initial call to acquire a specific text
-        logging.info(f"MCP Tool: Starting acquisition search for specific details: {text_details}")
-        payload = {"text_details": text_details}
-        response_data = call_backend_api("POST", "/acquire", json_data=payload)
-        // Return backend response (likely needs_confirmation with options)
+    ELSE: // is_discovery
+        // Discovery Phase
+        logging.info(f"MCP Tool: Starting acquisition discovery with filters: {filters}")
+        payload = {"filters": filters}
+        endpoint = "/acquire/discover"
+        response_data = call_backend_api("POST", endpoint, json_data=payload)
+        // Return backend response (e.g., {"discovery_id": "...", "candidates": [...]})
         RETURN response_data
 
-    ELSE:
-        // This is an initial call to find missing texts based on threshold
-        logging.info(f"MCP Tool: Starting acquisition search for missing texts (threshold: {threshold})")
-        payload = {"find_missing_threshold": threshold} # Assuming API supports this
-        response_data = call_backend_api("POST", "/acquire", json_data=payload)
-        // Return backend response (likely needs_confirmation with options, or error if none found)
-        RETURN response_data
-
-    // Note: The agent calling this tool needs to handle the multi-step confirmation workflow
-    // based on the responses received (e.g., if 'status' is 'needs_confirmation').
+    // Note: The agent calling this tool needs to handle the multi-step workflow.
+    // 1. Call with 'filters' -> Receive 'discovery_id' and 'candidates'.
+    // 2. Agent reviews 'candidates'.
+    // 3. Call with 'discovery_id' and 'selected_items' -> Receive confirmation/status.
 
 END FUNCTION
 

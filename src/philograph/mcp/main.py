@@ -1,6 +1,6 @@
 import logging
 import json
-from typing import Any, Dict, Optional, List # Added List
+from typing import Any, Dict, Optional, List, Union # Added List, Union
 
 import httpx # For potential errors from http_client
 
@@ -63,11 +63,6 @@ mcp_server = MockMCPFramework.initialize_server("philograph-mcp-server")
 # If the real MCP framework is async, this should use the async http_client
 def call_backend_api_sync(method: str, endpoint: str, json_data: Optional[Dict[str, Any]] = None) -> Any:
     """Makes a synchronous HTTP request to the backend API."""
-    # TDD: Test successful POST request to backend API
-    # TDD: Test successful GET request to backend API
-    # TDD: Test handling of connection errors to backend API
-    # TDD: Test handling of non-2xx responses from backend API
-    # TDD: Test handling of JSON decoding errors from backend API response
     url = f"{config.API_URL}{endpoint}"
     logger.debug(f"[MCP Server] Calling Backend API: {method} {url}")
     try:
@@ -112,9 +107,6 @@ def call_backend_api_sync(method: str, endpoint: str, json_data: Optional[Dict[s
 )
 def handle_ingest_tool(arguments: Dict[str, Any]) -> Dict[str, Any]:
     """Handles the 'philograph_ingest' MCP tool call."""
-    # TDD: Test successful ingestion call returns backend success message
-    # TDD: Test call with missing 'path' argument raises MCPValidationError
-    # TDD: Test handling of errors returned from backend API during ingestion
     logger.info(f"[MCP Tool] Received 'philograph_ingest' call with args: {arguments}")
     path = arguments.get("path")
     if not path:
@@ -125,7 +117,6 @@ def handle_ingest_tool(arguments: Dict[str, Any]) -> Dict[str, Any]:
     response_data = call_backend_api_sync("POST", "/ingest", json_data={"path": path})
 
     # Return the result from the backend API directly
-    # TDD: Test that the exact response from the backend is returned
     return response_data
 
 # --- Tool Definition: philograph_search ---
@@ -163,10 +154,6 @@ def handle_ingest_tool(arguments: Dict[str, Any]) -> Dict[str, Any]:
 )
 def handle_search_tool(arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Handles the 'philograph_search' MCP tool call."""
-    # TDD: Test successful search call returns formatted results from backend
-    # TDD: Test search call with filters passes filters correctly to backend
-    # TDD: Test call with missing 'query' argument raises MCPValidationError
-    # TDD: Test handling of errors returned from backend API during search
     logger.info(f"[MCP Tool] Received 'philograph_search' call with args: {arguments}")
     query = arguments.get("query")
     filters = arguments.get("filters", None)
@@ -183,87 +170,81 @@ def handle_search_tool(arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
     response_data = call_backend_api_sync("POST", "/search", json_data=payload)
 
     # Return the results list from the backend API response
-    # TDD: Test that only the 'results' part of the backend response is returned
     return response_data.get("results", [])
 
-# (Remaining tool and main execution block will be added next)
-# --- Tool Definition: philograph_acquire_missing ---
+# --- Tool Definition: philograph_acquire (Updated Workflow - ADR 009) ---
 @mcp_server.tool(
-    name="philograph_acquire_missing",
-    description="Attempt to identify, acquire via zlibrary-mcp, and ingest missing texts based on citation frequency or specific details.",
+    name="philograph_acquire", # Renamed from philograph_acquire_missing
+    description="Discover potential missing texts based on filters, or confirm acquisition for a previous discovery session.",
     input_schema={
         "type": "object",
         "properties": {
-            "threshold": {
-                "type": "integer",
-                "description": "Minimum citation count to trigger automatic search (if text_details not provided). Not fully implemented in Tier 0 API.",
-                "default": 5
-            },
-            "text_details": {
+            "filters": {
                 "type": "object",
-                "description": "Specific details of the text to acquire (e.g., {'title': '...', 'author': '...'}). If provided, threshold is ignored.",
-                 "properties": {
-                    "title": {"type": "string"},
-                    "author": {"type": "string"}
-                 },
-                 "additionalProperties": False
+                "description": "Filters for discovering missing texts (e.g., {'threshold': 5, 'author': 'Kant', 'tags': ['ethics']}). Used for discovery phase.",
+                "additionalProperties": True
             },
-            "acquisition_id": {
-                "type": "string",
-                "description": "ID of an ongoing acquisition process (used for confirmation)."
+            "discovery_id": {
+                "type": "string", # UUID string
+                "description": "ID of a previous discovery session. Required for confirmation phase."
             },
-            "selected_book_details": {
-                "type": "object",
-                "description": "The full book details object selected by the user/agent for download (used for confirmation)."
-                # Schema for bookDetails can be complex, using object for flexibility
+            "selected_items": {
+                "type": "array",
+                "description": "List of candidate IDs (md5 or index_*) or full book details objects selected for acquisition. Required for confirmation phase.",
+                "items": {
+                    "oneOf": [
+                        {"type": "string", "description": "Candidate ID (md5 or index_*)"},
+                        {"type": "object", "description": "Full book details object"}
+                    ]
+                }
             }
         },
-        # No single required field, logic depends on combination used
+        # Complex validation (either filters OR discovery_id+selected_items) handled in function
     }
 )
 def handle_acquire_tool(arguments: Dict[str, Any]) -> Dict[str, Any]:
-    """Handles the 'philograph_acquire_missing' MCP tool call."""
-    # TDD: Test initial call with text_details triggers backend /acquire (direct search)
-    # TDD: Test confirmation call with acquisition_id and selected_book_details triggers backend /acquire/confirm
-    # TDD: Test handling of 'needs_confirmation' response from backend
-    # TDD: Test handling of processing/completion/error responses from backend
-    # TDD: Test call with invalid argument combination raises MCPValidationError
+    """Handles the 'philograph_acquire' MCP tool call for discovery or confirmation."""
+    logger.info(f"[MCP Tool] Received 'philograph_acquire' call with args: {arguments}")
 
-    logger.info(f"[MCP Tool] Received 'philograph_acquire_missing' call with args: {arguments}")
+    discovery_id = arguments.get("discovery_id")
+    selected_items = arguments.get("selected_items")
+    filters = arguments.get("filters")
 
-    acquisition_id = arguments.get("acquisition_id")
-    selected_book_details = arguments.get("selected_book_details")
-    text_details = arguments.get("text_details")
-    threshold = arguments.get("threshold") # Not used in API yet
+    # --- Input Validation ---
+    is_discovery = filters is not None
+    is_confirmation = discovery_id is not None and selected_items is not None
 
-    if acquisition_id and selected_book_details:
-        # This is a confirmation call
-        logger.info(f"[MCP Tool] Confirming acquisition {acquisition_id}")
-        payload = {
-            "acquisition_id": acquisition_id,
-            "selected_book_details": selected_book_details
-        }
-        response_data = call_backend_api_sync("POST", "/acquire/confirm", json_data=payload)
-        # Return backend response (e.g., {"status": "complete", "message": "...", "document_id": 123})
+    if is_discovery and is_confirmation:
+        raise MCPValidationError("Cannot provide both 'filters' and ('discovery_id', 'selected_items'). Use 'filters' for discovery or ('discovery_id', 'selected_items') for confirmation.")
+    if not is_discovery and not is_confirmation:
+        raise MCPValidationError("Must provide either 'filters' for discovery or ('discovery_id' AND 'selected_items') for confirmation.")
+    if is_confirmation and not isinstance(selected_items, list):
+         raise MCPValidationError("'selected_items' must be a list.")
+    # Add more specific validation for filter contents if needed
+
+    # --- API Call Logic ---
+    if is_confirmation:
+        # Confirmation Phase
+        logger.info(f"[MCP Tool] Confirming acquisition for discovery session {discovery_id}")
+        payload = {"selected_items": selected_items}
+        endpoint = f"/acquire/confirm/{discovery_id}" # Use discovery_id in path
+        response_data = call_backend_api_sync("POST", endpoint, json_data=payload)
+        # Return backend response (e.g., {"message": "...", "status_url": "..."})
         return response_data
 
-    elif text_details:
-        # This is an initial call to acquire a specific text
-        logger.info(f"[MCP Tool] Starting acquisition search for specific details: {text_details}")
-        payload = {"text_details": text_details}
-        response_data = call_backend_api_sync("POST", "/acquire", json_data=payload)
-        # Return backend response (likely needs_confirmation with options)
-        # Agent needs to handle the multi-step workflow based on this response.
+    else: # is_discovery
+        # Discovery Phase
+        logger.info(f"[MCP Tool] Starting acquisition discovery with filters: {filters}")
+        payload = {"filters": filters}
+        endpoint = "/acquire/discover"
+        response_data = call_backend_api_sync("POST", endpoint, json_data=payload)
+        # Return backend response (e.g., {"discovery_id": "...", "candidates": [...]})
         return response_data
 
-    # elif threshold is not None: # Threshold-based finding not implemented in API/CLI yet
-    #     logger.info(f"[MCP Tool] Starting acquisition search for missing texts (threshold: {threshold})")
-    #     payload = {"find_missing_threshold": threshold}
-    #     response_data = call_backend_api_sync("POST", "/acquire", json_data=payload)
-    #     return response_data
-
-    else:
-        raise MCPValidationError("Invalid arguments for philograph_acquire_missing. Provide either 'text_details' or ('acquisition_id' and 'selected_book_details').")
+    # Note: The agent calling this tool needs to handle the multi-step workflow.
+    # 1. Call with 'filters' -> Receive 'discovery_id' and 'candidates'.
+    # 2. Agent reviews 'candidates'.
+    # 3. Call with 'discovery_id' and 'selected_items' -> Receive confirmation/status.
 
 
 # --- Main Execution (Simulation) ---
@@ -271,10 +252,6 @@ if __name__ == "__main__":
     # In a real scenario, the MCP framework's start() method would handle everything.
     # This just logs that the simulated server is "running".
     mcp_server.start()
-    # Keep alive for simulation if needed, or just exit
-    # import time
-    # try:
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     logger.info("MCP Server simulation stopped.")
+    # The start method in the simulation doesn't block,
+    # so the script would normally exit here.
+    # In a real server, start() would block or run indefinitely.

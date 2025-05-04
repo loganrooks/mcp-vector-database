@@ -214,90 +214,114 @@ FUNCTION get_collection(collection_id):
         db_layer.close_db_connection(db_conn)
 END FUNCTION
 
-// === Text Acquisition ===
-@app.route("/acquire", methods=["POST"])
-FUNCTION handle_acquire_request():
-    // TDD: Test triggering acquisition with valid text details
-    // TDD: Test request missing required details returns 400
-    // TDD: Test response when acquisition service returns search results for confirmation
-    // TDD: Test handling errors from the text_acquisition service
-    request_data = get_request_json()
-    text_details = request_data.get('text_details') // e.g., {"title": "...", "author": "..."}
+// === Text Acquisition (New Workflow - ADR 009) ===
 
-    IF not text_details:
-        RETURN create_json_response({"error": "Missing 'text_details'"}, http_status_codes.BAD_REQUEST)
+@app.route("/acquire/discover", methods=["POST"])
+FUNCTION handle_discover_request():
+    // TDD: Test successful discovery with threshold filter
+    // TDD: Test successful discovery with author filter
+    // TDD: Test successful discovery with tag filter
+    // TDD: Test discovery with multiple filters
+    // TDD: Test discovery with no filters (returns error or default behavior?)
+    // TDD: Test discovery resulting in no candidates found
+    // TDD: Test handling of errors from acquisition_service.handle_discovery_request
+    // TDD: Test response structure includes 'candidates' list and 'discovery_id'
+
+    request_data = get_request_json()
+    filters = request_data.get('filters', {}) // e.g., {"threshold": 5, "author": "Kant", "tags": ["ethics"]}
+
+    IF not filters:
+        RETURN create_json_response({"error": "Missing discovery filters"}, http_status_codes.BAD_REQUEST)
 
     TRY:
-        // This might involve multiple steps (search, confirm, download)
-        // The acquisition service should handle the state machine
-        // Initial call might just start the search
-        result = text_acquisition.start_acquisition_search(text_details)
+        // Call the new acquisition service function
+        result = acquisition_service.handle_discovery_request(filters)
 
-        IF result['status'] == 'needs_confirmation':
-            // TDD: Test response format for confirmation step
+        IF result['status'] == 'success':
             RETURN create_json_response({
-                "message": "Select book for acquisition",
-                "options": result['search_results'],
-                "acquisition_id": result['acquisition_id'] // ID to track this process
+                "discovery_id": result['discovery_id'],
+                "candidates": result['candidates'] // List of bookDetails-like objects
             }, http_status_codes.OK)
-        ELSE IF result['status'] == 'error':
+        ELSE IF result['status'] == 'no_candidates':
+             RETURN create_json_response({
+                "discovery_id": result['discovery_id'],
+                "candidates": []
+            }, http_status_codes.OK) // Still OK, just no results
+        ELSE: // Error case
             RETURN create_json_response({"error": result['message']}, http_status_codes.INTERNAL_SERVER_ERROR)
-        ELSE: // Should not happen if service logic is correct
-            RETURN handle_generic_error(Exception("Unexpected acquisition status"))
 
     CATCH Exception as e:
-        logging.exception("Error starting text acquisition", exc_info=e)
+        logging.exception("Error during acquisition discovery", exc_info=e)
         RETURN handle_generic_error(e)
 END FUNCTION
 
-@app.route("/acquire/confirm", methods=["POST"])
-FUNCTION handle_acquire_confirm():
-    // TDD: Test confirming download with valid acquisition_id and bookDetails
-    // TDD: Test confirming with invalid acquisition_id returns 404
-    // TDD: Test response indicating download/processing started
-    // TDD: Test handling errors from text_acquisition service during confirmation/download trigger
-    request_data = get_request_json()
-    acquisition_id = request_data.get('acquisition_id')
-    selected_book_details = request_data.get('selected_book_details')
+@app.route("/acquire/confirm/<discovery_id>", methods=["POST"])
+FUNCTION handle_confirm_request(discovery_id):
+    // TDD: Test successful confirmation with valid discovery_id and selected items
+    // TDD: Test confirmation with non-existent discovery_id returns 404
+    // TDD: Test confirmation with discovery_id in invalid state returns 400/409
+    // TDD: Test confirmation with empty selected items list
+    // TDD: Test confirmation with invalid selected item IDs/details returns 400
+    // TDD: Test response indicating processing started (ACCEPTED)
+    // TDD: Test handling of errors from acquisition_service.handle_confirmation_request
 
-    IF not acquisition_id or not selected_book_details:
-        RETURN create_json_response({"error": "Missing 'acquisition_id' or 'selected_book_details'"}, http_status_codes.BAD_REQUEST)
+    request_data = get_request_json()
+    selected_items = request_data.get('selected_items', []) // List of candidate IDs or full details
+
+    IF not selected_items:
+        RETURN create_json_response({"error": "Missing 'selected_items'"}, http_status_codes.BAD_REQUEST)
+    IF not discovery_id:
+         RETURN create_json_response({"error": "Missing 'discovery_id' in path"}, http_status_codes.BAD_REQUEST) // Should be caught by routing
 
     TRY:
-        // Trigger the download and processing via the acquisition service
-        result = text_acquisition.confirm_and_trigger_download(acquisition_id, selected_book_details)
+        // Call the new acquisition service function
+        result = acquisition_service.handle_confirmation_request(discovery_id, selected_items)
 
-        IF result['status'] == 'processing':
+        IF result['status'] == 'processing_started':
             RETURN create_json_response({
-                "message": "Download and processing initiated. Ingestion will follow.",
-                "status_url": f"/acquire/status/{acquisition_id}" // Optional status endpoint
+                "message": "Acquisition confirmed. Download and processing initiated.",
+                "status_url": f"/acquire/status/{discovery_id}" // Optional status endpoint using discovery_id
             }, http_status_codes.ACCEPTED)
-        ELSE IF result['status'] == 'error':
-            RETURN create_json_response({"error": result['message']}, http_status_codes.INTERNAL_SERVER_ERROR)
         ELSE IF result['status'] == 'not_found':
-            RETURN create_json_response({"error": "Acquisition ID not found or invalid state"}, http_status_codes.NOT_FOUND)
-        ELSE:
-            RETURN handle_generic_error(Exception("Unexpected acquisition confirmation status"))
+            RETURN create_json_response({"error": "Discovery session not found or expired"}, http_status_codes.NOT_FOUND)
+        ELSE IF result['status'] == 'invalid_state':
+            RETURN create_json_response({"error": "Discovery session is not awaiting confirmation"}, http_status_codes.CONFLICT) # 409 Conflict
+        ELSE IF result['status'] == 'invalid_selection':
+             RETURN create_json_response({"error": f"Invalid items selected: {result.get('details', '')}"}, http_status_codes.BAD_REQUEST)
+        ELSE: // Error case
+            RETURN create_json_response({"error": result['message']}, http_status_codes.INTERNAL_SERVER_ERROR)
 
     CATCH Exception as e:
-        logging.exception("Error confirming text acquisition", exc_info=e)
+        logging.exception(f"Error confirming acquisition for discovery {discovery_id}", exc_info=e)
         RETURN handle_generic_error(e)
 END FUNCTION
 
-// Optional: Status endpoint for async acquisition/ingestion
-@app.route("/acquire/status/<acquisition_id>", methods=["GET"])
-FUNCTION get_acquisition_status(acquisition_id):
-    // TDD: Test retrieving status for ongoing acquisition
-    // TDD: Test retrieving status for completed acquisition
-    // TDD: Test retrieving status for failed acquisition
-    // TDD: Test retrieving status for invalid acquisition_id returns 404
-    // Requires text_acquisition service to track status
-    status_info = text_acquisition.get_status(acquisition_id)
+// Optional: Status endpoint for async acquisition/ingestion using discovery_id
+@app.route("/acquire/status/<discovery_id>", methods=["GET"])
+FUNCTION get_acquisition_status(discovery_id):
+    // TDD: Test retrieving status for ongoing acquisition (processing)
+    // TDD: Test retrieving status for completed acquisition (all items processed/failed)
+    // TDD: Test retrieving status for failed acquisition (major error)
+    // TDD: Test retrieving status for invalid discovery_id returns 404
+    // Requires acquisition_service to track status by discovery_id
+    status_info = acquisition_service.get_status(discovery_id)
     IF status_info:
         RETURN create_json_response(status_info, http_status_codes.OK)
     ELSE:
         RETURN handle_not_found_error(None)
 END FUNCTION
+
+
+// === DEPRECATED Text Acquisition (Old Workflow) ===
+// @app.route("/acquire", methods=["POST"])
+// FUNCTION handle_acquire_request_DEPRECATED():
+//     // ... (previous implementation) ...
+// END FUNCTION
+//
+// @app.route("/acquire/confirm", methods=["POST"])
+// FUNCTION handle_acquire_confirm_DEPRECATED():
+//     // ... (previous implementation) ...
+// END FUNCTION
 
 
 // --- Utility ---
