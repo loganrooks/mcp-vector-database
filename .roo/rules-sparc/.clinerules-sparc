@@ -64,8 +64,9 @@ memory_bank_strategy:
   general:
     status_prefix: "Begin EVERY response with either '[MEMORY BANK: ACTIVE]' or '[MEMORY BANK: INACTIVE]', according to the current state of the Memory Bank."
     context_management: |
-      # --- DELEGATE CLAUSE (Handover Trigger - For SPARC Mode Self-Monitoring) ---
-      Monitor **your own** context window size and performance. If **your** context consistently exceeds 40-50%, or **you** notice repeated errors or difficulty recalling steps, **you** must proactively initiate handover to a *new SPARC instance* using the `new_task` tool. Log the context concern, ensure the Memory Bank is updated, and provide a comprehensive handover message like this one. Do not wait for critical failure.
+      # --- DELEGATE CLAUSE (Handover Trigger - For SPARC Mode Self-Monitoring - V2) ---
+    Monitor **your own** context window size and performance. Calculate the context percentage manually (`Current Context Size (Tokens) / 1,000,000 = Context Percentage`). If **this manually calculated percentage** consistently exceeds 40-50%, OR **you** notice repeated errors or difficulty recalling steps, **you** must proactively initiate handover to a *new SPARC instance* using the `new_task` tool. Log the context concern (including the manual percentage), ensure the Memory Bank is updated, and provide a comprehensive handover message like this one. Do not wait for critical failure. **STRICTLY IGNORE the system-reported percentage for this decision.**
+
     error_handling_protocol: |
       # --- EARLY RETURN CLAUSE (Enhanced Detail - V6) ---
       If intractable issues arise (e.g., specific test 'X' fails assertion 'Y' despite state 'Z', tool 'A' fails with error 'B', logic conflict between file 'C' and spec 'D') OR context limits (~40-50%) are approached, **STOP IMMEDIATELY**.
@@ -176,3 +177,16 @@ umb:
       2. Temporary God-Mode Activation.
       3. Core Update Process: Update `activeContext.md` and `globalContext.md`. Update `memory-bank/mode-specific/sparc.md` under relevant headers (**newest first**, except Workflow State). Update feedback file (**newest first**). Ensure consistency. **Use batch operations.**
       4. Confirm Completion: '[MEMORY BANK: UPDATED]'.
+
+
+# --- CONTEXT MONITORING & RECOVERY (V[Next Version]) ---
+# Addresses known bug in system-reported context percentage and potential context truncation.
+
+1.  **Mandatory Manual Calculation:** ALWAYS calculate the context percentage manually using the formula: `Current Context Size (Tokens) / 1,000,000 = Context Percentage`. Log this calculated percentage in thinking tags.
+2.  **Ignore System Percentage:** STRICTLY IGNORE the system-reported percentage value in `environment_details` when evaluating the `DELEGATE CLAUSE` (40-50% threshold). Base handover decisions *only* on the manually calculated percentage.
+3.  **Token Drop Detection:** Before proceeding with any new action, compare the current `Current Context Size (Tokens)` with the value from the *previous* turn (if available).
+4.  **Recovery on Token Drop:** If a significant, unexplained drop in the *token count* is detected (e.g., >10% decrease without a corresponding large file removal or handover), assume potential context truncation has occurred.
+    *   **Log:** Log the detected drop and the initiation of the recovery procedure in `activeContext.md` and the Intervention Log.
+    *   **Re-Initialize Memory Bank:** Immediately re-execute the full Memory Bank initialization procedure (Steps 1 & 2 of `if_memory_bank_exists`: read active, global, mode-specific, feedback files).
+    *   **Re-Read Key Documents:** Re-read the most recently relevant project documents (e.g., current architecture doc, plan doc, spec doc) identified in the recent chat history or Memory Bank.
+    *   **Proceed Cautiously:** Continue with the planned task only after successful re-initialization and document review.

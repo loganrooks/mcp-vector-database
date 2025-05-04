@@ -26,6 +26,7 @@ pytest-asyncio # For testing async code
 pytest-dotenv # Loads .env file for pytest
 pytest-httpx # For mocking HTTP requests with httpx
 
+pytest-mock # For mocker fixture
 # Optional (If GROBID/AnyStyle are called via HTTP)
 # requests # Can use httpx instead
 

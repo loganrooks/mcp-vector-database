@@ -116,12 +116,31 @@ docker-compose exec philograph-backend python -m src.philograph.cli.main [COMMAN
     docker-compose exec philograph-backend python -m src.philograph.cli.main collection list --collection-id <coll_id>
     ```
 
-*   **Acquire Missing Text (Requires running `zlibrary-mcp`):**
+*   **Acquire Text (Requires running `zlibrary-mcp`):**
+    Attempts to acquire and ingest a text via the connected `zlibrary-mcp` server. It can search for a specific text using title/author or identify potentially missing texts based on citation frequency within the existing PhiloGraph database.
+
     ```bash
-    # Search for a specific text
+    # Search for a specific book by title and author
     docker-compose exec philograph-backend python -m src.philograph.cli.main acquire --title "Being and Time" --author "Heidegger"
-    # Follow prompts to select and confirm download/ingestion.
+
+    # Search for a specific book and auto-confirm if only one match is found
+    docker-compose exec philograph-backend python -m src.philograph.cli.main acquire --title "Critique of Pure Reason" --author "Kant" --yes
+
+    # Find and potentially acquire missing texts cited at least 5 times
+    docker-compose exec philograph-backend python -m src.philograph.cli.main acquire --find-missing-threshold 5
+    # Alias: --threshold 5
     ```
+    *   **Options:**
+        *   `--title TEXT`: Title of the text (use with `--author`).
+        *   `--author TEXT`: Author of the text (use with `--title`).
+        *   `--find-missing-threshold INTEGER`: Minimum citation count to find missing texts (use instead of `--title`/`--author`). Alias: `--threshold`.
+        *   `--yes` / `-y`: Automatically confirm if only one match is found. Errors if multiple matches exist with `--yes`.
+    *   **Workflow:**
+        1.  Initiates a search via the backend and `zlibrary-mcp`.
+        2.  If matches are found, they are displayed in a table.
+        3.  If multiple matches exist, prompts for selection (enter number) or cancellation (enter 0).
+        4.  If one match exists and `--yes` is used, confirms automatically.
+        5.  On confirmation, triggers download and ingestion via the backend and `zlibrary-mcp`.
 
 ### PhiloGraph MCP Server
 
