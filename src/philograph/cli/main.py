@@ -242,9 +242,9 @@ def collection_create(
 
 @collection_app.command("add")
 def collection_add_item(
-    collection_id: int = typer.Argument(..., help="ID of the collection."),
+    collection_id: str = typer.Argument(..., help="ID of the collection."), # Changed from int
     item_type: str = typer.Argument(..., help="Type of item ('document' or 'chunk')."),
-    item_id: int = typer.Argument(..., help="ID of the item to add.")
+    item_id: str = typer.Argument(..., help="ID of the item to add.") # Changed from int
 ):
     """Adds an item (document or chunk) to a collection."""
     logger.info(f"CLI: Adding {item_type} {item_id} to collection {collection_id}")
@@ -255,7 +255,7 @@ def collection_add_item(
 
 @collection_app.command("list")
 def collection_list_items(
-    collection_id: int = typer.Argument(..., help="ID of the collection.")
+    collection_id: str = typer.Argument(..., help="ID of the collection.") # Changed from int
 ):
     """Lists items within a specific collection."""
     logger.info(f"CLI: Listing items in collection {collection_id}")
@@ -264,6 +264,91 @@ def collection_list_items(
     display_results(response_data) # display_results handles collection item lists
 
 
+def _display_confirmation_options(options: List[Dict[str, Any]]):
+    """Displays the book options in a formatted table."""
+    if not options:
+        console.print("[yellow]No options found.[/yellow]")
+        return
+
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("#", style="dim", width=3)
+    table.add_column("Title")
+    table.add_column("Author", style="cyan")
+    table.add_column("Year", style="green")
+    table.add_column("Format", style="yellow")
+    table.add_column("Size", style="blue")
+
+    for i, book in enumerate(options):
+        table.add_row(
+            str(i+1),
+            book.get('title', 'N/A'),
+            book.get('author', 'N/A'),
+            str(book.get('year', 'N/A')),
+            book.get('extension', 'N/A'),
+            book.get('size', 'N/A')
+        )
+    console.print(table)
+
+
+def _handle_acquire_confirmation(response: Dict[str, Any], yes_flag: bool):
+    """Handles the confirmation flow for acquiring a text."""
+    acquisition_id = response.get('acquisition_id')
+    options = response.get('options', [])
+
+# Basic validation: Ensure we have options and an ID to proceed.
+    if not options or not acquisition_id:
+        error_console.print("Error: API returned confirmation status but no options or ID.")
+        raise typer.Exit(code=1)
+
+    selected_book = None
+    if yes_flag:
+# Handle the --yes flag for automatic confirmation.
+# If exactly one option is found, auto-select it.
+        if isinstance(options, list) and len(options) == 1:
+            selected_book = options[0]
+            console.print(f"Found 1 match. Auto-confirming acquisition for: '{selected_book.get('title')}' (--yes used).")
+# If multiple options are found, --yes is invalid; raise an error.
+        elif isinstance(options, list) and len(options) > 1:
+            error_console.print("Error: Multiple options found. Cannot auto-confirm with --yes.")
+            _display_confirmation_options(options) # Show options for clarity
+            raise typer.Exit(code=1)
+        else: # len(options) == 0 or not isinstance(options, list)
+# If no valid options (empty list or not a list), --yes cannot proceed.
+            error_console.print("Error: No valid options found for auto-confirmation.")
+            raise typer.Exit(code=1)
+    else: # Manual selection
+# Prompt the user for manual selection if --yes is not used.
+        console.print("\n[bold yellow]Potential matches found. Select a book to acquire (enter number) or 0 to cancel:[/bold yellow]")
+        _display_confirmation_options(options)
+        try:
+            selection = typer.prompt("Enter selection number (or 0 to cancel)", type=int, default=0)
+# Handle user cancellation (input 0).
+            if selection == 0:
+                console.print("Acquisition cancelled.")
+                return # Exit confirmation flow gracefully
+# Handle valid user selection (within the range of options).
+            elif 0 < selection <= len(options):
+                selected_book = options[selection - 1]
+                console.print(f"Confirming acquisition for: '{selected_book.get('title')}'...")
+# Handle invalid selection number (out of range).
+            else:
+                error_console.print("Error: Invalid selection number.")
+                raise typer.Exit(code=1)
+# Handle non-numeric input (caught by typer.prompt type validation).
+        except ValueError: # Should not happen with typer.prompt(type=int)
+            error_console.print("Invalid input. Please enter a number.")
+            raise typer.Exit(code=1)
+# If a book was successfully selected (either automatically or manually).
+
+    # If a book was selected (either auto or manual)
+    if selected_book:
+        confirm_payload = {
+            "acquisition_id": acquisition_id,
+            "selected_book_details": selected_book
+# Call the /acquire/confirm API endpoint with the selected details.
+        }
+        confirm_response = make_api_request("POST", "/acquire/confirm", json_data=confirm_payload)
+        display_results(confirm_response)
 @app.command()
 def acquire(
     title: Optional[str] = typer.Option(None, "--title", "-t", help="Title of the text to acquire (use with --author)."),
@@ -309,63 +394,7 @@ def acquire(
     # --- Confirmation Flow (Common Logic) ---
     # --- Confirmation Flow or Direct Result ---
     if initial_response.get('status') == 'needs_confirmation':
-        # --- Confirmation Flow Logic ---
-        acquisition_id = initial_response.get('acquisition_id')
-        options = initial_response.get('options', [])
-        if not options or not acquisition_id:
-            error_console.print("Error: API returned confirmation status but no options or ID.")
-            raise typer.Exit(code=1)
-
-        # Auto-confirm if --yes is used and only one option exists
-        if yes and len(options) == 1:
-            selected_book = options[0]
-            console.print(f"Found 1 match. Auto-confirming acquisition for: '{selected_book.get('title')}' (--yes used).")
-            confirm_payload = {
-                "acquisition_id": acquisition_id,
-                "selected_book_details": selected_book
-            }
-            confirm_response = make_api_request("POST", "/acquire/confirm", json_data=confirm_payload)
-            display_results(confirm_response)
-            return # Exit after auto-confirmation
-
-        # If not auto-confirmed, proceed with manual selection
-        console.print("\n[bold yellow]Potential matches found. Select a book to acquire (enter number) or 0 to cancel:[/bold yellow]")
-        table = Table(show_header=True, header_style="bold magenta")
-        table.add_column("#", style="dim", width=3)
-        table.add_column("Title")
-        table.add_column("Author", style="cyan")
-        table.add_column("Year", style="green")
-        table.add_column("Format", style="yellow")
-        table.add_column("Size", style="blue")
-
-        for i, book in enumerate(options):
-            table.add_row(
-                str(i+1),
-                book.get('title', 'N/A'),
-                book.get('author', 'N/A'),
-                str(book.get('year', 'N/A')),
-                book.get('extension', 'N/A'),
-                book.get('size', 'N/A')
-            )
-        console.print(table)
-
-        try:
-            selection = typer.prompt("Enter selection number (or 0 to cancel)", type=int, default=0)
-            if selection > 0 and selection <= len(options):
-                selected_book = options[selection - 1]
-                console.print(f"Confirming acquisition for: '{selected_book.get('title')}'...")
-                confirm_payload = {
-                    "acquisition_id": acquisition_id,
-                    "selected_book_details": selected_book
-                }
-                confirm_response = make_api_request("POST", "/acquire/confirm", json_data=confirm_payload)
-                display_results(confirm_response)
-            else:
-                console.print("Acquisition cancelled.")
-        except ValueError:
-            error_console.print("Invalid input. Please enter a number.")
-            raise typer.Exit(code=1)
-        # --- End Confirmation Flow Logic ---
+        _handle_acquire_confirmation(initial_response, yes)
 
     else: # Handle initial errors or non-confirmation status
         display_results(initial_response) # Display the direct result/error
