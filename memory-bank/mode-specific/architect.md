@@ -59,6 +59,18 @@
 ## Interface Definitions
 <!-- Append new interface definitions using the format below -->
 
+### Interface Definition: Backend API - Acquisition Workflow (Tier 0) - [2025-05-04 01:57:11]
+- **Purpose**: Allow flexible discovery and confirmation for acquiring missing texts.
+#### Method/Endpoint: POST /acquire/discover
+- Input: `{ "criteria": { "min_citation_threshold": int, "cited_by_author": str, "collection_id": int, "tags": list[str], "discourse_query": str }, "exclude_existing": bool }`
+- Output: `{ "discovery_id": "uuid", "candidates": [ { "candidate_id": "str", "title": "str", "author": "str", "year": int, "reason": "str", "potential_sources": list } ] }`
+- Behavior: Initiates discovery based on criteria, interacting with Relationship/Search services. Returns candidates and a session ID.
+- Security: None (Local Tier 0)
+#### Method/Endpoint: POST /acquire/confirm/{discovery_id}
+- Input: Path param `discovery_id`. Body: `{ "confirmations": [ { "candidate_id": "str", "acquisition_details": { "title": "str", "author": "str" } } ] }`
+- Output: `{ "status": "str", "triggered_acquisitions": [ { "candidate_id": "str", "acquisition_job_id": "str" } ] }`
+- Behavior: Confirms candidates for the given discovery session. Triggers acquisition via `zlibrary-mcp` for confirmed items.
+- Security: None (Local Tier 0)
 ### Interface Definition: Backend API (Internal REST - Tier 0) - [2025-04-27 23:39:30]
 - **Purpose**: Allow CLI/MCP clients to interact with PhiloGraph core services.
 #### Method/Endpoint: POST /ingest
@@ -82,6 +94,23 @@
 - Output: `{ "status": "searching/confirming/downloading/processing/complete/error", "results": [...], "processed_path": "..." }`
 - Behavior: Initiates the text acquisition workflow via the Acquisition Service, potentially returning search results for confirmation before proceeding with download and processing via `zlibrary-mcp`.
 - Security: None (Local Tier 0)
+### Component Specification: Backend Service (Tier 0 - Updated Acquisition) - [2025-05-04 01:57:11]
+- **Responsibility**: Orchestrates core logic, exposes API, manages workflows (ingestion, search, **acquisition discovery/confirmation**).
+- **Dependencies**: PostgreSQL+pgvector, LiteLLM Proxy, Text Processing Utilities, Local Filesystem, **zlibrary-mcp Server**.
+- **Interfaces Exposed**: Internal REST API (e.g., `/ingest`, `/search`, `/acquire/discover`, `/acquire/confirm/{id}`).
+- **Internal Structure (Tier 0)**: Monolithic Flask/FastAPI application containing Ingestion, Search, Relationship, Bibliography, and **Text Acquisition** service logic. Runs in Docker.
+
+### Component Specification: Acquisition Service (Tier 0 - Updated) - [2025-05-04 01:57:11]
+- **Responsibility**: Orchestrates the flexible workflow for discovering and acquiring missing texts. Handles discovery requests based on criteria, manages discovery sessions, handles confirmation requests, initiates `zlibrary-mcp` calls for confirmed items, and triggers ingestion.
+- **Dependencies**: Backend API, Relationship Service, Search Service, Database (PostgreSQL), zlibrary-mcp Server, Ingestion Service.
+- **Interfaces Exposed**: Internal API used by Backend API endpoints (`/acquire/discover`, `/acquire/confirm/{id}`).
+- **Internal Structure (Tier 0)**: Module within the Backend Service application.
+
+### Component Specification: Relationship Service (Tier 0 - Updated) - [2025-05-04 01:57:11]
+- **Responsibility**: Manages storage and retrieval of explicit relationships (primarily citations). Provides data for acquisition discovery criteria (e.g., citation counts, cited-by links).
+- **Dependencies**: Database (PostgreSQL).
+- **Interfaces Exposed**: Internal API used by other Backend services (e.g., Acquisition Service).
+- **Internal Structure (Tier 0)**: Module within the Backend Service application.
 
 ### Interface Definition: LiteLLM Proxy (OpenAI-Compatible REST - Tier 0) - [2025-04-27 23:39:30]
 - **Purpose**: Provide a unified endpoint for internal services to request embeddings.
@@ -98,6 +127,56 @@
 - **Responsibility**: Orchestrates core logic, exposes API, manages workflows (ingestion, search).
 - **Dependencies**: PostgreSQL+pgvector, LiteLLM Proxy, Text Processing Utilities, Local Filesystem.
 - **Interfaces Exposed**: Internal REST API (e.g., `/ingest`, `/search`).
+### Diagram: PhiloGraph Tier 0 Text Acquisition Workflow (Discovery & Confirmation) - [2025-05-04 01:57:11]
+- Description: Sequence diagram for acquiring missing texts via discovery and confirmation steps, using the external zlibrary-mcp server.
+```mermaid
+sequenceDiagram
+    participant User as User/Agent
+    participant CLI as CLI/MCP
+    participant API as Backend API
+    participant AcqSvc as Acquisition Service
+    participant RelSvc as Relationship Service
+    participant SearchSvc as Search Service
+    participant DB as PostgreSQL+pgvector
+    participant ZLibMCP as zlibrary-mcp Server
+    participant IngestSvc as Ingestion Service
+
+    User->>CLI: Trigger Discovery (e.g., find missing cited > 5 times by Author X)
+    CLI->>API: POST /acquire/discover (criteria={...})
+    API->>AcqSvc: Discover Candidates(criteria)
+    AcqSvc->>RelSvc: Query Relationships(criteria)
+    RelSvc->>DB: Fetch citation data, etc.
+    DB-->>RelSvc: Relationship data
+    RelSvc-->>AcqSvc: Potential candidates based on relationships
+    opt Semantic Criteria
+        AcqSvc->>SearchSvc: Query based on discourse/tags
+        SearchSvc->>DB: Vector/Metadata Search
+        DB-->>SearchSvc: Search results
+        SearchSvc-->>AcqSvc: Potential candidates based on search
+    end
+    AcqSvc->>AcqSvc: Consolidate & Filter Candidates (exclude existing)
+    AcqSvc->>API: Return Candidates(discovery_id, candidates)
+    API->>CLI: Display Candidates for Review
+
+    User->>CLI: Confirm Selection (discovery_id, confirmed_candidate_ids)
+    CLI->>API: POST /acquire/confirm/{discovery_id} (confirmations=[...])
+    API->>AcqSvc: Trigger Acquisition(discovery_id, confirmations)
+    loop For Each Confirmed Candidate
+        AcqSvc->>ZLibMCP: use_mcp_tool('search_books', {query: refined_details})
+        ZLibMCP-->>AcqSvc: Search Results (bookDetails list)
+        AcqSvc->>AcqSvc: Select Best Match (or require further confirmation)
+        AcqSvc->>ZLibMCP: use_mcp_tool('download_book_to_file', {bookDetails: selected_match, process_for_rag: true})
+        ZLibMCP-->>AcqSvc: { success: true/false, processed_path: "...", job_id: "..." }
+        opt Download Successful
+            AcqSvc->>IngestSvc: Trigger Ingestion(processed_path)
+            Note over IngestSvc: Ingestion proceeds similar to 3.1, reading from ZLibProcessed path.
+            IngestSvc-->>AcqSvc: Ingestion Status
+        end
+        AcqSvc->>API: Report Acquisition Status (job_id, candidate_id, status)
+    end
+    API->>CLI: Update User on Progress/Completion
+```
+**Notes:** Replaces the previous simpler acquisition workflow. Introduces a two-step process with explicit discovery and confirmation. Relies on Relationship and Search services for discovery criteria.
 - **Internal Structure (Tier 0)**: Monolithic Flask/FastAPI application containing Ingestion, Search, Relationship, Bibliography, and **Text Acquisition** service logic. Runs in Docker.
 
 ### Component Specification: LiteLLM Proxy (Tier 0) - [2025-04-27 23:39:30]

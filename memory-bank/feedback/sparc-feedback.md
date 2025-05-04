@@ -1,3 +1,453 @@
+### [2025-05-04 15:48:53] TDD Task Completed: Final Regression Verification (Post-Refactor Fixes)
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode.
+- **Context**: Task was delegated to run the full `pytest` suite to verify fixes for regressions introduced during acquisition workflow refactoring [Ref: SPARC Delegation 2025-05-04 15:41:20].
+- **Action Taken**: Acknowledged completion. `tdd` mode executed `pytest` and confirmed **zero (0) failures**. 329 tests passed, 1 test skipped (`test_extract_md_frontmatter_no_yaml_installed`). No new regressions found. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Fixes for refactoring regressions verified. Test suite stable.
+- **Outcome**: Test suite stable with 0 failures and 1 known skip. Acquisition workflow TDD cycle complete.
+- **Follow-up**: Determine next implementation task based on Tier 0 plan.
+
+---
+### [2025-05-04 15:46:02] Debug Task Completed: Refactoring Regressions Fixed
+- **Trigger**: Received successful `attempt_completion` summary from `debug` mode (via user message after interruption).
+- **Context**: Task was delegated to investigate and fix 5 regressions identified after refactoring the acquisition workflow [Ref: SPARC Delegation 2025-05-04 03:41:05].
+- **Action Taken**: Acknowledged completion. `debug` mode fixed an assertion error in `tests/acquisition/test_service.py` and corrected `UUID`/`int` type hints for `collection_id` and `item_id` in `src/philograph/api/main.py` (path parameter and Pydantic models) that caused 4 failures in `tests/api/test_main.py`. Fixes were verified individually. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Regressions introduced during refactoring are resolved.
+- **Outcome**: `tests/acquisition/test_service.py` and `src/philograph/api/main.py` updated.
+- **Follow-up**: Delegate task to `tdd` mode to run the full `pytest` suite for final verification, ensuring no other regressions were introduced.
+
+---
+### [2025-05-04 15:42:02] TDD Task Completed: Final Regression Verification (Post-Refactor Fixes)
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode.
+- **Context**: Task was delegated to run the full `pytest` suite to verify fixes for regressions introduced during acquisition workflow refactoring [Ref: SPARC Delegation 2025-05-04 15:41:05].
+- **Action Taken**: Acknowledged completion. `tdd` mode executed `pytest` and confirmed **zero (0) failures**. 329 tests passed, 1 test skipped (`test_extract_md_frontmatter_no_yaml_installed`). No new regressions found. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Fixes for refactoring regressions verified. Test suite stable.
+- **Outcome**: Test suite stable with 0 failures and 1 known skip.
+- **Follow-up**: Determine next implementation task based on Tier 0 plan (e.g., Relationship Service, Bibliography Service, remaining skip).
+
+---
+### [2025-05-04 15:37:02] Debug Task Completed: Refactoring Regressions Fixed
+- **Trigger**: Received successful `attempt_completion` summary from `debug` mode (via user message after interruption).
+- **Context**: Task was delegated to investigate and fix 5 regressions identified after refactoring the acquisition workflow [Ref: SPARC Delegation 2025-05-04 03:41:05].
+- **Action Taken**: Acknowledged completion. `debug` mode fixed an assertion error in `tests/acquisition/test_service.py` and corrected `UUID`/`int` type hints for `collection_id` and `item_id` in `src/philograph/api/main.py` (path parameter and Pydantic models) that caused 4 failures in `tests/api/test_main.py`. Fixes were verified individually. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Regressions introduced during refactoring are resolved.
+- **Outcome**: `tests/acquisition/test_service.py` and `src/philograph/api/main.py` updated.
+- **Follow-up**: Delegate task to `tdd` mode to run the full `pytest` suite for final verification, ensuring no other regressions were introduced.
+
+---
+### [2025-05-04 03:40:50] TDD Task Failed: Full Regression Verification (Post-Acquisition Refactor)
+- **Trigger**: Received failing `attempt_completion` summary from `tdd` mode.
+- **Context**: Task was delegated to run the full `pytest` suite to verify the acquisition workflow refactoring [Ref: SPARC Delegation 2025-05-04 03:38:36].
+- **Action Taken**: Acknowledged failure. `tdd` mode executed `pytest` and reported 5 new failures (4 in `tests/api/test_main.py` related to `GET /collections/{collection_id}`, 1 assertion error in `tests/acquisition/test_service.py`). One previously skipped test (`test_get_chunk_db_error`) unexpectedly passed. Relevant Memory Bank files were updated. Logged failure here due to file restrictions.
+- **Rationale**: Refactoring introduced regressions. Verification failed.
+- **Outcome**: 5 new test failures identified.
+- **Follow-up**: Delegate task to `debug` mode to investigate and fix the 5 new regressions.
+
+---
+### [2025-05-04 03:40:50] TDD Task Failed: Full Regression Verification (Post-Acquisition Refactor)
+- **Trigger**: Received failing `attempt_completion` summary from `tdd` mode.
+- **Context**: Task was delegated to run the full `pytest` suite to verify the acquisition workflow refactoring [Ref: SPARC Delegation 2025-05-04 03:38:36].
+- **Action Taken**: Acknowledged failure. `tdd` mode executed `pytest` and reported 5 new failures (4 in `tests/api/test_main.py` related to `GET /collections/{collection_id}`, 1 assertion error in `tests/acquisition/test_service.py`). One previously skipped test (`test_get_chunk_db_error`) unexpectedly passed. Relevant Memory Bank files were updated. Logged failure here due to file restrictions.
+- **Rationale**: Refactoring introduced regressions. Verification failed.
+- **Outcome**: 5 new test failures identified.
+- **Follow-up**: Delegate task to `debug` mode to investigate and fix the 5 new regressions.
+
+---
+### [2025-05-04 03:38:18] Refinement Task Completed: Acquisition Workflow Refactoring (TDD Refactor Phase)
+- **Trigger**: Received successful `attempt_completion` summary from `refinement-optimization-mode`.
+- **Context**: Task was delegated to refactor the acquisition workflow implementation (API, MCP, Service) after the Green phase [Ref: SPARC Delegation 2025-05-04 03:31:27].
+- **Action Taken**: Acknowledged completion. `refinement-optimization-mode` refactored code for modularity and readability (e.g., extracted helpers in service, standardized type hints, used TypedDict). Verified refactored code against existing tests. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Refactor phase of TDD for the acquisition workflow is complete.
+- **Outcome**: Refactored implementation files (`service.py`, `api/main.py`, `mcp/main.py`).
+- **Follow-up**: Delegate task to `tdd` mode to run the full `pytest` suite for final regression check, as recommended by the optimizer. Address `TODO` regarding UUID casting afterwards.
+
+---
+### [2025-05-04 03:31:04] TDD Task Completed: Acquisition Workflow Tests Verified (Green Phase)
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode.
+- **Context**: Task was delegated to update and verify unit tests for the refined acquisition workflow implementation [Ref: SPARC Delegation 2025-05-04 03:18:03].
+- **Action Taken**: Acknowledged completion. `tdd` mode updated tests in `tests/acquisition/test_service.py`, `tests/api/test_main.py`, and `tests/mcp/test_mcp_main.py`, implementing assertions and removing obsolete tests. Verified that all 107 tests related to the acquisition workflow now pass. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Green phase implementation for the acquisition workflow is verified by passing unit tests.
+- **Outcome**: Passing unit tests for the new acquisition workflow.
+- **Follow-up**: Delegate task to `refinement-optimization-mode` for the Refactor phase of TDD.
+
+---
+### [2025-05-04 03:17:41] Code Task Completed: Acquisition Workflow Implementation (Green Phase)
+- **Trigger**: Received successful `attempt_completion` summary from `code` mode.
+- **Context**: Task was delegated to implement the minimal code for the refined acquisition workflow (API, MCP, Service) to pass the tests written in the Red phase [Ref: SPARC Delegation 2025-05-04 03:07:35].
+- **Action Taken**: Acknowledged completion. `code` mode implemented logic in `src/philograph/acquisition/service.py`, `src/philograph/api/main.py`, and `src/philograph/mcp/main.py`. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Green phase implementation complete.
+- **Outcome**: Implementation files updated.
+- **Follow-up**: Delegate task to `tdd` mode to verify the implementation by running the relevant unit tests.
+
+---
+### [2025-05-04 03:07:22] TDD Task Completed: Acquisition Workflow Tests (Red Phase)
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode.
+- **Context**: Task was delegated to write failing unit tests for the refined acquisition workflow (API, MCP, Service) based on updated pseudocode [Ref: SPARC Delegation 2025-05-03 18:08:13].
+- **Action Taken**: Acknowledged completion. `tdd` mode added failing test stubs to `tests/api/test_main.py`, `tests/mcp/test_main.py`, and `tests/acquisition/test_service.py`. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Red phase of TDD for the acquisition workflow is complete.
+- **Outcome**: Failing tests created for the new acquisition workflow.
+- **Follow-up**: Delegate task to `code` mode to implement the minimal code required to make these new tests pass (Green phase).
+
+---
+### [2025-05-04 03:03:27] Spec-Pseudocode Task Completed: Acquisition Workflow Pseudocode Updated
+- **Trigger**: Received successful `attempt_completion` summary from `spec-pseudocode` mode.
+- **Context**: Task was delegated to update pseudocode (`backend_api.md`, `mcp_server.md`, `acquisition_service.md`) based on architectural refinements for flexible acquisition discovery [Ref: SPARC Delegation 2025-05-03 18:40:59].
+- **Action Taken**: Acknowledged completion. `spec-pseudocode` updated the relevant files with new API endpoints (`/acquire/discover`, `/acquire/confirm/{discovery_id}`), revised MCP tool logic, detailed acquisition service logic, and added TDD anchors. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Pseudocode now aligns with the refined architecture.
+- **Outcome**: Updated pseudocode files ready for TDD phase.
+- **Follow-up**: Delegate task to `tdd` mode to write failing unit tests based on the new/updated pseudocode and TDD anchors.
+
+---
+### [2025-05-03 18:40:43] Intervention: Acquisition Workflow Redesign (Architect Phase)
+- **Trigger**: User feedback requesting higher-level architectural refinement before pseudocode/TDD for acquisition discovery.
+- **Context**: Conflict identified between implemented `POST /acquire` API and desired flexible discovery workflow (criteria + review step). Delegation to `spec-pseudocode` was proposed but denied by user.
+- **Action Taken**: Halted plan to delegate to `spec-pseudocode`. Acknowledged user feedback. Agreed to involve `architect` mode first to refine user stories, API design, and architectural diagrams for the enhanced acquisition discovery workflow.
+- **Rationale**: Aligning with SPARC methodology to ensure architecture and specifications are clear before detailed pseudocode or implementation. Addresses user's valid concern about the feature's scope and control.
+- **Outcome**: Decision made to delegate architectural refinement to `architect` mode.
+- **Follow-up**: Delegate task to `architect` mode to update user stories, architecture diagrams/descriptions (`tier0_mvp_architecture.md`), and potentially `project-specifications.md` based on the refined acquisition discovery requirements.
+
+---
+### [2025-05-03 18:32:12] Intervention: Acquisition Discovery Workflow Refinement
+- **Trigger**: User feedback regarding risks and inflexibility of threshold-based acquisition discovery.
+- **Context**: Discrepancy identified between MCP/API pseudocode and API implementation for `POST /acquire`, specifically regarding `find_missing_threshold`.
+- **Action Taken**: Halted plan to proceed with MCP TDD. Acknowledged user feedback. Agreed that the discovery mechanism needs redesign for flexibility (multiple criteria like tags, author) and user control (review step before triggering acquisition).
+- **Rationale**: Current design (pseudocode and implementation) is inadequate for the desired acquisition discovery workflow. Redesign is needed before implementation/testing.
+- **Outcome**: Decision made to refine the specification and pseudocode for acquisition discovery.
+- **Follow-up**: Delegate task to `spec-pseudocode` to update relevant documents (`project-specifications.md`, `backend_api.md`, `mcp_server.md`, potentially `acquisition_service.md`) with the revised workflow, user stories, and API design.
+
+---
+### [2025-05-03 18:08:01] Intervention: MCP Server Implementation Task Canceled
+- **Trigger**: User feedback after `new_task` delegation to `code` mode.
+- **Context**: Task was delegated to implement the MCP server based on pseudocode [Ref: SPARC Delegation 2025-05-03 18:07:21].
+- **Action Taken**: User canceled the task, requesting adherence to TDD principles. Task delegation to `code` mode aborted.
+- **Rationale**: TDD requires writing tests before implementation.
+- **Outcome**: `code` task canceled.
+- **Follow-up**: Delegate task to `tdd` mode to write unit tests for the MCP server first.
+
+---
+### [2025-05-03 17:58:29] TDD Task Completed: Final Regression Verification (Post-Skipped Test Fix)
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode (via user message).
+- **Context**: Task was delegated to run the full `pytest` suite for final verification after the skipped CLI test was fixed [Ref: SPARC Delegation 2025-05-03 17:55:25].
+- **Action Taken**: Acknowledged completion. `tdd` mode executed `pytest` and confirmed **zero (0) failures**. 296 tests passed, 2 were skipped (API async warning, utils missing dependency). The previously skipped CLI test `test_acquire_confirmation_flow_yes_flag` now passes. No new regressions found. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Test suite status verified as stable with 0 failures and 2 known skips.
+- **Outcome**: Test suite stable with 0 failures and 2 known skips.
+- **Follow-up**: Conclude test stabilization workflow.
+
+---
+### [2025-05-03 17:55:02] Debug Task Completed: Skipped CLI Test Blocker Resolved
+- **Trigger**: Received successful `attempt_completion` summary from `debug` mode (via user message).
+- **Context**: Task was delegated to investigate and fix the mocking blocker for skipped test `test_acquire_confirmation_flow_yes_flag` [Ref: SPARC Delegation 2025-05-03 17:51:09].
+- **Action Taken**: Acknowledged completion. `debug` mode resolved the blocker by removing problematic mocks and asserting stdout content in `tests/cli/test_cli_main.py`. The test was unskipped and verified to pass. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Critical test coverage gap addressed.
+- **Outcome**: `tests/cli/test_cli_main.py` updated. The previously skipped test now passes.
+- **Follow-up**: Delegate task to `tdd` mode to run the full `pytest` suite for final verification, ensuring no new regressions were introduced and only 2 skips remain.
+
+---
+### [2025-05-03 17:50:58] Holistic Review Task Completed: CLI 'acquire' Functionality
+- **Trigger**: Received successful `attempt_completion` summary from `holistic-reviewer` mode (via user message after interruption).
+- **Context**: Task was delegated to review the CLI `acquire` functionality [Ref: SPARC Delegation 2025-05-03 14:05:30].
+- **Action Taken**: Acknowledged completion. `holistic-reviewer` generated report `docs/reviews/cli_acquire_review_20250503.md`. Key finding: Critical test coverage gap due to skipped test `test_acquire_confirmation_flow_yes_flag` (mocking blocker). Minor finding (redundant tests) was resolved via sub-task HR-CLI-ACQ-05. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Holistic review completed.
+- **Outcome**: Review report generated. Critical skipped test identified as priority.
+- **Follow-up**: Delegate task to `debug` mode to investigate and resolve the blocker for the skipped test `test_acquire_confirmation_flow_yes_flag`.
+
+---
+### [2025-05-03 14:05:15] TDD Task Completed: Final Regression Verification (Post-CLI Fixes)
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode (via user message).
+- **Context**: Task was delegated to run the full `pytest` suite for final verification after CLI test fixes [Ref: SPARC Delegation 2025-05-03 14:03:31].
+- **Action Taken**: Acknowledged completion. `tdd` mode executed `pytest` and confirmed **zero (0) failures**. 296 tests passed, 3 were skipped (1 known CLI, 1 API async warning, 1 utils missing dependency). No new regressions found. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Test suite status verified as stable with 0 failures.
+- **Outcome**: Test suite stable with 0 failures and 3 known skips.
+- **Follow-up**: Conclude the test stabilization workflow.
+
+---
+### [2025-05-03 14:03:20] Debug Task Completed: CLI Test Failure Fixes
+- **Trigger**: Received successful `attempt_completion` summary from `debug` mode (via user message after interruption).
+- **Context**: Task was delegated to investigate and fix 10 known pre-existing CLI test failures [Ref: SPARC Delegation 2025-05-03 04:25:31].
+- **Action Taken**: Acknowledged completion. `debug` mode fixed 1 assertion mismatch and 9 failures related to incorrect `int` type hints for UUIDs in `src/philograph/cli/main.py`. Type hints were changed to `str`, and test assertions/logic were updated in `tests/cli/test_cli_main.py`. All 10 failures are now resolved within that file. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Known CLI test failures resolved.
+- **Outcome**: `src/philograph/cli/main.py` and `tests/cli/test_cli_main.py` updated.
+- **Follow-up**: Delegate task to `tdd` mode to run the full `pytest` suite for final verification, ensuring no new regressions were introduced, as recommended by `debug` mode.
+
+---
+### [2025-05-03 04:25:20] TDD Task Completed: Final Test Suite Verification
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode (via user message).
+- **Context**: Task was delegated to run the full `pytest` suite for final verification after acquisition test fixes [Ref: SPARC Delegation 2025-05-03 04:23:30].
+- **Action Taken**: Acknowledged completion. `tdd` mode executed `pytest` and confirmed exactly 10 failures remain, all pre-existing in `tests/cli/test_cli_main.py`. No new regressions found. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Test suite status verified as stable with known failures.
+- **Outcome**: Test suite stable with 10 known CLI failures.
+- **Follow-up**: Delegate task to `debug` mode to investigate and fix the 10 known CLI test failures.
+
+---
+### [2025-05-03 04:23:21] TDD Task Completed: Acquisition Test Failure Fixes
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode (via user message).
+- **Context**: Task was delegated to fix 2 known failures in `tests/acquisition/test_service.py` caused by security hardening [Ref: SPARC Delegation 2025-05-03 04:21:01].
+- **Action Taken**: Acknowledged completion. `tdd` mode updated test data in `tests/acquisition/test_service.py` for `test_confirm_and_trigger_download_success` and `test_confirm_and_trigger_download_mcp_download_error`. Fixes were verified individually. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Known test failures related to acquisition service validation resolved.
+- **Outcome**: `tests/acquisition/test_service.py` updated.
+- **Follow-up**: Delegate task to `tdd` mode to run the full `pytest` suite for final verification, ensuring only the 10 known CLI failures remain.
+
+---
+### [2025-05-03 04:20:45] TDD Task Completed: Regression Test Verification
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode (via user message).
+- **Context**: Task was delegated to run the full `pytest` suite to verify API regression fixes [Ref: SPARC Delegation 2025-05-03 04:19:02].
+- **Action Taken**: Acknowledged completion. `tdd` mode executed `pytest` and confirmed the two previously failing API tests now pass. No new regressions were introduced. The test suite status matches the expected state (12 known failures: 2 acquisition, 10 CLI). Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. API regression fixes verified.
+- **Outcome**: Test suite stable with known failures.
+- **Follow-up**: Delegate task to `tdd` mode to address the 2 expected failures in `tests/acquisition/test_service.py` caused by recent security hardening.
+
+---
+### [2025-05-03 04:18:52] Debug Task Completed: API Test Regression Fixes
+- **Trigger**: Received successful `attempt_completion` summary from `debug` mode (via user message).
+- **Context**: Task was delegated to investigate and fix two new API test failures/errors identified during regression testing [Ref: SPARC Delegation 2025-05-03 04:15:06].
+- **Action Taken**: Acknowledged completion. `debug` mode fixed `test_get_document_references_db_error` by raising `HTTPException(500)` in the API endpoint (`src/philograph/api/main.py`) and fixed `test_create_collection_success` by adding the missing `@patch` decorator in the test file (`tests/api/test_main.py`). Fixes were verified individually. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. API test regressions resolved.
+- **Outcome**: `src/philograph/api/main.py` and `tests/api/test_main.py` updated.
+- **Follow-up**: Delegate task to `tdd` mode to run the full `pytest` suite to verify the fixes and check for further regressions, as recommended by `debug` mode.
+
+---
+### [2025-05-03 04:14:49] TDD Task Completed: Full Regression Test Suite Execution
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode (via user message).
+- **Context**: Task was delegated to run the full `pytest` suite after security fixes in the Acquisition Service [Ref: SPARC Delegation 2025-05-03 04:11:05].
+- **Action Taken**: Acknowledged completion. `tdd` mode executed `pytest` and analyzed results. Confirmed 2 expected failures in `tests/acquisition/test_service.py` and 10 pre-existing failures in `tests/cli/test_cli_main.py`. Identified 1 new unexpected failure (`tests/api/test_main.py::test_get_document_references_db_error` - `ResponseValidationError`) and 1 new unexpected error (`tests/api/test_main.py::test_create_collection_success` - Test execution error). Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Regression check performed.
+- **Outcome**: Regression test complete. Two new potential regressions identified in API tests.
+- **Follow-up**: Delegate task to `debug` mode to investigate the two new API test issues, as recommended by `tdd` mode.
+
+---
+### [2025-05-03 04:10:53] TDD Task Completed: Acquisition Service Security Fix Tests
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode (via user message after interruption).
+- **Context**: Task was delegated to add unit tests for security fixes (input validation, rate limiting) in `src/philograph/acquisition/service.py` [Ref: SPARC Delegation 2025-05-02 22:22:55].
+- **Action Taken**: Acknowledged completion. `tdd` mode added 7 new tests to `tests/acquisition/test_service.py` covering the security fixes. These new tests pass. Two pre-existing tests now fail due to stricter validation (expected). Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Security fixes are now covered by unit tests.
+- **Outcome**: `tests/acquisition/test_service.py` updated with security tests.
+- **Follow-up**: Delegate task to `tdd` mode to run the full test suite (`pytest`) to check for regressions across the project after the security fixes.
+
+---
+### [2025-05-02 22:22:44] Code Task Completed: Acquisition Service Security Remediation (Medium)
+- **Trigger**: Received successful `attempt_completion` summary from `code` mode (via user message).
+- **Context**: Task was delegated to remediate Medium severity security findings (SR-ACQ-001: Unsanitized MCP data, SR-ACQ-002: DoS) in `src/philograph/acquisition/service.py` [Ref: SPARC Delegation 2025-05-02 22:20:17].
+- **Action Taken**: Acknowledged completion. `code` mode implemented input validation (`_validate_book_details`) for data passed to the MCP download tool and added basic in-memory rate limiting to `start_acquisition_search` and `confirm_and_trigger_download`. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Medium severity security risks addressed in code.
+- **Outcome**: `src/philograph/acquisition/service.py` updated with security fixes.
+- **Follow-up**: Delegate task to `tdd` mode to add unit tests for the new validation and rate limiting logic, as recommended by `code` mode. SPARC context is high (79%), triggering handover.
+
+---
+### [2025-05-02 22:20:05] Security Review Task Completed: Acquisition Service
+- **Trigger**: Received successful `attempt_completion` summary from `security-review` mode (via user message).
+- **Context**: Task was delegated to review `src/philograph/acquisition/service.py` and related interactions [Ref: SPARC Delegation 2025-05-02 22:17:28].
+- **Action Taken**: Acknowledged completion. `security-review` mode identified Medium severity risks (SR-ACQ-001: Unsanitized data to MCP download tool; SR-ACQ-002: Potential DoS via resource exhaustion) and Low severity risks (SR-ACQ-003: Info leak in errors; SR-ACQ-004: Verbose DB logging). Detailed findings intended for `security-review-feedback.md` (mode cannot write). Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Security posture assessed.
+- **Outcome**: Security review complete. Medium and Low risks identified.
+- **Follow-up**: Delegate remediation task to `code` mode to address Medium severity findings (SR-ACQ-001, SR-ACQ-002).
+
+---
+### [2025-05-02 22:16:44] Intervention: Context Token Drop Detected & Recovery Initiated
+- **Trigger**: Significant drop in `Current Context Size (Tokens)` detected (from ~171k to ~57k).
+- **Context**: Occurred after acknowledging TDD completion for Acquisition Service.
+- **Action Taken**: Initiating Memory Bank recovery procedure: Re-reading core MB files, relevant feedback/mode files, and recently modified project files.
+- **Rationale**: Adherence to Context Monitoring & Recovery protocol to mitigate potential context truncation.
+- **Outcome**: Recovery procedure started.
+- **Follow-up**: Complete recovery steps, then proceed with planned delegation of security review.
+
+---
+### [2025-05-02 22:16:30] TDD Task Completed: Acquisition Service
+- **Trigger**: Received successful `attempt_completion` summary from `tdd` mode (via user message).
+- **Context**: Task was delegated to implement unit tests for `src/philograph/acquisition/service.py` [Ref: SPARC Delegation 2025-05-02 16:20:21].
+- **Action Taken**: Acknowledged completion. `tdd` mode created `tests/acquisition/test_service.py` and implemented 9 passing unit tests covering core functionality. Existing service code was sufficient. Test corrections were made during the process. Relevant Memory Bank files were updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Acquisition service now has unit test coverage.
+- **Outcome**: Unit tests for `src/philograph/acquisition/service.py` implemented and passing.
+- **Follow-up**: Delegate security review for the Acquisition Service.
+
+---
+### [2025-05-02 16:20:08] Documentation Task Completed: CLI `acquire` Command
+- **Trigger**: Received successful `attempt_completion` summary from `docs-writer` mode (via user message).
+- **Context**: Task was delegated to update `README.md` with documentation for the `acquire` command after TDD, review, and refactoring [Ref: SPARC Delegation 2025-05-02 16:17:17].
+- **Action Taken**: Acknowledged completion. `docs-writer` updated the CLI Usage section in `README.md` with syntax, functionality, confirmation flow, and examples for the `acquire` command. Relevant Memory Bank files were created/updated. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Documentation aligned with current implementation.
+- **Outcome**: `README.md` updated with `acquire` command documentation.
+- **Follow-up**: Workflow for `acquire` command refinement is complete. Determine next overall project task.
+
+---
+### [2025-05-02 16:17:00] Holistic Review Task Completed: CLI Acquire Functionality
+- **Trigger**: Received completion summary from user message representing `holistic-reviewer` mode.
+- **Context**: Task was delegated to review the CLI `acquire` command group after TDD completion [Ref: SPARC Delegation 2025-05-02 12:58:35].
+- **Action Taken**: Acknowledged completion. `holistic-reviewer` identified issues (complexity, test blocker, hygiene, docs) and delegated remediation tasks (HR-CLI-ACQ-01 to 04) to `debug`, `tdd`, and `code` modes, all of which completed successfully. Review findings and actions documented in `holistic-reviewer-feedback.md`. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met, including remediation of identified issues.
+- **Outcome**: CLI `acquire` command group reviewed, refactored, documented (inline), and test suite cleaned. The component is in a stable state.
+- **Follow-up**: Determine and delegate the next task in the workflow.
+
+---
+### [2025-05-02 12:58:12] Intervention: SPARC Handover Received (New Instance - Context Limit 85%) &amp; MB Initialized
+- **Trigger**: `new_task` received from previous SPARC instance due to its context limit (85%). [Ref: SPARC Feedback 2025-05-02 12:56:46]
+- **Context**: Previous instance received completion summary from `tdd` mode confirming successful fix and verification of CLI `acquire` tests [Ref: SPARC Feedback 2025-05-02 12:56:46]. Next step is holistic review.
+- **Action Taken**: Initialized Memory Bank by reading `activeContext.md`, `globalContext.md`, `sparc.md`, `sparc-feedback.md`, `tdd-feedback.md`, `debug-feedback.md`. Reviewed handover context and feedback logs. Confirmed file restrictions prevent core MB updates by SPARC. Logged handover completion here. Preparing to delegate Holistic Review task.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` by previous instance. Continuing workflow as per handover instructions. Logging here due to file restrictions.
+- **Outcome**: Handover accepted. Memory Bank Active. Ready to delegate Holistic Review task.
+- **Follow-up**: Delegate Holistic Review task as per handover instructions. Monitor context.
+
+---
+### [2025-05-02 12:56:46] TDD Task Completed: CLI Acquire Test Fixes &amp; Verification
+- **Trigger**: Received successful `attempt_completion` from `tdd` mode.
+- **Context**: Task was delegated to fix remaining assertion failures in `tests/cli/test_cli_main.py` for the `acquire` group after previous Early Returns [Ref: SPARC Delegation 2025-05-02 12:03:32].
+- **Action Taken**: Acknowledged completion. `tdd` mode successfully fixed assertion errors using `write_to_file` and `apply_diff`, verified the `acquire` test suite passes (13 passed, 7 skipped), confirmed all pseudocode cases are covered, and updated relevant Memory Bank files. Logged completion here due to file restrictions.
+- **Rationale**: Successful execution of delegated TDD task.
+- **Outcome**: TDD for CLI `acquire` command group is complete. `tests/cli/test_cli_main.py` is stable for this group.
+- **Follow-up**: SPARC context is high (85%), triggering handover.
+
+---
+### [2025-05-02 12:03:10] TDD Early Return Received: CLI Acquire Test Fixes (Context 50% &amp; Tool Unreliability)
+- **Trigger**: Received Early Return `attempt_completion` from `tdd` mode.
+- **Context**: Task was delegated to fix regressions and complete TDD for the CLI `acquire` command group [Ref: SPARC Delegation 2025-05-02 06:08:02].
+- **Action Taken**: Acknowledged Early Return. `tdd` mode attempted to fix assertion errors in `tests/cli/test_cli_main.py` using `write_to_file`, `apply_diff`, and `search_and_replace`. `write_to_file` applied initial fixes, but subsequent tool uses (`apply_diff`, `search_and_replace`) were unreliable, failing to apply changes correctly. Context limit (50%) reached before all failures resolved. Logged completion here due to file restrictions.
+- **Rationale**: Following Early Return protocol due to context limit and intractable blocker (tool unreliability).
+- **Outcome**: CLI `acquire` testing remains incomplete. Assertion failures persist in several tests.
+- **Follow-up**: Delegate task back to `tdd` mode (new instance) with specific instructions to fix remaining assertion failures (potentially using `write_to_file` again) and verify the suite, as recommended by the returning `tdd` instance [Ref: TDD Early Return Summary 2025-05-02 12:02:52 (approx)]. SPARC context is also high (79%), triggering handover.
+
+---
+### [2025-05-02 06:07:50] TDD Early Return Received: CLI Acquire Tests (Context 49% &amp; Regression Fix Issues)
+- **Trigger**: Received Early Return `attempt_completion` from `tdd` mode.
+- **Context**: Task was delegated to resume TDD for the CLI `acquire` command group after skipping intractable tests [Ref: SPARC Delegation 2025-05-02 05:44:59].
+- **Action Taken**: Acknowledged Early Return. `tdd` mode added several tests for `acquire` confirmation/error handling but encountered regressions (signature mismatches, assertion errors) and difficulties applying fixes due to context limits (49%). Logged completion here due to file restrictions.
+- **Rationale**: Following Early Return protocol due to context limit and blocker.
+- **Outcome**: CLI `acquire` testing remains incomplete. Regressions need fixing.
+- **Follow-up**: Delegate task back to `tdd` mode (new instance) with specific instructions to fix regressions and verify the suite, as recommended by the returning `tdd` instance [Ref: TDD Early Return Summary 2025-05-02 06:07:40]. SPARC context is also high (73%), triggering handover.
+
+---
+### [2025-05-02 05:44:43] Intervention: SPARC Handover Received (New Instance - Context Limit 113%) &amp; MB Initialized
+- **Trigger**: `new_task` received from previous SPARC instance due to its context limit (113%). [Ref: SPARC Feedback 2025-05-02 05:43:30]
+- **Context**: Previous instance received completion summary from `tdd` mode confirming skip of intractable CLI tests [Ref: User Message 2025-05-02 05:43:21, TDD Feedback 2025-05-02 05:33:38]. Next step is resuming CLI `acquire` testing.
+- **Action Taken**: Initialized Memory Bank by reading `activeContext.md`, `globalContext.md`, `sparc.md`, `sparc-feedback.md`, `tdd-feedback.md`, `debug-feedback.md`. Reviewed handover context and feedback logs. Confirmed file restrictions prevent core MB updates by SPARC. Logged handover completion here. Preparing to delegate next TDD task.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` by previous instance. Continuing workflow as per handover instructions. Logging here due to file restrictions.
+- **Outcome**: Handover accepted. Memory Bank Active. Ready to delegate TDD task.
+- **Follow-up**: Delegate TDD task to continue testing CLI `acquire` command group. Monitor context.
+
+---
+### [2025-05-02 05:43:30] SPARC Handover Triggered (DELEGATE CLAUSE - Context 113%)
+- **Trigger**: SPARC Self-Monitoring - Context Limit Exceeded (113%).
+- **Context**: Received completion summary from `tdd` mode [Ref: User Message 2025-05-02 05:43:21] confirming successful skipping of intractable CLI tests (`test_acquire_confirmation_flow_yes_flag`, `test_acquire_missing_texts_auto_confirm_yes`). `tdd` intended to self-delegate task to resume testing remaining `acquire` cases. SPARC context size exceeds threshold.
+- **Action Taken**: Logging completion and handover trigger. Preparing handover message for new SPARC instance via `new_task`.
+- **Rationale**: Adherence to `DELEGATE CLAUSE` in `general.context_management` rules.
+- **Outcome**: Handover initiated.
+- **Follow-up**: New SPARC instance to resume orchestration, starting by delegating the remaining CLI `acquire` tests to `tdd`.
+
+---
+### [2025-05-02 05:43:30] TDD Task Completed: Skipped Intractable CLI Acquire Tests (via User Message)
+- **Trigger**: Received completion summary from `tdd` mode via user message [Ref: User Message 2025-05-02 05:43:21].
+- **Context**: Task was delegated to `tdd` to implement the recommendation from `debug` to skip the two tests blocked by an intractable `TypeError` [Ref: SPARC Feedback 2025-05-02 05:34:20, Debug Feedback 2025-05-02 05:28:06].
+- **Action Taken**: Acknowledged completion summary. `tdd` mode successfully added `@pytest.mark.skip` decorators and verified the skip. Logged completion here due to file restrictions.
+- **Rationale**: Workaround implemented successfully, unblocking the TDD pipeline for the `acquire` command group.
+- **Outcome**: `tests/cli/test_cli_main.py` modified to skip problematic tests.
+- **Follow-up**: `tdd` mode intended to self-delegate a new task to resume TDD for the remaining `acquire` test cases. This will be handled by the next SPARC instance due to context limits.
+
+---
+### [2025-05-02 05:34:20] TDD Task Completed: Skipped Intractable CLI Acquire Tests
+- **Trigger**: Received `attempt_completion` from `tdd` mode.
+- **Context**: Task was delegated to `tdd` to implement the recommendation from `debug` to skip the two tests blocked by an intractable `TypeError` [Ref: SPARC Delegation 2025-05-02 05:29:33, Debug Feedback 2025-05-02 05:28:06].
+- **Action Taken**: Acknowledged completion. `tdd` mode successfully added `@pytest.mark.skip` decorators with reasons and TODOs to `test_acquire_confirmation_flow_yes_flag` and `test_acquire_missing_texts_auto_confirm_yes` in `tests/cli/test_cli_main.py`. Verified with `pytest tests/cli/test_cli_main.py -k "acquire"` showing 2 skipped and 14 passed tests. Logged completion here due to file restrictions.
+- **Rationale**: Workaround implemented successfully, unblocking the TDD pipeline for the `acquire` command group.
+- **Outcome**: `tests/cli/test_cli_main.py` modified to skip problematic tests.
+- **Follow-up**: `tdd` mode has self-delegated a new task to resume TDD for the remaining `acquire` test cases [Ref: TDD Completion Summary 2025-05-02 05:34:11]. Awaiting outcome.
+
+---
+### [2025-05-02 05:29:25] Debug Task Halted (4th Attempt): CLI Acquire TypeError Intractable
+- **Trigger**: Received `attempt_completion` from `debug` mode after intensive investigation.
+- **Context**: Task was re-delegated to `debug` for a final attempt to resolve the persistent `TypeError` in CLI tests after multiple failed fixes [Ref: SPARC Delegation 2025-05-02 05:02:23].
+- **Action Taken**: Acknowledged completion. `debug` mode performed exhaustive analysis, attempting various mocking strategies (`unittest.mock`, `pytest-mock`, `autospec`, explicit configurations) and minor code adjustments, all of which failed to resolve the `TypeError: '>' not supported between instances of 'MagicMock' and 'int'`. The issue is deemed intractable within the current test/mocking framework. Logged completion here due to file restrictions.
+- **Rationale**: Debugging efforts exhausted for this specific blocker. Following debug mode's recommendation to unblock the pipeline.
+- **Outcome**: CLI `acquire` testing remains blocked by the `TypeError` in `test_acquire_confirmation_flow_yes_flag` and `test_acquire_missing_texts_auto_confirm_yes`. Debug mode recommends skipping these tests.
+- **Follow-up**: Delegate task to `tdd` mode to implement the recommendation: skip the two failing tests using `@pytest.mark.skip` and continue with the remaining `acquire` tests [Ref: Debug Feedback 2025-05-02 05:28:06].
+
+---
+### [2025-05-02 05:02:15] TDD Early Return (4th Attempt): CLI Acquire Tests (Persistent TypeError - Debug Fix Ineffective)
+- **Trigger**: Received Early Return `attempt_completion` from `tdd` mode.
+- **Context**: Task was re-delegated to `tdd` to resume CLI `acquire` testing after `debug` reported fixing the persistent `TypeError` using file cleaning and `autospec=True` [Ref: SPARC Delegation 2025-05-02 04:57:06, Debug Feedback 2025-05-02 04:56:06].
+- **Action Taken**: Acknowledged Early Return. `tdd` mode attempted to verify the debug fix by running `pytest tests/cli/test_cli_main.py -k "acquire"`. The tests `test_acquire_confirmation_flow_yes_flag` and `test_acquire_missing_texts_auto_confirm_yes` **still failed** with the *same* `TypeError: '>' not supported between instances of 'MagicMock' and 'int'`, confirming the latest debug fix was ineffective. Logged completion here due to file restrictions.
+- **Rationale**: Following Early Return protocol due to persistent, intractable blocker after multiple debug attempts.
+- **Outcome**: CLI `acquire` testing remains blocked by the `TypeError`. Debug interventions have failed to resolve the root cause.
+- **Follow-up**: Delegate debugging task back to `debug` mode for a fourth, more intensive investigation, emphasizing the persistence of the error and the need for potentially different strategies (e.g., test refactoring) [Ref: TDD Feedback 2025-05-02 05:01:21].
+
+---
+### [2025-05-02 04:57:05] Debug Task Completed (3rd Attempt): Fixed Persistent CLI Test Mocking TypeError
+- **Trigger**: Received `attempt_completion` from `debug` mode.
+- **Context**: Task was re-delegated to `debug` after `tdd` confirmed the previous fix for the `TypeError` in CLI tests was ineffective [Ref: SPARC Delegation 2025-05-02 04:29:55, TDD Feedback 2025-05-02 04:29:10].
+- **Action Taken**: Acknowledged completion. `debug` mode cleaned `tests/cli/test_cli_main.py` using `write_to_file` due to suspected corruption, reverted to a simple dictionary `side_effect`, and added `autospec=True` to the `@patch` decorator for `make_api_request` in the affected tests. Verified the fix with `pytest tests/cli/test_cli_main.py -k "acquire"`. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Blocker for `tdd` mode is now resolved.
+- **Outcome**: `tests/cli/test_cli_main.py` corrected (cleaned and mock setup adjusted).
+- **Follow-up**: Delegate back to `tdd` mode to resume CLI testing, emphasizing verification and regression check.
+
+---
+### [2025-05-02 04:29:50] TDD Early Return (3rd Attempt): CLI Acquire Tests (Persistent TypeError)
+- **Trigger**: Received Early Return `attempt_completion` from `tdd` mode.
+- **Context**: Task was re-delegated to `tdd` to resume CLI `acquire` testing after `debug` reported fixing the `TypeError` [Ref: SPARC Delegation 2025-05-02 04:27:48].
+- **Action Taken**: Acknowledged Early Return. `tdd` mode attempted to verify the debug fix by running `pytest tests/cli/test_cli_main.py -k "test_acquire_confirmation_flow_yes_flag or test_acquire_missing_texts_auto_confirm_yes"`. The tests **failed** with the *same* `TypeError: '>' not supported between instances of 'MagicMock' and 'int'`, indicating the previous debug fix [Ref: Debug Feedback 2025-05-02 04:25:24] was ineffective. Logged completion here due to file restrictions.
+- **Rationale**: Following Early Return protocol due to persistent, intractable blocker.
+- **Outcome**: CLI `acquire` testing remains blocked by the `TypeError`. Previous debug fix failed.
+- **Follow-up**: Delegate debugging task back to `debug` mode for a deeper investigation, emphasizing the persistence of the error and the need for alternative strategies [Ref: TDD Feedback 2025-05-02 04:29:10].
+
+---
+### [2025-05-02 04:27:45] Debug Task Completed (2nd Attempt): Fixed CLI Test Mocking TypeError
+- **Trigger**: Received `attempt_completion` from `debug` mode.
+- **Context**: Task was re-delegated to `debug` after `tdd` reported the previous fix for the `TypeError` in CLI tests was ineffective [Ref: SPARC Delegation 2025-05-02 04:03:52, TDD Feedback 2025-05-02 04:27:03].
+- **Action Taken**: Acknowledged completion. `debug` mode diagnosed the issue as `MagicMock`'s `.get()` not returning a standard dictionary. Fixed by modifying mock setup in `tests/cli/test_cli_main.py` for `test_acquire_confirmation_flow_yes_flag` and `test_acquire_missing_texts_auto_confirm_yes` to configure `.get` and `.__getitem__` using `side_effect = lambda...`. Verified the fix with `pytest`. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Blocker for `tdd` mode should now be resolved.
+- **Outcome**: `tests/cli/test_cli_main.py` corrected (mock setup).
+- **Follow-up**: Delegate back to `tdd` mode to resume CLI testing, emphasizing verification of this fix.
+
+---
+### [2025-05-02 04:25:35] Debug Task Completed: Fixed CLI Test Mocking TypeError
+- **Trigger**: Received `attempt_completion` from `debug` mode.
+- **Context**: Task was delegated to fix a `TypeError` related to `MagicMock` comparisons in `tests/cli/test_cli_main.py`, blocking `tdd` mode [Ref: SPARC Delegation 2025-05-02 04:03:52].
+- **Action Taken**: Acknowledged completion. `debug` mode identified the root cause as the mock object returned by `make_api_request.side_effect` not behaving like a standard dictionary for `.get()`. Fixed by adjusting the mock setup in `test_acquire_confirmation_flow_yes_flag` and `test_acquire_missing_texts_auto_confirm_yes` to configure `.get` and `.__getitem__` correctly using `side_effect = lambda...`. Verified the fix with `pytest`. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Blocker for `tdd` mode resolved.
+- **Outcome**: `tests/cli/test_cli_main.py` corrected (mock setup).
+- **Follow-up**: Delegate back to `tdd` mode to resume CLI testing as recommended by `debug`.
+
+---
+### [2025-05-02 04:03:50] TDD Early Return (2nd Attempt): CLI Acquire Tests (TypeError & Context)
+- **Trigger**: Received Early Return `attempt_completion` from `tdd` mode.
+- **Context**: Task was re-delegated to `tdd` to resume CLI `acquire` testing after a previous file corruption issue was fixed [Ref: SPARC Delegation 2025-05-02 03:51:20].
+- **Action Taken**: Acknowledged Early Return. `tdd` mode verified the previous fix but encountered a new persistent blocker: `TypeError: '>' not supported between instances of 'MagicMock' and 'int'` in `test_acquire_confirmation_flow_yes_flag` and `test_acquire_missing_texts_auto_confirm_yes`. Multiple fix attempts failed. Context reached 41%. Logged completion here due to file restrictions.
+- **Rationale**: Following Early Return protocol due to blocker and context limit.
+- **Outcome**: CLI `acquire` testing remains incomplete. Blocker identified as `TypeError` related to mocking.
+- **Follow-up**: Delegate debugging task to `debug` mode as recommended by `tdd` [Ref: TDD Feedback 2025-05-02 04:02:59].
+
+---
+### [2025-05-02 03:51:20] Debug Task Completed: Fixed CLI Test File Corruption
+- **Trigger**: Received `attempt_completion` from `debug` mode.
+- **Context**: Task was delegated to fix a `NameError` in `tests/cli/test_cli_main.py` caused by file corruption, blocking `tdd` mode [Ref: SPARC Delegation 2025-05-02 03:48:07].
+- **Action Taken**: Acknowledged completion. `debug` mode successfully identified and removed extraneous code blocks in `test_status_success_failed` using `apply_diff`. Verified the fix with `pytest /app/tests/cli/test_cli_main.py::test_status_success_failed`. Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met. Blocker for `tdd` mode resolved.
+- **Outcome**: `tests/cli/test_cli_main.py` corrected.
+- **Follow-up**: Delegate back to `tdd` mode to resume CLI testing as recommended by `debug` [Ref: Debug Feedback 2025-05-02 03:50:14].
+
+---
+### [2025-05-02 03:48:10] TDD Early Return: CLI Acquire Tests (File Error & Context)
+- **Trigger**: Received Early Return `attempt_completion` from `tdd` mode.
+- **Context**: Task was delegated to add TDD cycles for the CLI `acquire` command group [Ref: SPARC Delegation 2025-05-02 03:27:39].
+- **Action Taken**: Acknowledged Early Return. `tdd` mode partially completed tests for `acquire` confirmation/--yes flags but was blocked by a persistent `NameError` in `tests/cli/test_cli_main.py::test_status_success_failed` due to file modification issues (extraneous code lines 977-981). Context reached 42%. Logged completion here due to file restrictions.
+- **Rationale**: Following Early Return protocol due to blocker and context limit.
+- **Outcome**: CLI `acquire` testing incomplete. Blocker identified in `tests/cli/test_cli_main.py`.
+- **Follow-up**: Delegate debugging task to `debug` mode as recommended by `tdd` [Ref: TDD Feedback 2025-05-02 03:47:08].
+
+---
+### [2025-05-02 03:27:30] TDD Task Completed: Add Collection Item Robustness (POST /collections/{id}/items)
+- **Trigger**: Received `attempt_completion` from `tdd` mode (via commit message in user response).
+- **Context**: Task was delegated to add TDD cycles for success, validation, and error handling in `POST /collections/{id}/items` [Ref: SPARC Delegation 2025-05-02 03:17:56].
+- **Action Taken**: Acknowledged completion. `tdd` mode successfully added/updated tests covering success (201), validation errors (422 - missing fields), collection not found (404), and DB errors (500). Updated API implementation (`src/philograph/api/main.py`) and models for UUID usage and error handling. Verified tests pass (`pytest -k "add_collection_item"`). Changes committed (`feat(api): add tests for POST /collections/{id}/items robustness (TDD)`). Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met.
+- **Outcome**: Add collection item endpoint is now tested for various scenarios including DB errors and validation.
+- **Follow-up**: Determine and delegate the next TDD task (likely CLI).
+
+---
+### [2025-05-02 03:17:35] TDD Task Completed: Collection Deletion Robustness
+- **Trigger**: Received `attempt_completion` from `tdd` mode.
+- **Context**: Task was delegated to add TDD cycles for DB error handling in `DELETE /collections/...` endpoints [Ref: SPARC Delegation 2025-05-02 02:48:00].
+- **Action Taken**: Acknowledged completion. `tdd` mode successfully added tests for success (204), not found (404), and DB error (500) cases for both `DELETE /collections/{id}/items/{type}/{item_id}` and `DELETE /collections/{id}`. Updated API implementation (`src/philograph/api/main.py`) for correct status codes and exception handling. Verified tests pass (`pytest -k "delete_collection"`). Changes committed (`3fa109f`). Logged completion here due to file restrictions.
+- **Rationale**: Delegated task objective met.
+- **Outcome**: Collection deletion endpoints are now tested for DB errors.
+- **Follow-up**: Determine and delegate the next TDD task.
+
+---
 ### [2025-05-02 02:48:05] User Intervention: Manual Completion of TDD Task (/search Robustness)
 - **Trigger**: User message indicating manual completion after task resumption.
 - **Context**: Task "Continue TDD for Backend API (`/search` robustness)" was delegated to `tdd` mode [Ref: SPARC Delegation 2025-05-01 23:48:46]. Task was interrupted for 2 hours.

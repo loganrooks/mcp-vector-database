@@ -89,6 +89,55 @@
 - Testing approach: Test ingestion and citation generation with various combinations of EPUBs, PDFs (with/without page numbers), and texts with canonical numbering. Verify consistency of citation pointers.
 
 ## Pseudocode Library
+### Pseudocode: Acquisition Service - Internal Logic
+- Created: 2025-05-04 03:02:31
+- Updated: 2025-05-04 03:02:31
+```pseudocode
+// Link: pseudocode/tier0/acquisition_service.md
+// Defines internal logic for handling discovery requests (DB queries, zlib search),
+// managing discovery sessions (in-memory for Tier 0), and handling confirmation
+// requests (zlib download trigger, ingestion trigger). Aligns with ADR 009.
+```
+#### TDD Anchors:
+- Test session creation, retrieval, expiry, update.
+- Test discovery request handling (DB queries, zlib search, candidate return).
+- Test confirmation request handling (session state validation, selection validation, download trigger, ingestion trigger).
+- Test error handling for DB, MCP, and ingestion calls.
+- Test status retrieval for different session states.
+
+### Pseudocode: MCP Server - Acquisition Tool Update
+- Created: 2025-04-28 03:46:40
+- Updated: 2025-05-04 03:02:00
+```pseudocode
+// Link: pseudocode/tier0/mcp_server.md
+// Renamed 'philograph_acquire_missing' to 'philograph_acquire'.
+// Updated tool logic and schema to interact with the new two-stage API:
+// - Calls POST /acquire/discover with 'filters'.
+// - Calls POST /acquire/confirm/{discovery_id} with 'discovery_id' and 'selected_items'.
+// Includes validation for argument combinations.
+```
+#### TDD Anchors:
+- Test discovery call forwards 'filters' to `/acquire/discover`.
+- Test confirmation call forwards 'discovery_id' and 'selected_items' to `/acquire/confirm/{discovery_id}`.
+- Test validation logic for argument combinations (discovery vs. confirmation).
+- Test handling of backend API responses for both phases.
+
+### Pseudocode: Backend API - Acquisition Endpoints Update
+- Created: 2025-04-28 03:44:43
+- Updated: 2025-05-04 03:01:38
+```pseudocode
+// Link: pseudocode/tier0/backend_api.md
+// Implemented new two-stage acquisition endpoints based on ADR 009:
+// - POST /acquire/discover: Accepts filters, calls acquisition_service.handle_discovery_request, returns candidates + discovery_id.
+// - POST /acquire/confirm/{discovery_id}: Accepts selected_items, calls acquisition_service.handle_confirmation_request, returns processing status.
+// - GET /acquire/status/{discovery_id}: Retrieves status from acquisition_service.
+// Deprecated previous /acquire and /acquire/confirm endpoints.
+```
+#### TDD Anchors:
+- Test `/acquire/discover` endpoint (success, filters, no candidates, errors).
+- Test `/acquire/confirm/{discovery_id}` endpoint (success, validation, state checks, errors).
+- Test `/acquire/status/{discovery_id}` endpoint (various statuses, 404).
+- Test that deprecated endpoints are removed or return appropriate status (e.g., 410 Gone).
 ### Pseudocode: MCP Server - Tier 0
 - Created: 2025-04-28 03:46:40
 ```pseudocode

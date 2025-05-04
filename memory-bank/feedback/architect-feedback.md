@@ -1,6 +1,13 @@
 # Architect Feedback
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-05-04 01:54:21] - Task Trigger: Refine Acquisition Workflow
+*   **Trigger:** User task assignment.
+*   **Context:** Received user feedback [Ref: SPARC Feedback 2025-05-03 18:40:43] indicating the current acquisition workflow (`find_missing_threshold`, `POST /acquire`) is inflexible and lacks user control/review.
+*   **Action:** Refined architecture to introduce a two-stage discovery (`POST /acquire/discover`) and confirmation (`POST /acquire/confirm/{id}`) workflow. Updated user stories, architecture document (`docs/architecture/tier0_mvp_architecture.md`), specification document (`docs/project-specifications.md`), created ADR 009 (`docs/architecture/adr/009-flexible-acquisition-workflow.md`), and updated Memory Bank files (`activeContext.md`, `globalContext.md`, `mode-specific/architect.md`).
+*   **Rationale:** Address user feedback, improve workflow clarity, support flexible discovery criteria, and enhance user control over the acquisition process.
+*   **Outcome:** Architectural documents updated to reflect the new flexible acquisition workflow.
+*   **Follow-up:** Attempt completion.
 ### [2025-04-28 03:35:37] - User Feedback on Tier 0 Architecture Attempt 3
 *   **Trigger:** User denied `attempt_completion` after incorporating `zlibrary-mcp` integration.
 *   **Context:** Attempted completion summarizing ADR creation and document updates for embedding dimension and `zlibrary-mcp`.

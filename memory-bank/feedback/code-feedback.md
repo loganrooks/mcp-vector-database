@@ -1,6 +1,17 @@
 # Code Mode Feedback Log
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-05-02 22:21:49] Fix: Remediate Acquisition Service Security Findings
+- **Trigger**: Task received to address Medium severity security findings [Ref: Security Review 2025-05-02 22:20:05].
+- **Context**: Security review identified unsanitized data passed to MCP download tool (SR-ACQ-001) and potential DoS via resource exhaustion due to lack of rate limiting (SR-ACQ-002) in `src/philograph/acquisition/service.py`.
+- **Action Taken**:
+    - Added imports for `time`, `collections.deque`, `typing.Set`.
+    - Implemented `_validate_book_details` helper function with `EXPECTED_BOOK_KEYS` and `REQUIRED_BOOK_KEYS` sets. This function checks dictionary type, unexpected keys, missing required keys, and basic type validation for `md5` and `download_url`. Added call to this validator in `confirm_and_trigger_download` before the MCP call (SR-ACQ-001).
+    - Added global `deque` variables (`_search_request_timestamps`, `_download_request_timestamps`) and constants for rate limit window/max requests.
+    - Implemented rate limiting checks using `time.time()` and the deques at the beginning of `start_acquisition_search` and `confirm_and_trigger_download` (SR-ACQ-002).
+- **Rationale**: Addressing specific security vulnerabilities identified in the review to improve robustness and security posture. Input validation prevents potential injection attacks via MCP arguments. Rate limiting mitigates potential DoS attacks.
+- **Outcome**: Security findings SR-ACQ-001 and SR-ACQ-002 addressed in `src/philograph/acquisition/service.py`.
+- **Follow-up**: Update Memory Bank. Perform pre-completion checks. Recommend TDD run to verify fixes and check for regressions.
 ### [2025-05-01 15:46:53] Fix: Correct Syntax Errors in Search Service
 - **Trigger**: Task handover from SPARC to fix syntax errors introduced during Debug session [Ref: Debug Feedback 2025-05-01 15:43:00].
 - **Context**: Syntax errors (indentation, try/except structure) around line 40 in `src/philograph/search/service.py` prevented further debugging of [Ref: Issue-ID: CLI-API-500-ERRORS].
