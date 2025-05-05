@@ -1,3 +1,22 @@
+### Early Return: Intractable ModuleNotFoundError &amp; High Context - [2025-05-05 03:12:31]
+- **Trigger**: User instruction + High Context (71%) + Persistent `ModuleNotFoundError: No module named 'fastapi.testing'`.
+- **Context**: Attempting to switch API tests (`tests/api/*`) from custom `httpx.AsyncClient` fixture to standard `fastapi.testing.TestClient`.
+- **Blocker**: `pytest` fails with `ModuleNotFoundError` during test collection, unable to import `fastapi.testing`. This persists despite:
+    - Modifying `requirements.txt` to `fastapi[all]`.
+    - Re-installing requirements via `pip install --force-reinstall -r requirements.txt`.
+    - Verifying `fastapi` location (`/home/appuser/.local/lib/python3.11/site-packages`) via `pip show`.
+    - Verifying user site-packages is in `sys.path`.
+    - Attempting to set `PYTHONPATH` during `docker-compose exec`.
+    - Modifying `Dockerfile` to explicitly install `fastapi[all]` as root.
+    - Rebuilding the Docker image.
+- **Analysis**: The issue seems related to Python's module resolution within the Docker container, specifically how user-installed packages are found by `pytest`. The user installation path is in `sys.path` but still not found during import.
+- **Self-Correction**: Invoking Early Return as instructed due to intractable blocker and high context.
+- **Context %**: ~71%
+- **Recommendations**:
+    1.  Investigate Python path and environment variables specifically within the `pytest` execution context inside the container.
+    2.  Consider modifying the `Dockerfile` to ensure dependencies are installed system-wide (e.g., avoid user install, ensure correct permissions).
+    3.  Delegate further investigation via `new_task`.
+- **Related Issues**: [Ref: Task 2025-05-05 02:11:57]
 ### Task Completion: Investigate Skipped Test `test_extract_md_frontmatter_no_yaml_installed` - [2025-05-04 20:01:19]
 - **Issue**: Investigate skipped test `tests/utils/test_text_processing.py::test_extract_md_frontmatter_no_yaml_installed` [Ref: Task 2025-05-04 19:59:09].
 - **Diagnosis**:
