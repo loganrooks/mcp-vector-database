@@ -11,6 +11,102 @@ from ..utils import http_client
 
 logger = logging.getLogger(__name__)
 
+# --- Data Structures ---
+
+class SearchResult:
+    """Placeholder for search result data structure."""
+    # Define attributes based on format_search_results later
+    pass
+
+# --- Service Class ---
+
+class SearchService:
+    """Handles search operations including embedding generation and DB interaction."""
+
+    def __init__(self, db_layer: Any): # Use Any for now
+        self.db_layer = db_layer
+        # TODO: Potentially initialize http client session here if needed frequently
+
+    # --- Main Search Method ---
+    async def perform_search(
+        self,
+        query_text: str,
+        top_k: int = config.SEARCH_TOP_K,
+        filters: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Performs semantic search with optional filtering.
+
+        Args:
+            query_text: The user's search query.
+            top_k: The maximum number of results to return.
+            filters: Optional dictionary of metadata filters.
+
+        Returns:
+            A list of formatted search result dictionaries.
+
+        Raises:
+            ValueError: If query_text is empty or embedding dimension mismatch occurs.
+            RuntimeError: If embedding generation or database search fails.
+        """
+        # TDD: Test search with valid query returns formatted results
+        # TDD: Test search with valid query and filters returns filtered results
+        # TDD: Test search with empty query text raises error
+        # TDD: Test handling of embedding generation failure
+        # TDD: Test handling of database search failure
+        # TDD: Test result formatting includes necessary fields
+
+        if not query_text:
+            raise ValueError("Query text cannot be empty")
+
+        logger.info(f"Performing search for query: '{query_text[:100]}...' with filters: {filters}, top_k: {top_k}")
+
+        # 1. Get Query Embedding
+        try:
+            # Assuming get_query_embedding remains a standalone helper for now
+            query_embedding = await get_query_embedding(query_text)
+            logger.debug("Successfully generated query embedding.")
+        except httpx.RequestError as req_err:
+            # More specific handling for connection errors to embedding service
+            logger.error(f"Embedding generation failed (Request Error): {req_err}", exc_info=True)
+            raise RuntimeError("Embedding generation failed (Request Error)") from req_err
+        except httpx.HTTPStatusError as status_err:
+             # More specific handling for API errors from embedding service
+            logger.error(f"Embedding generation failed (HTTP {status_err.response.status_code}): {status_err.response.text}", exc_info=True)
+            raise RuntimeError(f"Embedding generation failed (HTTP {status_err.response.status_code})") from status_err
+        except (ValueError, RuntimeError) as e:
+            # Re-raise specific errors like ValueError or RuntimeErrors from get_query_embedding itself
+            raise e
+        except Exception as e:
+            # Catch any other truly unexpected errors during embedding
+            logger.exception("Unexpected error during query embedding generation", exc_info=e)
+            raise RuntimeError("Search failed due to truly unexpected embedding error") from e
+
+        # 2. Perform Database Search
+        try:
+            # Use self.db_layer now
+            async with self.db_layer.get_db_connection() as conn:
+                # TDD: Test db_layer.vector_search_chunks call with correct parameters
+                db_results: List[db_layer.SearchResult] = await self.db_layer.vector_search_chunks(
+                    conn, query_embedding, top_k, filters
+                )
+                logger.info(f"Retrieved {len(db_results)} results from database.")
+        except psycopg.Error as db_e:
+            logger.error(f"Database search failed: {db_e}", exc_info=True)
+            raise RuntimeError(f"Database search failed: {db_e}") from db_e
+        except AttributeError as attr_err:
+             # Catch potential AttributeError if db_layer doesn't have get_db_connection (during early TDD)
+             logger.error(f"DB layer interaction error: {attr_err}", exc_info=True)
+             raise RuntimeError("Search failed due to DB layer configuration error") from attr_err
+        except Exception as e:
+            logger.exception("Unexpected error during database search", exc_info=e)
+            raise RuntimeError("Search failed due to unexpected database error") from e
+
+        # 3. Format Results
+        # Assuming format_search_results remains a standalone helper for now
+        formatted_results = format_search_results(db_results)
+
+        return formatted_results
 # --- Helper: Query Embedding Generation ---
 
 async def get_query_embedding(text: str) -> List[float]:
