@@ -1,6 +1,17 @@
 # DevOps Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Docker & Dependency Fixes (Holistic Review) - [2025-05-05 06:59:00]
+- **Action**: Addressed deployability issues identified in Holistic Review [Ref: `docs/reviews/holistic_review_tier0_20250504.md`].
+- **Changes**:
+    - `requirements.txt`: Pinned all dependencies using `pip freeze` output from the container.
+    - `Dockerfile`: Added `COPY src/ /app/src` to include application code in the image. Removed `libpq-dev` and `build-essential` as `psycopg-binary` is used.
+    - `docker-compose.yml`: Removed host volume mount `- ./src:/app/src` for the `philograph-backend` service.
+- **Verification**:
+    - Rebuilt images successfully (`docker-compose build`).
+    - Restarted services successfully (`docker-compose down && docker-compose up -d`).
+    - Ran test suite successfully (`docker-compose exec philograph-backend pytest` -> 362 passed, 1 skipped).
+- **Branch**: `fix/devops-holistic-review`
 ### Git Debt Management - [2025-05-04 16:45:13]
 - **Action**: Analyzed uncommitted changes (`git status`) and grouped them into 4 logical commits based on SPARC analysis to clear working directory.
 - **Commits Created**:

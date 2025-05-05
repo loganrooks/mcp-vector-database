@@ -1,3 +1,14 @@
+### [2025-05-05 06:59:00] - DevOps - Progress Update
+- **Task:** Address DevOps issues from Holistic Review (Pin dependencies, fix Dockerfile COPY, fix docker-compose volume mount).
+- **Status:** Completed & Verified.
+- **Details:** Pinned dependencies in `requirements.txt` using `pip freeze`. Modified `Dockerfile` to `COPY src/ /app/src` and removed `libpq-dev`, `build-essential`. Removed `./src:/app/src` volume mount from `philograph-backend` in `docker-compose.yml`. Verified changes by rebuilding images (`docker-compose build`), restarting services (`docker-compose down && docker-compose up -d`), and running tests (`docker-compose exec philograph-backend pytest` - 362 passed, 1 skipped).
+- **Files Affected:** `requirements.txt`, `Dockerfile`, `docker-compose.yml`
+- **Branch:** `fix/devops-holistic-review`
+### [2025-05-05 06:43:53] - DocsWriter - Progress Update
+- **Task:** Update documentation (README, ADRs, .env.example) based on Holistic Review findings.
+- **Status:** Completed.
+- **Details:** Updated README.md CLI/MCP descriptions, ADR statuses (001-009 to Implemented), added comments to .env.example (via code mode), ensured embedding dimension consistency (768).
+- **Files Affected:** README.md, docs/architecture/adr/00*.md, .env.example, docs/project-specifications.md
 - **[2025-05-04 19:57:00]** - TDD: Completed TDD cycle for MCP Server (`src/philograph/mcp/main.py`). Added 7 tests for `ingest`/`search` handlers (Red/Green skipped). Refactored tests. All 15 tests pass. [Ref: Task 2025-05-04 19:54:01]
 - **[2025-05-04 19:38:19]** - TDD: Completed TDD cycle for Search Service (`src/philograph/search/service.py`). Added 7 tests covering core logic and error handling. Refactored error handling. All tests pass. [Ref: Task 2025-05-04 19:30:33]
 - **[2025-05-04 18:56:30]** - Code: Completed TDD Green phase review for Relationship Service functions (`add_relationship`, `get_relationships`) in `src/philograph/data_access/db_layer.py`. Existing implementation appears correct. No code changes made. [Ref: Task 2025-05-04 18:55:07]
@@ -6,6 +17,8 @@
 - **[2025-05-04 20:00:30]** - Debug: Investigated skipped test `tests/utils/test_text_processing.py::test_extract_md_frontmatter_no_yaml_installed`. Confirmed skip is correct behavior as `PyYAML` is installed and the test condition (`@pytest.mark.skipif(HAS_YAML, ...)`) is designed for when it's absent. No code changes needed. Verified via `pytest`. [Ref: Task 2025-05-04 19:59:09]
 - **[2025-05-04 21:13:12]** - HolisticReview: Completed holistic review of Tier 0 MVP. Key findings include documentation inconsistencies (README outdated, ADR statuses), SPARC violations (excessive file sizes in multiple source/test files), integration issues (CLI acquire command), hygiene issues (TODOs, commented code, test duplication), and deployability concerns (Docker setup relies on host mounts). Report generated: `docs/reviews/holistic_review_tier0_20250504.md`.
 - **[2025-05-05 06:23:08]** - Debug: Resolved `TypeError: 'coroutine' object does not support the asynchronous context manager protocol` in 2 tests within `tests/data_access/test_connection.py`. Fix involved correcting the mock setup for `pool.connection()` to return the context manager directly. Verified with full `pytest` suite (363 passed, 1 skipped). [Ref: Task 2025-05-05 06:19:47]
+- **[2025-05-05 06:50:31]** - Code: Refactored CLI commands (`acquire`, `status`) and tests (`tests/cli/`) to align with ADR 009 two-stage acquisition API. Used subcommands `acquire discover` and `acquire confirm`. Verified with `pytest` (49 passed). [Ref: Task 2025-05-05 06:45:17]
+- **[2025-05-05 07:03:44]** - Optimizer: Completed verification of holistic review refactoring tasks. Confirmed `tests/utils/test_text_processing.py` and `tests/ingestion/test_pipeline.py` were already refactored. Deleted empty remnant `tests/ingestion/test_pipeline.py`. Verified with `pytest` (362 passed, 1 skipped). [Ref: Task 2025-05-05 07:01:30]
 ## Progress
 - **[2025-05-04 19:23:49]** - TDD: Verified existing tests for `process_document` directory handling (`tests/ingestion/test_pipeline.py`). All 29 tests passed. Confirmed required functionality was already covered. [Ref: Task 2025-05-04 19:22:29]
 - **[2025-05-04 19:20:44]** - TDD: Completed TDD cycle for DB Layer Collection operations (`add_collection`, `add_item_to_collection`, `get_collection_items`). Added 7 tests, implemented minimal code, fixed 2 test assertions. All 16 targeted collection tests pass. [Ref: Task 2025-05-04 19:10:10]

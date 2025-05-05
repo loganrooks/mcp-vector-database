@@ -1,6 +1,21 @@
 # Code Mode Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-05-05 06:50:31] CLI Refactor: Acquire/Status Commands (ADR 009)
+- **Purpose**: Align CLI `acquire` and `status` commands with the two-stage acquisition API.
+- **Files**:
+    - `src/philograph/cli/main.py`
+    - `tests/cli/test_cli_acquire.py`
+    - `tests/cli/test_cli_status.py`
+- **Status**: Implemented & Verified
+- **Dependencies**: Added `uuid` import to `src/philograph/cli/main.py`.
+- **API Surface**: CLI commands changed:
+    - Removed `philograph acquire ...`
+    - Added `philograph acquire discover ...`
+    - Added `philograph acquire confirm <discovery_id> ...`
+    - Modified `philograph status <acquisition_id>` to `philograph status <discovery_id>`
+- **Tests**: Updated tests in affected files. Verified with `pytest tests/cli/` (49 passed).
+- **Details**: Refactored `main.py` to use Typer subcommands for `acquire`. Updated command logic to call new API endpoints (`/acquire/discover`, `/acquire/confirm/{id}`, `/acquire/status/{id}`). Updated tests to match new structure and API calls. [Ref: Task 2025-05-05 06:45:17, ADR 009]
 ### [2025-05-04 18:56:30] TDD Green Phase Review: Relationship Service
 - **Purpose**: Review existing implementation of `add_relationship` and `get_relationships` in `db_layer.py` against TDD Green phase requirements.
 - **Files**: `src/philograph/data_access/db_layer.py` (Lines 380-442 reviewed)
