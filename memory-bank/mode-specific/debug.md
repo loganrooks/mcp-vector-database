@@ -1,6 +1,21 @@
 # Debug Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Issue: TEST-CONN-TYPEERROR-20250505 - TypeError mocking async context manager in test_connection.py - [Status: Resolved] - [2025-05-05 06:24:07]
+- **Reported**: [2025-05-05 06:19:47] (via Task) / **Severity**: Medium / **Symptoms**: `TypeError: 'coroutine' object does not support the asynchronous context manager protocol` in `tests/data_access/test_connection.py` (`test_get_db_connection_success`, `test_get_db_connection_psycopg_error`).
+- **Investigation**:
+    1. Reviewed Memory Bank feedback, confirming similar past issue [Ref: debug.md line 377].
+    2. Read `tests/data_access/test_connection.py`. Identified mock setup for `pool.connection()` returning an `AsyncMock` (`mock_cm`) with only `__aenter__` configured.
+    3. Read `src/philograph/data_access/connection.py`. Confirmed `get_db_connection` uses `async with pool.connection()`.
+    4. Attempt 1: Added `mock_cm.__aexit__ = AsyncMock(return_value=None)` to tests. Ran `pytest` on file. Failed with same `TypeError`. [Ref: Pytest Output 2025-05-05 06:21:56]
+    5. Analysis: Realized `pool.connection()` (an `AsyncMock` method) was returning a coroutine wrapper around `mock_cm`, not `mock_cm` itself.
+    6. Attempt 2: Changed mock setup to `mock_pool.connection = MagicMock(return_value=mock_cm)` to make `pool.connection()` a synchronous method returning the context manager directly.
+    7. Ran `pytest` on file. Passed (10/10). [Ref: Pytest Output 2025-05-05 06:22:32]
+    8. Ran full `pytest` suite. Passed (363 passed, 1 skipped). [Ref: Pytest Output 2025-05-05 06:23:08]
+- **Root Cause**: Incorrect mocking of the `pool.connection()` method. The default `AsyncMock` behavior returned a coroutine wrapper instead of the required async context manager object, violating the `async with` protocol.
+- **Fix Applied**: Modified `tests/data_access/test_connection.py` in `test_get_db_connection_success` and `test_get_db_connection_psycopg_error` to configure `mock_pool.connection = MagicMock(return_value=mock_cm)`. Also removed an incorrect assertion (`mock_get_pool.assert_awaited_once()`) from `test_get_db_connection_success`.
+- **Verification**: `pytest` run on `tests/data_access/test_connection.py` passed (10/10). Full `pytest` suite run passed (363 passed, 1 skipped).
+- **Related Issues**: [Ref: Task 2025-05-05 06:19:47], [Ref: debug.md line 377]
 ### Issue: INVESTIGATION-SKIP-YAML-TEST-20250504 - Investigate Skipped Test `test_extract_md_frontmatter_no_yaml_installed` - [Status: Closed (Verified Correct)] - [2025-05-04 20:01:02]
 - **Reported**: [2025-05-04 19:59:09] (via Task) / **Severity**: Low / **Symptoms**: Test skipped in `pytest` output.
 - **Investigation**:

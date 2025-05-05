@@ -1,3 +1,52 @@
+### Task Completion: Resolve TypeError in test_connection.py - [2025-05-05 06:24:07]
+- **Issue**: Resolve `TypeError: 'coroutine' object does not support the asynchronous context manager protocol` in `tests/data_access/test_connection.py` (`test_get_db_connection_success`, `test_get_db_connection_psycopg_error`) [Ref: Task 2025-05-05 06:19:47].
+- **Diagnosis**:
+    - Reviewed test code and source code (`get_db_connection`).
+    - Identified that the mock for `pool.connection()` was incorrectly returning a coroutine wrapper instead of the async context manager object itself, due to the default behavior of `AsyncMock` methods.
+- **Fix**:
+    - Modified the mock setup in the two failing tests within `tests/data_access/test_connection.py`. Changed `mock_pool.connection.return_value = mock_cm` to `mock_pool.connection = MagicMock(return_value=mock_cm)`. This ensures `pool.connection()` synchronously returns the mock context manager object (`mock_cm`), satisfying the `async with` protocol.
+    - Removed an incorrect assertion (`mock_get_pool.assert_awaited_once()`) from `test_get_db_connection_success`.
+- **Verification**:
+    - Ran `pytest` on `tests/data_access/test_connection.py`: 10 passed.
+    - Ran full `pytest` suite (`/app/tests`): 363 passed, 1 skipped (expected).
+- **Files Affected**:
+    - `tests/data_access/test_connection.py`
+- **Memory Bank Updates**:
+    - `activeContext.md`: Logged task completion.
+    - `globalContext.md`: Updated Progress log and Decision Log.
+    - `debug.md`: Added Issue History entry TEST-CONN-TYPEERROR-20250505.
+    - `debug-feedback.md`: Added this entry.
+- **Status/Next Steps/Recommendations**:
+    - **Status**: The `TypeError` is resolved, and the two previously failing tests now pass. The full test suite confirms no regressions.
+    - **Recommendations**:
+        1.  Commit the changes to the `refactor/holistic-review-fixes` branch.
+        2.  **(Optional but Recommended)** Delegate to `tdd` mode via `new_task` to review the test changes and ensure they align with best practices, although the fix is verified. Objective: "Review test mocking strategy changes in `tests/data_access/test_connection.py` for correctness and best practices [Ref: Debug Feedback 2025-05-05 06:24:07]".
+- **Related Issues**: [Ref: Task 2025-05-05 06:19:47], [Ref: debug.md line 377]
+
+---
+### Early Return: High Context &amp; Repeated `apply_diff` Failures - [2025-05-05 05:04:03]
+- **Trigger**: User feedback ("EARLY RETURN IS NECESSARY") + High Context (65%) + Repeated `apply_diff` failures.
+- **Context**: Attempting to fix `json_serialize` patch targets in `tests/data_access/test_relationships_queries.py` after fixing similar issues in `test_documents_queries.py`.
+- **Blocker**: `apply_diff` failed multiple times for `test_relationships_queries.py` due to shifting line numbers after initial successful patches, requiring repeated `read_file` calls and increasing context significantly. This makes further modifications unreliable and risks exceeding context limits.
+- **Progress**:
+    - Corrected `TARGET_EMBEDDING_DIMENSION` patch target in `tests/data_access/test_documents_queries.py`.
+    - Corrected `json_serialize` patch target in `tests/data_access/test_documents_queries.py`.
+    - Partially corrected `json_serialize` patch target in `tests/data_access/test_relationships_queries.py` before encountering repeated diff failures.
+- **Analysis**: The repeated `apply_diff` failures suggest instability in applying multiple patches sequentially, especially with high context. The core issue identified (incorrect patch target for `json_serialize`) likely remains in `test_relationships_queries.py`.
+- **Self-Correction**: Invoking Early Return as instructed and per protocol due to high context and tool instability.
+- **Context %**: ~65%
+- **Recommendations**:
+    1.  **Invoke Early Return Clause.**
+    2.  **Delegate via `new_task` to `debug` mode (new instance)**: Objective: "Fix remaining `json_serialize` patch target errors in `tests/data_access/test_relationships_queries.py` (likely around lines 120, 148 in the last read) and address other test failures identified in the previous `pytest` run [Ref: Debug Feedback 2025-05-05 05:04:03]".
+    3.  **Next Steps for New Task**:
+        *   Re-read `tests/data_access/test_relationships_queries.py`.
+        *   Apply the corrected patch target (`src.philograph.data_access.queries.relationships.json_serialize`) for the remaining `json_serialize` mocks.
+        *   Re-run `pytest` via `docker-compose exec philograph-backend python -m pytest /app/tests`.
+        *   Analyze and fix the remaining failures (SQL string mismatches, DB pool initialization/lifespan issues, `test_connection.py` failures). Prioritize fixing the DB pool/lifespan issue affecting `test_collections_router.py` as it might resolve many API test failures.
+        *   Update Memory Bank and use `attempt_completion` upon resolution.
+- **Related Issues**: [Ref: Task 2025-05-05 04:52:52], [Ref: Pytest Output 2025-05-05 04:57:04]
+
+---
 ### Early Return: Intractable ModuleNotFoundError &amp; High Context - [2025-05-05 03:12:31]
 - **Trigger**: User instruction + High Context (71%) + Persistent `ModuleNotFoundError: No module named 'fastapi.testing'`.
 - **Context**: Attempting to switch API tests (`tests/api/*`) from custom `httpx.AsyncClient` fixture to standard `fastapi.testing.TestClient`.
