@@ -44,9 +44,11 @@ async def get_db_pool() -> AsyncConnectionPool:
             logger.error(f"Failed to connect to database: {e}", exc_info=True)
             # Depending on requirements, you might want to raise the error
             # or handle it gracefully (e.g., allow app to start but log error)
+            pool = None # Reset pool on operational error
             raise RuntimeError(f"Failed to initialize database connection pool: {e}") from e
         except Exception as e:
             logger.error(f"An unexpected error occurred during pool initialization: {e}", exc_info=True)
+            pool = None # Reset pool on other exceptions
             raise RuntimeError(f"Unexpected error initializing database pool: {e}") from e
         # Removed diagnostic sleep.
     return pool # Ensure this is indented correctly within the function

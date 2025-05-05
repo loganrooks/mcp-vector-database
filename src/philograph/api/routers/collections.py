@@ -167,7 +167,8 @@ async def get_collection(collection_id: int = FastApiPath(..., gt=0, description
             if items_raw is None:
                  raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Collection not found.")
             # Convert list of dicts from db_layer to list of Pydantic models
-            items = [CollectionItem(**item) for item in items_raw]
+            # Map tuple elements explicitly to model fields
+            items = [CollectionItem(item_type=item[0], item_id=item[1]) for item in items_raw]
             return CollectionGetResponse(collection_id=collection_id, items=items)
     except HTTPException:
          raise # Re-raise HTTP exceptions (like the 404)
