@@ -1,5 +1,5 @@
 # Core Framework
-fastapi
+fastapi[all] # Include testing extras like TestClient
 uvicorn[standard] # ASGI server for FastAPI
 
 # Database
