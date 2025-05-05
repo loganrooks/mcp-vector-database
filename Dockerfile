@@ -26,6 +26,7 @@ COPY requirements.txt .
 # Copy tests directory explicitly
 COPY tests /app/tests
 
+# Install Python dependencies AS root
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir "fastapi[all]" # Explicitly install extras again
@@ -46,6 +47,9 @@ RUN useradd --create-home appuser
 RUN chown -R appuser:appuser /app
 USER appuser
 WORKDIR /app
+
+# Set PATH for appuser (PYTHONPATH not needed for global install)
+ENV PATH="/home/appuser/.local/bin:${PATH}"
 
 # Command to run the application using Uvicorn
 # The actual host and port binding should be handled by Uvicorn command arguments,
