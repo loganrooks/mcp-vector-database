@@ -100,6 +100,8 @@ DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD_ENCODED}@{DB_HOST}:
 ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD_ENCODED}@{DB_HOST}:{DB_PORT}/{DB_NAME}" # Using hostname
 # ASYNC_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD_ENCODED}@172.20.0.2:{DB_PORT}/{DB_NAME}" # Using explicit IP - REVERTED
 
+DB_POOL_MIN_SIZE = get_int_env_variable("DB_POOL_MIN_SIZE", 1)
+DB_POOL_MAX_SIZE = get_int_env_variable("DB_POOL_MAX_SIZE", 10)
 # --- Backend API Settings ---
 BACKEND_HOST = get_env_variable("BACKEND_HOST", "0.0.0.0")
 BACKEND_PORT = get_int_env_variable("BACKEND_PORT", 8000)
@@ -113,6 +115,9 @@ EMBEDDING_MODEL_NAME = get_env_variable("EMBEDDING_MODEL_NAME", "philo-embed")
 # --- Text Processing Settings ---
 SOURCE_FILE_DIR = get_env_variable("SOURCE_FILE_DIR", "./data/source_documents")
 TARGET_CHUNK_SIZE = get_int_env_variable("TARGET_CHUNK_SIZE", 512)
+# pgvector HNSW index parameters (adjust based on performance testing)
+PGVECTOR_HNSW_M = get_int_env_variable("PGVECTOR_HNSW_M", 16)
+PGVECTOR_HNSW_EF_CONSTRUCTION = get_int_env_variable("PGVECTOR_HNSW_EF_CONSTRUCTION", 64)
 EMBEDDING_BATCH_SIZE = get_int_env_variable("EMBEDDING_BATCH_SIZE", 32)
 TARGET_EMBEDDING_DIMENSION = get_int_env_variable("TARGET_EMBEDDING_DIMENSION", 768) # From ADR 004
 

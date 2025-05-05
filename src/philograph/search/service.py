@@ -197,12 +197,12 @@ def format_search_results(db_results: List[db_layer.SearchResult]) -> List[Dict[
                 "title": row.doc_title,
                 "author": row.doc_author,
                 "year": row.doc_year,
-                "source_path": row.source_path
+                "source_path": row.doc_source_path # Correct attribute name
             },
             "location": {
                 "section_id": row.section_id,
                 "section_title": row.section_title,
-                "chunk_sequence_in_section": row.sequence
+                "chunk_sequence_in_section": row.chunk_sequence # Correct attribute name
             }
         }
         results_list.append(formatted)

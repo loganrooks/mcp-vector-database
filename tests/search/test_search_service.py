@@ -11,9 +11,9 @@ from src.philograph.data_access import db_layer as db_layer_module # Import the 
 TEST_QUERY = "What is Geist?"
 TEST_EMBEDDING = [0.1] * 768 # Use correct dimension from config (assuming 768)
 MOCK_DB_RESULT_ROW = db_layer_module.SearchResult(
-    chunk_id=1, text_content="Chunk text", sequence=1, section_id=1,
+    chunk_id=1, text_content="Chunk text", chunk_sequence=1, section_id=1, # Corrected: sequence -> chunk_sequence
     section_title="Section 1", doc_id=1, doc_title="Doc Title",
-    doc_author="Author Name", doc_year=2024, source_path="/path/doc.pdf",
+    doc_author="Author Name", doc_year=2024, doc_source_path="/path/doc.pdf", # Corrected: source_path -> doc_source_path
     distance=0.5
 )
 MOCK_DB_RESULTS = [MOCK_DB_RESULT_ROW]
