@@ -58,7 +58,7 @@ def test_acquire_discover_success_direct(mock_error_console, mock_display_result
 
     assert result.exit_code == 0
     mock_make_api_request.assert_called_once_with(
-        "POST", "/acquire/discover", json_data={"filters": {"title": title, "author": author}}
+        "POST", "/acquire/discover", json_data={"text_details": {"title": title, "author": author}} # Corrected payload structure
     )
     mock_display_results.assert_called_once_with(mock_api_response)
     # Don't assert error console not called
@@ -81,7 +81,7 @@ def test_acquire_discover_needs_confirmation_multi_options(mock_prompt, mock_err
 
     assert result.exit_code == 0
     mock_make_api_request.assert_called_once_with(
-        "POST", "/acquire/discover", json_data={"filters": {"title": title, "author": author}}
+        "POST", "/acquire/discover", json_data={"text_details": {"title": title, "author": author}} # Corrected payload structure
     )
     # Cannot reliably assert display helper call or lack of display_results call due to patching issues
     mock_prompt.assert_not_called() # Discover should not prompt
@@ -106,7 +106,7 @@ def test_acquire_discover_needs_confirmation_single_option(mock_prompt, mock_err
 
     assert result.exit_code == 0
     mock_make_api_request.assert_called_once_with(
-        "POST", "/acquire/discover", json_data={"filters": {"title": title, "author": author}}
+        "POST", "/acquire/discover", json_data={"text_details": {"title": title, "author": author}} # Corrected payload structure
     )
     # Cannot reliably assert display helper call or lack of display_results call
     mock_prompt.assert_not_called()
@@ -190,7 +190,7 @@ def test_acquire_discover_api_error(mock_error_console, mock_display_results, mo
     result = runner.invoke(app, ["acquire", "discover", "--title", title, "--author", author])
     assert result.exit_code == 1
     mock_make_api_request.assert_called_once_with(
-        "POST", "/acquire/discover", json_data={"filters": {"title": title, "author": author}}
+        "POST", "/acquire/discover", json_data={"text_details": {"title": title, "author": author}} # Corrected payload structure
     )
     mock_display_results.assert_not_called()
 
@@ -223,7 +223,7 @@ def test_acquire_discover_find_missing_threshold(mock_display_results, mock_make
     mock_make_api_request.assert_called_once_with(
         "POST",
         "/acquire/discover",
-        json_data=expected_payload
+        json_data={"find_missing_threshold": threshold} # Corrected payload structure (no "filters" key)
     )
     mock_display_results.assert_called_once_with(mock_api_response)
 
@@ -325,7 +325,8 @@ def test_acquire_confirm_no_options_found(mock_error_console, mock_make_api_requ
 
     assert result.exit_code == 1
     # Assert the incorrect error message that is actually printed due to Typer issue
-    mock_error_console.print.assert_called_with('Error: Must provide either --selection <number> or --yes flag.')
+    # Assert the actual error message printed when status is not 'needs_confirmation'
+    mock_error_console.print.assert_called_with(f"Error: Acquisition {acquisition_id} is not awaiting confirmation or does not exist.")
     # mock_make_api_request.assert_called_once_with("GET", f"/acquire/status/{acquisition_id}") # Removed assertion as command exits early
     # Cannot reliably assert mock_display_options call
 

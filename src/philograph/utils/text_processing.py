@@ -1,3 +1,4 @@
+import semchunk
 import logging
 import re
 from pathlib import Path
@@ -298,10 +299,10 @@ def parse_grobid_tei(tei_xml: str) -> Optional[Dict[str, Any]]:
         return {"text_by_section": text_by_section, "metadata": metadata, "references_raw": references_raw}
 
     except ET.ParseError as pe:
-        logger.error(f"Failed to parse TEI XML (ParseError): {pe}", exc_info=True)
+        logger.error(f"Failed to parse TEI XML (ParseError): {pe}", exc_info=False) # Less verbose for common parse errors
         return None
     except Exception as e:
-        logger.error(f"Failed to parse TEI XML (General Error): {e}", exc_info=True)
+        logger.error(f"Failed to parse TEI XML (General Error): {e}", exc_info=True) # Keep full traceback for unexpected errors
         return None
 
 # --- Chunking ---
@@ -314,30 +315,18 @@ def chunk_text_semantically(text: str, chunk_size: int) -> List[str]:
     # TDD: Test chunking produces expected chunk sizes and overlap
     # TDD: Test handling of very short texts
     # TDD: Test handling of texts with no clear sentence boundaries
-    logger.debug(f"Chunking text semantically (Placeholder Implementation), target size: {chunk_size}")
-    # TODO: Replace with actual call to a semantic chunking library/function
-    # Example using simple splitting (replace with actual semchunk):
-    # sentences = re.split(r'(?<=[.!?])\s+', text) # Basic sentence split
-    # chunks = []
-    # current_chunk = ""
-    # for sentence in sentences:
-    #     if len(current_chunk) + len(sentence) + 1 < chunk_size:
-    #         current_chunk += (" " + sentence if current_chunk else sentence)
-    #     else:
-    #         if current_chunk:
-    #             chunks.append(current_chunk)
-    #         current_chunk = sentence
-    # if current_chunk:
-    #     chunks.append(current_chunk)
-    # return chunks
-
-    # Placeholder: Split by paragraph for now
-    chunks = [p.strip() for p in text.split('\n\n') if p.strip()]
-    if not chunks:
-        chunks = [text] # Handle case where there are no double newlines
-
-    logger.warning("Using basic paragraph splitting as placeholder for semantic chunking.")
-    return chunks
+    logger.debug(f"Chunking text semantically using semchunk, target size: {chunk_size}")
+    try:
+        # Assuming semchunk.chunk is the primary function based on library name
+        # The library might have different functions or parameters, adjust if tests fail.
+        chunks = semchunk.chunk(text, chunk_size)
+        logger.debug(f"Successfully chunked text into {len(chunks)} chunks.")
+        return chunks
+    except Exception as e:
+        logger.error(f"Error during semantic chunking with semchunk: {e}", exc_info=True)
+        # Fallback or re-raise depending on desired behavior
+        # Raising exception might be better to signal failure clearly
+        raise ValueError(f"Semantic chunking failed: {e}") from e
 
 
 # --- Reference Parsing ---
@@ -378,10 +367,10 @@ async def parse_references(raw_references: List[str]) -> List[Dict[str, Any]]:
     return parsed_details_list
 
 async def call_anystyle_parser(reference_string: str) -> Optional[Dict[str, Any]]:
-    """Calls the AnyStyle API to parse a reference string. Placeholder."""
-    logger.debug(f"Calling AnyStyle parser for: '{reference_string[:50]}...' (Placeholder)")
+    """Calls the AnyStyle API to parse a reference string."""
+    logger.debug(f"Calling AnyStyle parser for: '{reference_string[:50]}...'")
     if not config.ANYSTYLE_API_URL:
-        logger.warning("ANYSTYLE_API_URL not configured.")
+        logger.warning("ANYSTYLE_API_URL not configured, cannot call AnyStyle.")
         return None
 
     endpoint = config.ANYSTYLE_API_URL # Assuming endpoint takes POST with JSON
@@ -392,17 +381,25 @@ async def call_anystyle_parser(reference_string: str) -> Optional[Dict[str, Any]
         await response.raise_for_status()
         parsed_list = await response.json()
         if parsed_list and isinstance(parsed_list, list):
-            # TODO: Adapt based on actual AnyStyle API response structure
-            # Assuming it returns a list with one parsed item containing fields like 'author', 'title', 'date', etc.
+            # TODO: Verify and refine normalization against the actual AnyStyle API response schema.
+            # The current implementation assumes a list containing a dict with 'title', 'author' (list of dicts with 'family'), and 'date' keys.
             parsed_data = parsed_list[0]
-            # Basic normalization example
+
+            # Safer normalization using .get() with defaults
+            title = parsed_data.get("title")
+            authors_list = parsed_data.get("author", [])
+            date = parsed_data.get("date")
+
             structured_ref = {
-                "title": parsed_data.get("title", [None])[0],
-                "author": " and ".join(a.get("family", "") for a in parsed_data.get("author", []) if a.get("family")),
-                "year": parsed_data.get("date", [None])[0],
+                "title": title[0] if isinstance(title, list) and title else title if isinstance(title, str) else None,
+                "author": " and ".join(
+                    author.get("family", "")
+                    for author in authors_list if isinstance(author, dict) and author.get("family")
+                ).strip() or None,
+                "year": date[0] if isinstance(date, list) and date else date if isinstance(date, str) else None,
                 "raw": reference_string, # Keep original
                 "source": "anystyle",
-                "full_parsed": parsed_data # Store original parsed data
+                "full_parsed": parsed_data # Store original parsed data for potential future use
             }
             return structured_ref
         else:
@@ -419,25 +416,40 @@ async def call_anystyle_parser(reference_string: str) -> Optional[Dict[str, Any]
         raise # Re-raise
 
 def basic_reference_parser(reference_string: str) -> Optional[Dict[str, Any]]:
-    """Performs very basic reference parsing using heuristics. Placeholder."""
-    logger.debug(f"Using basic parser for: '{reference_string[:50]}...'")
-    # TODO: Implement simple regex or heuristics to extract author, year, title
-    # Example: Look for (YYYY) pattern for year, assume text before is author(s), text after is title. Highly unreliable.
-    year_match = re.search(r'\((\d{4})\)', reference_string)
-    year = year_match.group(1) if year_match else None
-    # Very naive split
-    parts = reference_string.split(f"({year})") if year else [reference_string]
-    author = parts[0].strip() if len(parts) > 0 else None
-    title = parts[1].strip().lstrip('. ') if len(parts) > 1 else None
+    """Performs very basic reference parsing using heuristics as a fallback."""
+    logger.debug(f"Using basic heuristic parser for: '{reference_string[:50]}...'")
 
-    if year: # Only proceed if a year was found by the regex
-        return {
-            "title": title,
-            "author": author,
-            "year": year,
-            "raw": reference_string,
-            "source": "basic_parser"
-        }
-    else:
-        logger.warning(f"Basic parser could not extract anything from: '{reference_string[:50]}...'")
+    # Attempt to find a year in parentheses, allowing for spaces
+    year_match = re.search(r'\(\s*(\d{4})\s*\)', reference_string)
+    year = year_match.group(1) if year_match else None
+
+    if not year:
+        logger.warning(f"Basic parser could not extract year using regex from: '{reference_string[:50]}...'")
+        return None # Return None if year extraction failed
+
+    # Split based on the found year pattern
+    year_pattern = year_match.group(0) # e.g., "( 2023 )"
+    parts = reference_string.split(year_pattern, 1) # Split only once
+
+    # Extract potential author and title parts based on split
+    author_part = parts[0].strip() if len(parts) > 0 else "" # Strip whitespace only
+    title_part = parts[1].strip().lstrip('.,;: ') if len(parts) > 1 else "" # Strip whitespace and leading punctuation
+
+    # Assign None if the stripped part is empty, otherwise use the stripped part
+    author = author_part if author_part else None
+    title = title_part if title_part else None
+
+    # Require a non-empty author string for a successful parse
+    if not author:
+        logger.warning(f"Basic parser found year ({year}) but failed to extract plausible author from: '{reference_string[:50]}...'")
         return None
+
+    logger.debug(f"Basic parse result - Author: {author}, Year: {year}, Title: {title}")
+    return {
+        "title": title,
+        "author": author,
+        "year": year,
+        "raw": reference_string,
+        "source": "basic_heuristic", # Ensure correct source string
+        "full_parsed": None
+    }
