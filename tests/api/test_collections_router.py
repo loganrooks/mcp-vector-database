@@ -4,19 +4,24 @@ import uuid
 from unittest.mock import AsyncMock, patch, ANY # Keep AsyncMock for patching async functions
 # from httpx import AsyncClient # No longer needed
 from fastapi import status
-from fastapi.testing import TestClient # Import TestClient
+from fastapi.testclient import TestClient # Import TestClient
 
 # Import the app
 from src.philograph.api.main import app
 
-# Instantiate the TestClient
-client = TestClient(app)
+# Remove module-level client instantiation
+
+@pytest.fixture(scope="module") # Use module scope for efficiency if tests don't interfere
+def client():
+    with TestClient(app) as c:
+        yield c
 
 # --- Test Collections Router ---
 
 # TestClient is synchronous, remove async decorators/keywords
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_collection", new_callable=AsyncMock)
-def test_create_collection_success(mock_add_collection: AsyncMock):
+def test_create_collection_success(mock_add_collection, client): # Correct: mock_add_collection is injected by @patch decorator
     """
     Test POST /collections creates a new collection and returns 201 Created.
     """
@@ -42,8 +47,9 @@ def test_create_collection_success(mock_add_collection: AsyncMock):
     # Check args passed to the mock (connection object is first arg)
     assert mock_add_collection.await_args[0][1] == collection_name # Use await_args
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
-def test_create_collection_missing_name():
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
+def test_create_collection_missing_name(client):
     """
     Test POST /collections returns 422 Unprocessable Entity when 'name' is missing.
     """
@@ -56,9 +62,10 @@ def test_create_collection_missing_name():
     # Assert
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_collection", new_callable=AsyncMock)
-def test_create_collection_duplicate_name(mock_add_collection: AsyncMock):
+def test_create_collection_duplicate_name(mock_add_collection, client): # Correct: mock_add_collection is injected by @patch decorator
     """
     Test POST /collections returns 409 Conflict when collection name already exists.
     """
@@ -75,9 +82,10 @@ def test_create_collection_duplicate_name(mock_add_collection: AsyncMock):
     assert response.json() == {"detail": f"Collection name '{collection_name}' already exists."}
     mock_add_collection.assert_awaited_once()
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_collection", new_callable=AsyncMock)
-def test_create_collection_db_error(mock_add_collection: AsyncMock):
+def test_create_collection_db_error(mock_add_collection, client): # Correct: mock_add_collection is injected by @patch decorator
     """
     Test POST /collections returns 500 Internal Server Error on database error.
     """
@@ -95,9 +103,10 @@ def test_create_collection_db_error(mock_add_collection: AsyncMock):
     assert response.json() == {"detail": "Error creating collection."}
     mock_add_collection.assert_awaited_once()
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_item_to_collection", new_callable=AsyncMock)
-def test_add_collection_item_document_success(mock_add_item: AsyncMock):
+def test_add_collection_item_document_success(mock_add_item, client): # Correct: mock_add_item is injected by @patch decorator
     """
     Test POST /collections/{collection_id}/items successfully adds a document item.
     """
@@ -116,9 +125,10 @@ def test_add_collection_item_document_success(mock_add_item: AsyncMock):
     assert response.json() == {"message": f"{item_type.capitalize()} added to collection."}
     mock_add_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_item_to_collection", new_callable=AsyncMock)
-def test_add_collection_item_chunk_success(mock_add_item: AsyncMock):
+def test_add_collection_item_chunk_success(mock_add_item, client): # Correct: mock_add_item is injected by @patch decorator
     """
     Test POST /collections/{collection_id}/items successfully adds a chunk item.
     """
@@ -137,8 +147,9 @@ def test_add_collection_item_chunk_success(mock_add_item: AsyncMock):
     assert response.json() == {"message": f"{item_type.capitalize()} added to collection."}
     mock_add_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
-def test_add_collection_item_invalid_type():
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
+def test_add_collection_item_invalid_type(client):
     """
     Test POST /collections/{collection_id}/items returns 422 for invalid item_type.
     """
@@ -155,9 +166,10 @@ def test_add_collection_item_invalid_type():
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert "String should match pattern" in response.text
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_item_to_collection", new_callable=AsyncMock)
-def test_add_collection_item_collection_not_found(mock_add_item: AsyncMock):
+def test_add_collection_item_collection_not_found(mock_add_item, client): # Correct: mock_add_item is injected by @patch decorator
     """
     Test POST /collections/{collection_id}/items returns 404 when collection_id does not exist.
     """
@@ -176,9 +188,10 @@ def test_add_collection_item_collection_not_found(mock_add_item: AsyncMock):
     assert response.json() == {"detail": "Collection or item not found."}
     mock_add_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_item_to_collection", new_callable=AsyncMock)
-def test_add_collection_item_item_not_found(mock_add_item: AsyncMock):
+def test_add_collection_item_item_not_found(mock_add_item, client): # Correct: mock_add_item is injected by @patch decorator
     """
     Test POST /collections/{collection_id}/items returns 404 when item_id does not exist.
     """
@@ -197,9 +210,10 @@ def test_add_collection_item_item_not_found(mock_add_item: AsyncMock):
     assert response.json() == {"detail": "Collection or item not found."}
     mock_add_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_item_to_collection", new_callable=AsyncMock)
-def test_add_collection_item_duplicate_item(mock_add_item: AsyncMock):
+def test_add_collection_item_duplicate_item(mock_add_item, client): # Correct: mock_add_item is injected by @patch decorator
     """
     Test POST /collections/{collection_id}/items returns 409 Conflict when adding the same item twice.
     """
@@ -218,8 +232,9 @@ def test_add_collection_item_duplicate_item(mock_add_item: AsyncMock):
     assert response.json() == {"detail": f"{item_type.capitalize()} ID {item_id} already exists in collection ID {collection_id}."}
     mock_add_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
-def test_add_collection_item_missing_fields():
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
+def test_add_collection_item_missing_fields(client):
     """
     Test POST /collections/{id}/items returns 422 when required fields are missing.
     """
@@ -235,9 +250,10 @@ def test_add_collection_item_missing_fields():
     assert "Field required" in response.text
     assert '"item_id"' in response.text
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.add_item_to_collection", new_callable=AsyncMock)
-def test_add_collection_item_db_error(mock_add_item: AsyncMock):
+def test_add_collection_item_db_error(mock_add_item, client): # Correct: mock_add_item is injected by @patch decorator
     """
     Test POST /collections/{id}/items returns 500 when a database error occurs.
     """
@@ -256,9 +272,10 @@ def test_add_collection_item_db_error(mock_add_item: AsyncMock):
     assert response.json() == {"detail": "Database error adding item to collection."}
     mock_add_item.assert_awaited_once_with(ANY, collection_id, item_type, item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.get_collection_items", new_callable=AsyncMock)
-def test_get_collection_success(mock_get_items: AsyncMock):
+def test_get_collection_success(mock_get_items, client): # Correct: mock_get_items is injected by @patch decorator
     """
     Test GET /collections/{collection_id} returns 200 OK and items for an existing collection.
     """
@@ -281,9 +298,10 @@ def test_get_collection_success(mock_get_items: AsyncMock):
     assert response.json() == {"collection_id": collection_id, "items": expected_response_items}
     mock_get_items.assert_awaited_once_with(ANY, collection_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.get_collection_items", new_callable=AsyncMock)
-def test_get_collection_empty(mock_get_items: AsyncMock):
+def test_get_collection_empty(mock_get_items, client): # Correct: mock_get_items is injected by @patch decorator
     """
     Test GET /collections/{collection_id} returns 200 OK and an empty list for an empty collection.
     """
@@ -300,9 +318,10 @@ def test_get_collection_empty(mock_get_items: AsyncMock):
     assert response.json() == {"collection_id": collection_id, "items": expected_items}
     mock_get_items.assert_awaited_once_with(ANY, collection_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.get_collection_items", new_callable=AsyncMock)
-def test_get_collection_not_found(mock_get_items: AsyncMock):
+def test_get_collection_not_found(mock_get_items, client): # Correct: mock_get_items is injected by @patch decorator
     """
     Test GET /collections/{collection_id} returns 404 Not Found for a non-existent collection ID.
     """
@@ -318,9 +337,10 @@ def test_get_collection_not_found(mock_get_items: AsyncMock):
     assert response.json() == {"detail": "Collection not found."}
     mock_get_items.assert_awaited_once_with(ANY, collection_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.get_collection_items", new_callable=AsyncMock)
-def test_get_collection_db_error(mock_get_items: AsyncMock):
+def test_get_collection_db_error(mock_get_items, client): # Correct: mock_get_items is injected by @patch decorator
     """Test GET /collections/{id} returns 500 Internal Server Error on database error."""
     # Arrange
     collection_id = 1
@@ -334,10 +354,11 @@ def test_get_collection_db_error(mock_get_items: AsyncMock):
     assert response.json() == {"detail": "Error retrieving collection."}
     mock_get_items.assert_awaited_once_with(ANY, collection_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.remove_item_from_collection", new_callable=AsyncMock)
 @patch("src.philograph.api.routers.collections.db_layer.get_db_connection") # Patch connection used by router
-def test_delete_collection_item_success(mock_get_conn, mock_remove_item):
+def test_delete_collection_item_success(mock_get_conn, mock_remove_item, client): # Correct: mock_remove_item injected by @patch
     """Test successful deletion of an item from a collection."""
     mock_conn = AsyncMock()
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -351,10 +372,11 @@ def test_delete_collection_item_success(mock_get_conn, mock_remove_item):
     assert response.status_code == status.HTTP_204_NO_CONTENT
     mock_remove_item.assert_awaited_once_with(conn=mock_conn, collection_id=collection_id, item_type=item_type, item_id=item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.remove_item_from_collection", new_callable=AsyncMock)
 @patch("src.philograph.api.routers.collections.db_layer.get_db_connection")
-def test_delete_collection_item_not_found(mock_get_conn, mock_remove_item):
+def test_delete_collection_item_not_found(mock_get_conn, mock_remove_item, client): # Correct: mock_remove_item injected by @patch
     """Test deleting a non-existent item from a collection returns 404."""
     mock_conn = AsyncMock()
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -369,10 +391,11 @@ def test_delete_collection_item_not_found(mock_get_conn, mock_remove_item):
     assert response.json() == {"detail": "Item not found in collection or collection does not exist."}
     mock_remove_item.assert_awaited_once_with(conn=mock_conn, collection_id=collection_id, item_type=item_type, item_id=item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.remove_item_from_collection", new_callable=AsyncMock)
 @patch("src.philograph.api.routers.collections.db_layer.get_db_connection")
-def test_delete_collection_item_db_error(mock_get_conn, mock_remove_item):
+def test_delete_collection_item_db_error(mock_get_conn, mock_remove_item, client): # Correct: mock_remove_item injected by @patch
     """Test deleting an item returns 500 on database error."""
     mock_conn = AsyncMock()
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -387,10 +410,11 @@ def test_delete_collection_item_db_error(mock_get_conn, mock_remove_item):
     assert response.json() == {"detail": "Database error removing item from collection."}
     mock_remove_item.assert_awaited_once_with(conn=mock_conn, collection_id=collection_id, item_type=item_type, item_id=item_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.delete_collection", new_callable=AsyncMock)
 @patch("src.philograph.api.routers.collections.db_layer.get_db_connection")
-def test_delete_collection_success(mock_get_conn, mock_delete_collection):
+def test_delete_collection_success(mock_get_conn, mock_delete_collection, client): # Correct: mock_delete_collection injected by @patch
     """Test successful deletion of a collection returns 204."""
     mock_conn = AsyncMock()
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -402,10 +426,11 @@ def test_delete_collection_success(mock_get_conn, mock_delete_collection):
     assert response.status_code == status.HTTP_204_NO_CONTENT
     mock_delete_collection.assert_awaited_once_with(conn=mock_conn, collection_id=collection_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.delete_collection", new_callable=AsyncMock)
 @patch("src.philograph.api.routers.collections.db_layer.get_db_connection")
-def test_delete_collection_not_found(mock_get_conn, mock_delete_collection):
+def test_delete_collection_not_found(mock_get_conn, mock_delete_collection, client): # Correct: mock_delete_collection injected by @patch
     """Test deleting a non-existent collection returns 404."""
     mock_conn = AsyncMock()
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -418,10 +443,11 @@ def test_delete_collection_not_found(mock_get_conn, mock_delete_collection):
     assert response.json() == {"detail": "Collection not found."}
     mock_delete_collection.assert_awaited_once_with(conn=mock_conn, collection_id=collection_id)
 
-# Remove @pytest.mark.asyncio and async/await, remove test_client param
+# Remove @pytest.mark.asyncio and async/await
+# Add client fixture as argument
 @patch("src.philograph.api.routers.collections.db_layer.delete_collection", new_callable=AsyncMock)
 @patch("src.philograph.api.routers.collections.db_layer.get_db_connection")
-def test_delete_collection_db_error(mock_get_conn, mock_delete_collection):
+def test_delete_collection_db_error(mock_get_conn, mock_delete_collection, client): # Correct: mock_delete_collection injected by @patch
     """Test deleting a collection returns 500 on database error."""
     mock_conn = AsyncMock()
     mock_get_conn.return_value.__aenter__.return_value = mock_conn

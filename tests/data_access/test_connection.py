@@ -115,56 +115,64 @@ async def test_get_db_pool_failure(mock_pool_class):
 
 
 @pytest.mark.asyncio
-@patch('src.philograph.data_access.connection.get_db_pool') # Patch the new location
-async def test_get_db_connection_success(mock_get_pool):
+@patch('src.philograph.data_access.connection.pool', new_callable=AsyncMock) # Patch global pool
+async def test_get_db_connection_success(mock_pool):
     """Tests successfully getting a connection from the pool."""
-    mock_pool = AsyncMock(spec=AsyncConnectionPool)
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
-    mock_get_pool.return_value = mock_pool # Mock get_db_pool to return our mock pool
 
-    # Configure the pool's connection context manager
-    mock_pool.connection.return_value.__aenter__.return_value = mock_conn
+    # Configure the pool's connection method to return an async context manager mock
+    mock_cm = AsyncMock()
+    mock_cm.__aenter__.return_value = mock_conn
+    mock_cm.__aexit__ = AsyncMock(return_value=None) # Configure __aexit__
+    # Configure pool.connection as a synchronous mock returning the CM object
+    mock_pool.connection = MagicMock(return_value=mock_cm)
+
+    # No need to await get_db_pool as we patch the global pool directly
 
     async with db_connection.get_db_connection() as conn:
         assert conn is mock_conn # Check the correct connection is yielded
 
-    mock_get_pool.assert_awaited_once()
+    # Removed incorrect assertion: mock_get_pool.assert_awaited_once()
     mock_pool.connection.assert_called_once() # Check pool.connection() was used
 
 
 @pytest.mark.asyncio
-@patch('src.philograph.data_access.connection.get_db_pool') # Patch the new location
-async def test_get_db_connection_pool_error(mock_get_pool):
+# No need to patch get_db_pool, test relies on global state
+async def test_get_db_connection_pool_error():
     """Tests that an error during pool retrieval propagates."""
-    # Simulate get_db_pool raising an error
-    mock_get_pool.side_effect = RuntimeError("Database pool is not initialized.")
+    # Ensure global pool is None to trigger the error path
+    db_connection.pool = None
 
     with pytest.raises(RuntimeError, match="Database pool is not initialized."):
         async with db_connection.get_db_connection() as conn:
             pass # Should not reach here
 
-    mock_get_pool.assert_awaited_once()
+    # Removed incorrect assertion: mock_get_pool.assert_awaited_once()
 
 
 @pytest.mark.asyncio
-@patch('src.philograph.data_access.connection.get_db_pool') # Patch the new location
-async def test_get_db_connection_psycopg_error(mock_get_pool):
+@patch('src.philograph.data_access.connection.pool', new_callable=AsyncMock) # Patch global pool
+async def test_get_db_connection_psycopg_error(mock_pool):
     """Tests that psycopg errors within the context are re-raised."""
-    mock_pool = AsyncMock(spec=AsyncConnectionPool)
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
-    mock_get_pool.return_value = mock_pool
 
-    # Configure the pool's connection context manager
-    mock_pool.connection.return_value.__aenter__.return_value = mock_conn
+    # Configure the pool's connection method to return an async context manager mock
+    mock_cm = AsyncMock()
+    mock_cm.__aenter__.return_value = mock_conn
+    mock_cm.__aexit__ = AsyncMock(return_value=None) # Configure __aexit__
+    # Configure pool.connection as a synchronous mock returning the CM object
+    mock_pool.connection = MagicMock(return_value=mock_cm)
 
     simulated_error = psycopg.ProgrammingError("Syntax error")
+
+    # No need to await get_db_pool as we patch the global pool directly
 
     with pytest.raises(psycopg.ProgrammingError, match="Syntax error"):
         async with db_connection.get_db_connection() as conn:
             # Simulate an error occurring while using the connection
             raise simulated_error
 
-    mock_get_pool.assert_awaited_once()
+    # No need to assert get_db_pool was awaited
     mock_pool.connection.assert_called_once()
 
 

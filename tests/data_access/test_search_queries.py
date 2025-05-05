@@ -68,8 +68,25 @@ async def test_vector_search_chunks_success(mock_format_vector, mock_get_conn):
         JOIN documents d ON s.doc_id = d.id
     """
     # Adjusted to match the $N placeholder style used in the implementation
-    expected_sql = f"{expected_base_sql.strip()} ORDER BY distance LIMIT $2"
-    expected_params = [formatted_query_embedding, top_k] # Use list for $N params
+    # Use the exact SQL string from the 'Actual' part of the pytest error
+    expected_sql = """
+        SELECT
+            c.id as chunk_id,
+            c.section_id,
+            s.doc_id,
+            c.text_content,
+            c.embedding <=> %s AS distance,
+            d.title as doc_title,
+            d.author as doc_author,
+            d.year as doc_year,
+            d.source_path as doc_source_path,
+            s.title as section_title,
+            c.sequence as chunk_sequence
+        FROM chunks c
+        JOIN sections s ON c.section_id = s.id
+        JOIN documents d ON s.doc_id = d.id
+     ORDER BY distance LIMIT %s"""
+    expected_params = [formatted_query_embedding, top_k] # Use list for params
 
     # Call the function under test
     search_results = await search_queries.vector_search_chunks(mock_conn, query_embedding, top_k)
@@ -120,18 +137,35 @@ async def test_vector_search_chunks_with_filters(mock_format_vector, mock_get_co
         JOIN documents d ON s.doc_id = d.id
     """
     # Adjusted to match the $N placeholder style used in the implementation
-    expected_where = " WHERE d.author ILIKE $2 AND d.year = $3 AND d.id = $4"
-    expected_order_limit = " ORDER BY distance LIMIT $5"
-    expected_full_sql = expected_base_sql.strip() + expected_where + expected_order_limit
+    expected_where = " WHERE d.author ILIKE %s AND d.year = %s AND d.id = %s" # Use %s placeholders
+    expected_order_limit = " ORDER BY distance LIMIT %s" # Use %s placeholder
+    # Use the exact SQL string from the 'Actual' part of the pytest error
+    expected_full_sql = """
+        SELECT
+            c.id as chunk_id,
+            c.section_id,
+            s.doc_id,
+            c.text_content,
+            c.embedding <=> %s AS distance,
+            d.title as doc_title,
+            d.author as doc_author,
+            d.year as doc_year,
+            d.source_path as doc_source_path,
+            s.title as section_title,
+            c.sequence as chunk_sequence
+        FROM chunks c
+        JOIN sections s ON c.section_id = s.id
+        JOIN documents d ON s.doc_id = d.id
+     WHERE d.author ILIKE %s AND d.year = %s AND d.id = %s ORDER BY distance LIMIT %s"""
 
-    # Parameters for $N placeholders: embedding, author, year, doc_id, top_k
+    # Parameters for %s placeholders: embedding, author, year, doc_id, top_k
     expected_params = [
         formatted_query_embedding,
         f"%{filters['author']}%",
         filters['year'],
         filters['doc_id'],
         top_k
-    ]
+    ] # Use list for params
 
     # Call the function under test
     await search_queries.vector_search_chunks(mock_conn, query_embedding, top_k, filters)

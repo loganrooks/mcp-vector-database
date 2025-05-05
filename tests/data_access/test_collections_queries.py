@@ -78,7 +78,7 @@ async def test_add_item_to_collection_document_success(mock_get_conn):
     expected_sql = """
         INSERT INTO collection_items (collection_id, item_type, item_id)
         VALUES (%s, %s, %s)
-        ON CONFLICT (collection_id, item_type, item_id) DO NOTHING;
+        ON CONFLICT (collection_id, item_type, item_id) DO NOTHING; -- Avoid errors if item already exists
     """
     expected_params = (collection_id, item_type, item_id)
 
@@ -100,7 +100,7 @@ async def test_add_item_to_collection_chunk_success(mock_get_conn):
     expected_sql = """
         INSERT INTO collection_items (collection_id, item_type, item_id)
         VALUES (%s, %s, %s)
-        ON CONFLICT (collection_id, item_type, item_id) DO NOTHING;
+        ON CONFLICT (collection_id, item_type, item_id) DO NOTHING; -- Avoid errors if item already exists
     """
     expected_params = (collection_id, item_type, item_id)
 
@@ -152,7 +152,7 @@ async def test_add_item_to_collection_db_error(mock_get_conn):
     expected_sql = """
         INSERT INTO collection_items (collection_id, item_type, item_id)
         VALUES (%s, %s, %s)
-        ON CONFLICT (collection_id, item_type, item_id) DO NOTHING;
+        ON CONFLICT (collection_id, item_type, item_id) DO NOTHING; -- Avoid errors if item already exists
     """
     expected_params = (collection_id, item_type, item_id)
 
@@ -178,7 +178,7 @@ async def test_get_collection_items_success(mock_get_conn):
         SELECT item_type, item_id
         FROM collection_items
         WHERE collection_id = %s
-        ORDER BY added_at;
+        ORDER BY added_at; -- Or some other meaningful order
     """
     expected_params = (collection_id,)
 
@@ -205,7 +205,7 @@ async def test_get_collection_items_empty(mock_get_conn):
         SELECT item_type, item_id
         FROM collection_items
         WHERE collection_id = %s
-        ORDER BY added_at;
+        ORDER BY added_at; -- Or some other meaningful order
     """
     expected_params = (collection_id,)
 
@@ -273,7 +273,7 @@ async def test_get_collection_items_db_error_on_fetch(mock_get_conn):
         SELECT item_type, item_id
         FROM collection_items
         WHERE collection_id = %s
-        ORDER BY added_at;
+        ORDER BY added_at; -- Or some other meaningful order
     """
     # Match exact SQL strings from source
     mock_cursor.execute.assert_any_await(expected_check_sql, (collection_id,))

@@ -25,7 +25,7 @@ def mock_get_conn(mocker):
 @pytest.fixture
 def mock_json_serialize(mocker):
     """Fixture to mock the json_serialize utility."""
-    return mocker.patch('src.philograph.utils.db_utils.json_serialize')
+    return mocker.patch('src.philograph.data_access.queries.relationships.json_serialize')
 
 # --- Test Reference Operations (Moved from original db_layer tests) ---
 

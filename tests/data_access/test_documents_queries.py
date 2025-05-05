@@ -32,7 +32,7 @@ def mock_get_conn(mocker):
 @pytest.fixture
 def mock_format_vector(mocker):
     """Fixture to mock the format_vector_for_pgvector utility."""
-    return mocker.patch('src.philograph.utils.db_utils.format_vector_for_pgvector')
+    return mocker.patch('src.philograph.data_access.queries.documents.format_vector_for_pgvector')
 
 @pytest.fixture
 def mock_json_serialize(mocker):
@@ -63,8 +63,8 @@ async def test_add_document_success(mock_get_conn):
     """
     expected_params = (title, author, year, source_path, serialized_metadata)
 
-    # Mock json_serialize if it's called inside add_document
-    with patch('src.philograph.utils.db_utils.json_serialize', return_value=serialized_metadata) as mock_serialize:
+    # Mock json_serialize where it's looked up in the module under test
+    with patch('src.philograph.data_access.queries.documents.json_serialize', return_value=serialized_metadata) as mock_serialize:
         # Call the function under test using the mock connection
         returned_id = await doc_queries.add_document(mock_conn, title, author, year, source_path, metadata)
 
@@ -92,8 +92,8 @@ async def test_add_document_duplicate_source_path(mock_get_conn):
     metadata = {"key": "duplicate"}
     serialized_metadata = '{"key":"duplicate"}'
 
-    # Mock json_serialize
-    with patch('src.philograph.utils.db_utils.json_serialize', return_value=serialized_metadata):
+    # Mock json_serialize where it's looked up
+    with patch('src.philograph.data_access.queries.documents.json_serialize', return_value=serialized_metadata):
         # Expect psycopg.IntegrityError to be raised and propagated
         with pytest.raises(psycopg.IntegrityError):
             await doc_queries.add_document(mock_conn, title, author, year, source_path, metadata)
@@ -260,7 +260,7 @@ async def test_add_section_invalid_doc_id(mock_get_conn):
 # --- Test Chunk Operations ---
 
 @pytest.mark.asyncio
-@patch('src.philograph.config.EMBEDDING_DIMENSION', 3) # Mock dimension for test
+@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension for test
 async def test_add_chunk_success(mock_format_vector, mock_get_conn):
     """Tests successfully adding a chunk with its embedding."""
     mock_conn, mock_cursor = mock_get_conn
@@ -317,7 +317,7 @@ async def test_add_chunk_success(mock_format_vector, mock_get_conn):
 #     # mock_conn.commit.assert_not_called()
 
 @pytest.mark.asyncio
-@patch('src.philograph.config.EMBEDDING_DIMENSION', 3) # Mock dimension for test
+@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension for test
 async def test_add_chunks_batch_success(mock_format_vector, mock_get_conn):
     """Tests successfully adding multiple chunks in a batch."""
     mock_conn, mock_cursor = mock_get_conn
@@ -387,7 +387,7 @@ async def test_add_chunks_batch_empty_list(mock_get_conn):
 #     # mock_conn.commit.assert_not_called()
 
 @pytest.mark.asyncio
-@patch('src.philograph.config.EMBEDDING_DIMENSION', 3) # Mock dimension for test
+@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension for test
 async def test_add_chunks_batch_db_error(mock_format_vector, mock_get_conn):
     """Tests that a database error during batch insert prevents commit."""
     mock_conn, mock_cursor = mock_get_conn
