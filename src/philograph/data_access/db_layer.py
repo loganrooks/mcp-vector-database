@@ -437,7 +437,20 @@ async def get_relationships(conn: psycopg.AsyncConnection, node_id: str, directi
     processed_results = []
     for row in results:
         rel_data = dict(row) # Copy the dict_row result
-        rel_data['metadata'] = rel_data.pop('metadata_jsonb', {}) or {} # Pop 'metadata_jsonb', provide default {} if None/missing
+        metadata_jsonb_val = rel_data.pop('metadata_jsonb', None)
+        if isinstance(metadata_jsonb_val, str):
+            try:
+                # Attempt to deserialize if it's a string
+                rel_data['metadata'] = json.loads(metadata_jsonb_val)
+            except json.JSONDecodeError:
+                logger.warning(f"Failed to decode metadata_jsonb string: {metadata_jsonb_val}. Defaulting to empty dict.")
+                rel_data['metadata'] = {}
+        elif isinstance(metadata_jsonb_val, dict):
+             # Use directly if it's already a dict
+            rel_data['metadata'] = metadata_jsonb_val
+        else:
+            # Default to empty dict for None or other types
+            rel_data['metadata'] = {}
         processed_results.append(Relationship(**rel_data))
     return processed_results
 
@@ -497,31 +510,19 @@ async def add_item_to_collection(conn: psycopg.AsyncConnection, collection_id: i
     async with conn.cursor() as cur:
         await cur.execute(sql, params)
         await conn.commit()
+        # Minimal implementation based on pseudocode
 
-async def get_collection_items(conn: psycopg.AsyncConnection, collection_id: int) -> Optional[List[Dict[str, Any]]]:
-    """Retrieves items belonging to a collection. Returns None if collection_id does not exist."""
+async def get_collection_items(conn: psycopg.AsyncConnection, collection_id: int) -> List[Tuple[str, int]]:
+    """Retrieves items belonging to a collection."""
     # TDD: Test retrieving items from a collection
-    # TDD: Test retrieving items from non-existent collection returns None
-    # TDD: Test retrieving items from an empty collection returns []
-
-    # First, check if the collection exists
-    check_sql = "SELECT EXISTS(SELECT 1 FROM collections WHERE id = %s);"
+    # TDD: Test retrieving items from an empty collection
+    # TDD: Test retrieving items for a non-existent collection ID returns empty list
+    sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
     async with conn.cursor() as cur:
-        await cur.execute(check_sql, (collection_id,))
-        exists_result = await cur.fetchone()
-        collection_exists = exists_result[0] if exists_result else False
-
-    if not collection_exists:
-        logger.warning(f"Collection with ID {collection_id} not found.")
-        return None # Return None if collection does not exist
-
-    # If collection exists, retrieve items
-    items_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
-    params = (collection_id,)
-    async with conn.cursor(row_factory=dict_row) as cur:
-        await cur.execute(items_sql, params)
+        await cur.execute(sql, (collection_id,))
         results = await cur.fetchall()
-        return results # Returns list of dicts (can be empty if collection has no items)
+    # Return list of tuples as per pseudocode
+    return results
 
 async def remove_item_from_collection(conn: psycopg.AsyncConnection, collection_id: int, item_type: str, item_id: int) -> bool:
     """Removes an item from a collection. Returns True if removed, False if not found."""
