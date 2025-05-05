@@ -339,6 +339,72 @@ def test_search_success_with_filters(runner): # Removed mock_display_results
     assert "Search Results" in result.stdout
     assert "Nicomachean Ethics" in result.stdout
     assert "0.3000" in result.stdout
+# Test search with --doc-id filter
+def test_search_success_with_doc_id_filter(runner):
+    """Test the search command calls the API correctly with query and doc_id filter."""
+    test_query = "specific concept"
+    test_doc_id = 3
+    filters_dict = {"doc_id": test_doc_id}
+    expected_payload = {"query": test_query, "filters": filters_dict, "limit": 10}
+    mock_api_response_data = {
+        "results": [
+            {"id": 10, "type": "chunk", "score": 0.7, "text": "...", "document_title": "Relevant Doc", "source_document": {"title": "Relevant Doc", "author": "Author", "year": 2023, "doc_id": test_doc_id}, "chunk_id": 10, "distance": 0.3}
+        ]
+    }
+
+    with patch('philograph.cli.main.make_api_request') as mock_make_api_request:
+        mock_make_api_request.return_value = mock_api_response_data
+
+        result = runner.invoke(app, [
+            "search",
+            test_query,
+            "--doc-id", str(test_doc_id)
+        ])
+
+        assert result.exit_code == 0, f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+        mock_make_api_request.assert_called_once_with(
+            "POST",
+            "/search",
+            json_data=expected_payload
+        )
+    assert "Search Results" in result.stdout
+    assert "Relevant Doc" in result.stdout
+    assert "0.3000" in result.stdout
+# Test search with --limit option
+def test_search_success_with_limit(runner):
+    """Test the search command calls the API correctly with a specific limit."""
+    test_query = "another concept"
+    test_limit = 5
+    expected_payload = {"query": test_query, "limit": test_limit}
+    # Mock response with fewer results than default, matching the limit
+    mock_api_response_data = {
+        "results": [
+            {"id": 1, "type": "chunk", "score": 0.9, "text": "...", "source_document": {"title": "Doc A", "author": "Auth A", "year": 2020, "doc_id": 1}, "chunk_id": 1, "distance": 0.1},
+            {"id": 2, "type": "chunk", "score": 0.8, "text": "...", "source_document": {"title": "Doc B", "author": "Auth B", "year": 2021, "doc_id": 2}, "chunk_id": 2, "distance": 0.2},
+            {"id": 3, "type": "chunk", "score": 0.7, "text": "...", "source_document": {"title": "Doc C", "author": "Auth C", "year": 2022, "doc_id": 3}, "chunk_id": 3, "distance": 0.3},
+            {"id": 4, "type": "chunk", "score": 0.6, "text": "...", "source_document": {"title": "Doc D", "author": "Auth D", "year": 2023, "doc_id": 4}, "chunk_id": 4, "distance": 0.4},
+            {"id": 5, "type": "chunk", "score": 0.5, "text": "...", "source_document": {"title": "Doc E", "author": "Auth E", "year": 2024, "doc_id": 5}, "chunk_id": 5, "distance": 0.5},
+        ]
+    }
+
+    with patch('philograph.cli.main.make_api_request') as mock_make_api_request:
+        mock_make_api_request.return_value = mock_api_response_data
+
+        result = runner.invoke(app, [
+            "search",
+            test_query,
+            "--limit", str(test_limit)
+        ])
+
+        assert result.exit_code == 0, f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+        mock_make_api_request.assert_called_once_with(
+            "POST",
+            "/search",
+            json_data=expected_payload
+        )
+    assert "Search Results" in result.stdout
+    # Check if roughly the correct number of results are displayed (Rich table formatting makes exact count hard)
+    assert result.stdout.count("Doc ") == test_limit
 # Removed patch decorator
 @patch('src.philograph.cli.main.display_results', autospec=True) # Added autospec
 @patch('src.philograph.cli.main.error_console', autospec=True) # Added autospec
@@ -422,6 +488,23 @@ def test_show_document_success(mock_display_results, mock_make_api_request, runn
     assert result.exit_code == 0
     mock_make_api_request.assert_called_once_with("GET", f"/documents/{test_id_int}") # Check API call uses int
     mock_display_results.assert_called_once_with(mock_api_response)
+
+@patch('philograph.cli.main.make_api_request') # Don't expect API call
+@patch('philograph.cli.main.display_results') # Don't expect display
+@patch('philograph.cli.main.error_console')
+def test_show_document_invalid_id_format(mock_error_console, mock_display_results, mock_make_api_request, runner):
+    """Test the show command handles a non-integer document ID."""
+    test_id = "not-an-integer"
+    item_type = "document"
+
+    result = runner.invoke(app, ["show", item_type, test_id])
+
+    assert result.exit_code != 0 # Expect non-zero exit code for error
+    mock_error_console.print.assert_called_once_with(
+        f"Error: Invalid Document ID '{test_id}'. Must be an integer."
+    )
+    mock_make_api_request.assert_not_called()
+    mock_display_results.assert_not_called()
 @patch('philograph.cli.main.make_api_request')
 @patch('philograph.cli.main.display_results')
 def test_show_chunk_success(mock_display_results, mock_make_api_request, runner):
@@ -450,16 +533,30 @@ def test_show_chunk_success(mock_display_results, mock_make_api_request, runner)
 def test_show_invalid_item_type(mock_error_console, mock_display_results, mock_make_api_request, runner):
     """Test the show command handles an invalid item type."""
     test_id = "123"
-    invalid_type = "invalid_type"
+@patch('philograph.cli.main.make_api_request')
+@patch('philograph.cli.main.display_results')
+def test_collection_add_item_chunk_success(mock_display_results, mock_make_api_request, runner):
+    """Test adding a chunk item to a collection successfully."""
+    test_collection_id = "col_abc" # Use string as CLI argument
+    test_item_id = "chk_xyz" # Use string as CLI argument
+    item_type = "chunk"
+    mock_api_response = {"message": f"Item {test_item_id} added to collection {test_collection_id}."}
+    mock_make_api_request.return_value = mock_api_response
 
-    result = runner.invoke(app, ["show", invalid_type, test_id])
+    result = runner.invoke(app, [
+        "collection",
+        "add",
+        test_collection_id,
+        item_type,
+        test_item_id
+    ])
 
-    assert result.exit_code != 0 # Expect non-zero exit code for error
-    mock_error_console.print.assert_called_once_with(
-        f"Error: Invalid item type '{invalid_type}'. Must be 'document' or 'chunk'."
-    )
-    mock_make_api_request.assert_not_called()
-    mock_display_results.assert_not_called()
+    assert result.exit_code == 0
+    expected_endpoint = f"/collections/{test_collection_id}/items"
+    expected_payload = {"item_type": item_type, "item_id": test_item_id}
+    mock_make_api_request.assert_called_once_with("POST", expected_endpoint, json_data=expected_payload)
+    mock_display_results.assert_called_once_with(mock_api_response)
+
 @patch('philograph.cli.main.make_api_request')
 @patch('philograph.cli.main.display_results')
 @patch('philograph.cli.main.error_console') # Keep patching error_console for consistency, though not asserted here

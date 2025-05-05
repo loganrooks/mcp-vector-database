@@ -1470,6 +1470,27 @@ async def test_acquire_confirm_not_found(mock_handle_confirm: AsyncMock, test_cl
 
 @pytest.mark.asyncio
 @patch("philograph.api.main.acquisition_service.handle_confirmation_request", new_callable=AsyncMock)
+async def test_acquire_confirm_invalid_state(mock_handle_confirm: AsyncMock, test_client: AsyncClient):
+    """Test POST /acquire/confirm/{discovery_id} with discovery_id in invalid state returns 409."""
+    # Arrange
+    discovery_id = uuid.uuid4()
+    selected_items = [{"md5": "any_md5"}]
+    error_message = "Discovery session is not awaiting confirmation"
+    mock_handle_confirm.return_value = {
+        "status": "invalid_state",
+        "message": error_message
+    }
+    request_payload = {"selected_items": selected_items}
+
+    # Act
+    response = await test_client.post(f"/acquire/confirm/{discovery_id}", json=request_payload)
+
+    # Assert
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert response.json() == {"detail": error_message + "."} # Add period to match actual API response
+    mock_handle_confirm.assert_awaited_once_with(str(discovery_id), selected_items)
+@pytest.mark.asyncio
+@patch("philograph.api.main.acquisition_service.handle_confirmation_request", new_callable=AsyncMock)
 async def test_acquire_confirm_invalid_items(mock_handle_confirm: AsyncMock, test_client: AsyncClient):
     """Test POST /acquire/confirm/{discovery_id} with invalid selected items returns 400."""
     # Arrange
