@@ -349,25 +349,22 @@ def _handle_acquire_confirmation(response: Dict[str, Any], yes_flag: bool):
         }
         confirm_response = make_api_request("POST", "/acquire/confirm", json_data=confirm_payload)
         display_results(confirm_response)
-@app.command()
-def acquire(
-    title: Optional[str] = typer.Option(None, "--title", "-t", help="Title of the text to acquire (use with --author)."),
-    author: Optional[str] = typer.Option(None, "--author", "-a", help="Author of the text to acquire (use with --title)."),
+
+# --- Acquire Command Group ---
+acquire_app = typer.Typer(name="acquire", help="Acquire texts via discovery and confirmation.") # Reverted context_settings and chain
+app.add_typer(acquire_app)
+
+@acquire_app.command("discover")
+def discover(
+    title: Optional[str] = typer.Option(None, "--title", "-t", help="Title of the text to discover (use with --author)."),
+    author: Optional[str] = typer.Option(None, "--author", "-a", help="Author of the text to discover (use with --title)."),
     find_missing_threshold: Optional[int] = typer.Option(None, "--find-missing-threshold", "--threshold", help="Minimum citation count to find missing texts (use instead of --title/--author)."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Automatically confirm acquisition if only one option is found."),
 ):
     """
-    Attempt to acquire and ingest a text via zlibrary-mcp.
-
-    Use EITHER --title/--author OR --find-missing-threshold.
+    Discover potential texts to acquire via title/author or citation threshold.
     """
-    # TDD: Test calling API /acquire endpoint (initial search trigger - threshold)
-    # TDD: Test calling API /acquire endpoint (initial search trigger - title/author)
-    # TDD: Test handling API response requiring confirmation
-    # TDD: Test prompting user for confirmation
-    # TDD: Test calling API /acquire/confirm after user confirmation
-    # TDD: Test handling API errors during acquisition process
-    logger.info(f"CLI: Starting acquisition process...")
+    logger.info(f"CLI: Starting acquisition discovery...")
 
     # Argument validation
     search_by_details = bool(title or author)
@@ -384,26 +381,106 @@ def acquire(
     if search_by_details:
         text_details = {"title": title, "author": author}
         payload = {"text_details": text_details}
-        console.print(f"Searching for text: Title='{title}', Author='{author}'...")
+        console.print(f"Discovering text: Title='{title}', Author='{author}'...")
     else: # search_by_threshold
         payload = {"find_missing_threshold": find_missing_threshold}
-        console.print(f"Identifying potentially missing texts (threshold: {find_missing_threshold})...")
+        console.print(f"Discovering potentially missing texts (threshold: {find_missing_threshold})...")
 
-    initial_response = make_api_request("POST", "/acquire", json_data=payload)
+    initial_response = make_api_request("POST", "/acquire/discover", json_data=payload) # Updated API endpoint
 
-    # --- Confirmation Flow (Common Logic) ---
     # --- Confirmation Flow or Direct Result ---
     if initial_response.get('status') == 'needs_confirmation':
-        _handle_acquire_confirmation(initial_response, yes)
+        # If confirmation is needed, pass to _handle_acquire_confirmation
+        # Note: _handle_acquire_confirmation now needs to be called by the 'confirm' command
+        # We just display the options here for the user to see before calling 'confirm'
+        console.print(f"[bold yellow]Confirmation required.[/bold yellow] Acquisition ID: {initial_response.get('acquisition_id')}")
+        console.print("Run 'philograph acquire confirm <acquisition_id>' to proceed.")
+        _display_confirmation_options(initial_response.get('options', []))
+        # If --yes is used with a single option, handle it directly here
+        if yes and isinstance(initial_response.get('options'), list) and len(initial_response['options']) == 1:
+             console.print("Auto-confirming due to --yes flag and single option...")
+             confirm_payload = {
+                 "selected_book_details": initial_response['options'][0]
+             }
+             confirm_response = make_api_request("POST", f"/acquire/confirm/{initial_response['acquisition_id']}", json_data=confirm_payload)
+             display_results(confirm_response)
+        elif yes and isinstance(initial_response.get('options'), list) and len(initial_response['options']) > 1:
+             error_console.print("Error: Multiple options found. Cannot auto-confirm with --yes.")
+             # No exit here, let user decide to call confirm manually
+        # No explicit exit needed if confirmation is required but --yes isn't applicable
 
-    else: # Handle initial errors or non-confirmation status
+    else: # Handle initial errors or non-confirmation status (e.g., already acquired)
         display_results(initial_response) # Display the direct result/error
 
+@acquire_app.command("confirm")
+def confirm(
+    acquisition_id: str = typer.Argument(..., help="The acquisition ID obtained from 'discover'."),
+    selection: Optional[int] = typer.Option(None, "--selection", "-s", help="Select option number directly (1-based)."),
+    # Removed redundant 'yes' option - handled by discover or interactive prompt
+):
+    """
+    Confirm and trigger the download for a previously discovered acquisition.
+    """
+    logger.info(f"CLI: Confirming acquisition for discovery ID: {acquisition_id}")
 
-# --- Main Execution ---
-if __name__ == "__main__":
-    app()
-@app.command()
+    # Fetch the options again using the status endpoint
+    status_endpoint = f"/acquire/status/{acquisition_id}"
+    status_response = make_api_request("GET", status_endpoint)
+
+    if not status_response or status_response.get('status') != 'needs_confirmation':
+        error_console.print(f"Error: Acquisition {acquisition_id} is not awaiting confirmation or does not exist.")
+        if status_response:
+             console.print(f"Current status: {status_response.get('status', 'Unknown')}")
+        raise typer.Exit(code=1)
+
+    options = status_response.get('options', [])
+    if not options:
+        error_console.print(f"Error: No options found for acquisition {acquisition_id} to confirm.")
+        raise typer.Exit(code=1)
+
+    selected_book = None
+
+    # Handle direct selection via --selection
+    if selection is not None:
+        if 0 < selection <= len(options):
+            selected_book = options[selection - 1]
+            console.print(f"Confirming selection {selection}: '{selected_book.get('title')}'...")
+        else:
+            error_console.print(f"Error: Invalid selection number '{selection}'. Options are 1-{len(options)}.")
+            _display_confirmation_options(options)
+            raise typer.Exit(code=1)
+    # Handle interactive prompt (if --selection is not provided)
+    else: # selection is None
+        console.print("\n[bold yellow]Select a book to acquire (enter number) or 0 to cancel:[/bold yellow]")
+        _display_confirmation_options(options)
+        try:
+            user_selection = typer.prompt("Enter selection number (or 0 to cancel)", type=int, default=0)
+            if user_selection == 0:
+                console.print("Acquisition cancelled.")
+                raise typer.Exit() # Graceful exit
+            elif 0 < user_selection <= len(options):
+                selected_book = options[user_selection - 1]
+                console.print(f"Confirming selection {user_selection}: '{selected_book.get('title')}'...")
+            else:
+                error_console.print("Error: Invalid selection number.")
+                raise typer.Exit(code=1)
+        except ValueError: # Should not happen with typer.prompt(type=int)
+            error_console.print("Invalid input. Please enter a number.")
+            raise typer.Exit(code=1)
+
+    # If a book was selected, make the confirmation API call
+    if selected_book:
+        confirm_payload = {
+            "selected_book_details": selected_book
+        }
+        confirm_endpoint = f"/acquire/confirm/{acquisition_id}"
+        confirm_response = make_api_request("POST", confirm_endpoint, json_data=confirm_payload)
+        display_results(confirm_response)
+    # else: # Case where selection was 0 (cancel) - handled by typer.Exit()
+
+
+# --- Status Command ---
+@app.command("status") # Keep status under the main app
 def status(
     acquisition_id: str = typer.Argument(..., help="The ID of the acquisition task to check.")
 ):

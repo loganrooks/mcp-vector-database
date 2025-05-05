@@ -113,11 +113,11 @@ def test_acquire_discover_needs_confirmation_single_option(mock_prompt, mock_err
     # mock_error_console.print.assert_not_called()
 
 
+@pytest.mark.skip(reason="Persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 13:03:48]")
 @patch('philograph.cli.main.make_api_request') # Removed autospec=True
 @patch('philograph.cli.main.display_results')
 @patch('philograph.cli.main.error_console')
 # Removed patch for _display_confirmation_options / console.print
-@pytest.mark.skip(reason="Skipped due to persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 01:03:48 PM]")
 # TODO: Revisit this test after Typer subcommand interference issue is resolved.
 def test_acquire_discover_yes_flag_single_option_auto_confirms(mock_error_console, mock_display_results, mock_make_api_request, runner):
     """Test 'acquire discover --yes' auto-confirms if API returns only one option."""
@@ -148,12 +148,12 @@ def test_acquire_discover_yes_flag_single_option_auto_confirms(mock_error_consol
     # mock_error_console.print.assert_not_called() # Cannot reliably assert
 
 
+@pytest.mark.skip(reason="Persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 13:03:48]")
 @patch('philograph.cli.main.make_api_request')
 @patch('philograph.cli.main.display_results')
 @patch('philograph.cli.main.error_console')
 @patch('typer.prompt')
 # Removed patch for _display_confirmation_options / console.print
-@pytest.mark.skip(reason="Skipped due to persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 01:03:48 PM]")
 # TODO: Revisit this test after Typer subcommand interference issue is resolved.
 def test_acquire_discover_yes_flag_multiple_options_errors(mock_prompt, mock_error_console, mock_display_results, mock_make_api_request, runner):
     """Test 'acquire discover --yes' exits with error if API returns multiple options."""
@@ -233,12 +233,12 @@ def test_acquire_discover_find_missing_threshold(mock_display_results, mock_make
 # Note: _fetch_options_for_confirmation makes a GET /status call internally.
 # Tests need to mock make_api_request with side_effect to handle this.
 
+@pytest.mark.skip(reason="Persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 13:03:48]")
 @patch('philograph.cli.main.make_api_request')
 @patch('philograph.cli.main.display_results')
 @patch('philograph.cli.main.error_console')
 @patch('typer.prompt')
 # Removed patch for _display_confirmation_options / console.print
-@pytest.mark.skip(reason="Skipped due to persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 01:03:48 PM]")
 # TODO: Revisit this test after Typer subcommand interference issue is resolved.
 def test_acquire_confirm_success(mock_prompt, mock_error_console, mock_display_results, mock_make_api_request, runner):
     """Test 'acquire confirm' successfully confirms an acquisition via prompt."""
@@ -271,12 +271,12 @@ def test_acquire_confirm_success(mock_prompt, mock_error_console, mock_display_r
     # Cannot reliably assert mock_display_options call
 
 
+@pytest.mark.skip(reason="Persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 13:03:48]")
 @patch('philograph.cli.main.make_api_request')
 @patch('philograph.cli.main.display_results')
 @patch('philograph.cli.main.error_console')
 @patch('typer.prompt')
 # Removed patch for _display_confirmation_options / console.print
-@pytest.mark.skip(reason="Skipped due to persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 01:03:48 PM]")
 # TODO: Revisit this test after Typer subcommand interference issue is resolved.
 def test_acquire_confirm_api_error(mock_prompt, mock_error_console, mock_display_results, mock_make_api_request, runner):
     """Test 'acquire confirm' handles API error during the confirmation call."""
@@ -330,11 +330,11 @@ def test_acquire_confirm_no_options_found(mock_error_console, mock_make_api_requ
     # Cannot reliably assert mock_display_options call
 
 
+@pytest.mark.skip(reason="Persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 13:03:48]")
 @patch('philograph.cli.main.make_api_request')
 @patch('philograph.cli.main.error_console')
 @patch('typer.prompt')
 # Removed patch for _display_confirmation_options / console.print
-@pytest.mark.skip(reason="Skipped due to persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 01:03:48 PM]")
 # TODO: Revisit this test after Typer subcommand interference issue is resolved.
 def test_acquire_confirm_prompt_invalid_input(mock_prompt, mock_error_console, mock_make_api_request, runner: CliRunner):
     """Test 'acquire confirm' handles invalid input during prompt."""
@@ -358,11 +358,11 @@ def test_acquire_confirm_prompt_invalid_input(mock_prompt, mock_error_console, m
     assert mock_make_api_request.call_count == 1
 
 
+@pytest.mark.skip(reason="Persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 13:03:48]")
 @patch('philograph.cli.main.make_api_request')
 @patch('philograph.cli.main.error_console')
 @patch('typer.prompt')
 # Removed patch for _display_confirmation_options / console.print
-@pytest.mark.skip(reason="Skipped due to persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 01:03:48 PM]")
 # TODO: Revisit this test after Typer subcommand interference issue is resolved.
 def test_acquire_confirm_invalid_input_out_of_range(mock_prompt, mock_error_console, mock_make_api_request, runner: CliRunner):
     """Test 'acquire confirm' handles out-of-range numeric selection via prompt."""
@@ -385,12 +385,12 @@ def test_acquire_confirm_invalid_input_out_of_range(mock_prompt, mock_error_cons
     assert mock_make_api_request.call_count == 1
 
 
+@pytest.mark.skip(reason="Persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 13:03:48]")
 @patch('philograph.cli.main.make_api_request')
 @patch('philograph.cli.main.display_results')
 @patch('philograph.cli.main.error_console')
 @patch('typer.prompt')
 # Removed patch for _display_confirmation_options / console.print
-@pytest.mark.skip(reason="Skipped due to persistent Typer subcommand interference issue [Ref: Debug Feedback 2025-05-05 01:03:48 PM]")
 # TODO: Revisit this test after Typer subcommand interference issue is resolved.
 def test_acquire_confirm_cancel(mock_prompt, mock_error_console, mock_display_results, mock_make_api_request, runner: CliRunner):
     """Test 'acquire confirm' handles cancellation (selection 0 via prompt)."""
