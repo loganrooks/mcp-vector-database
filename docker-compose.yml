@@ -61,8 +61,7 @@ services:
       DB_HOST: db
       PYTHONPATH: /app/src # Add src directory to Python path
     volumes:
-      # Mount source code for development hot-reloading (if using uvicorn --reload)
-      - ./src:/app/src
+      # Source code is now copied into the image via Dockerfile
       - ./tests:/app/tests # Mount tests directory as a workaround for build issues
       # Mount data directory if needed by ingestion service (adjust path as needed)
       - ${SOURCE_FILE_DIR:-./data/source_documents}:/app/data/source_documents:ro # Mount read-only

@@ -1,36 +1,48 @@
-# Core Framework
-fastapi[all] # Include testing extras like TestClient
-uvicorn[standard] # ASGI server for FastAPI
-
-# Database
-psycopg[binary,pool] # Async PostgreSQL driver
-pgvector # For vector type handling/formatting if needed, primarily SQL strings used
-
-# Configuration
-python-dotenv
-
-# HTTP Client (Async for FastAPI integration)
-httpx[http2] # Added [http2] extra for HTTP/2 support
-
-# CLI
-typer[all]
-
-# Text Processing
-pymupdf # PDF/EPUB processing
-ebooklib # EPUB processing
-# semchunk # Placeholder - Requires implementation or finding a suitable library
-
-# Testing
-pytest
-pytest-asyncio # For testing async code
-pytest-dotenv # Loads .env file for pytest
-pytest-httpx # For mocking HTTP requests with httpx
-
-pytest-mock # For mocker fixture
-# Optional (If GROBID/AnyStyle are called via HTTP)
-# requests # Can use httpx instead
-
-# Note: Dependencies for GROBID/AnyStyle clients or libraries are not included here
-# as they are assumed to be running in separate Docker containers or accessed via API.
-# Note: Dependency for MCP interaction library is omitted as none was specified.
-# Will use httpx or subprocess depending on MCP server implementation details.
+annotated-types==0.7.0
+anyio==4.9.0
+certifi==2025.4.26
+click==8.1.8
+EbookLib==0.19
+fastapi==0.115.12
+h11==0.16.0
+h2==4.2.0
+hpack==4.1.0
+httpcore==1.0.9
+httptools==0.6.4
+httpx==0.28.1
+hyperframe==6.1.0
+idna==3.10
+iniconfig==2.1.0
+lxml==5.4.0
+markdown-it-py==3.0.0
+mdurl==0.1.2
+numpy==2.2.5
+packaging==25.0
+pgvector==0.4.1
+pluggy==1.5.0
+psycopg==3.2.7
+psycopg-binary==3.2.7
+psycopg-pool==3.2.6
+pydantic==2.11.4
+pydantic_core==2.33.2
+Pygments==2.19.1
+PyMuPDF==1.25.5
+pytest==8.3.5
+pytest-asyncio==0.26.0
+pytest-dotenv==0.5.2
+pytest-httpx==0.35.0
+pytest-mock==3.14.0
+python-dotenv==1.1.0
+PyYAML==6.0.2
+rich==14.0.0
+shellingham==1.5.4
+six==1.17.0
+sniffio==1.3.1
+starlette==0.46.2
+typer==0.15.3
+typing-inspection==0.4.0
+typing_extensions==4.13.2
+uvicorn==0.34.2
+uvloop==0.21.0
+watchfiles==1.0.5
+websockets==15.0.1
