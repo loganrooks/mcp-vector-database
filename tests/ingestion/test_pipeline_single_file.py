@@ -1,10 +1,11 @@
+# tests/ingestion/test_pipeline_single_file.py
 import asyncio
 import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-import httpx
+import httpx # Keep for potential exception types in dependencies
 
 # Assuming config values are needed and potentially mocked
 from philograph import config
@@ -14,16 +15,7 @@ from philograph.data_access import db_layer # For mocking types if needed
 # Mark all tests in this module as asyncio
 pytestmark = pytest.mark.asyncio
 
-
-# --- Tests for get_embeddings_in_batches ---
-# TODO: Add tests
-
-# --- Tests for extract_content_and_metadata ---
-# TODO: Add tests (dispatch logic, mocking text_processing)
-
-# --- Tests for process_document (Moved) ---
-# Single file tests moved to tests/ingestion/test_pipeline_single_file.py
-# Directory tests moved to tests/ingestion/test_pipeline_directory.py
+# --- Tests for process_document (Single File Scenarios) ---
 
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
@@ -166,7 +158,6 @@ async def test_process_document_single_pdf_success(
     mock_add_ref.assert_any_call(mock_conn, 1001, {"title": "Ref Title 1", "author": "Ref Author 1"})
     mock_add_ref.assert_any_call(mock_conn, 1001, {"title": "Ref Title 2", "author": "Ref Author 2"})
 
-# TODO: Add tests for process_document (single file, directory, errors, existing doc)
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
@@ -214,6 +205,7 @@ async def test_process_document_existing_document_skipped(
 
     # Ensure extraction and further processing steps were NOT called
     mock_extract.assert_not_called()
+
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
@@ -255,6 +247,7 @@ async def test_process_document_file_not_found(
     # Ensure DB and extraction were NOT called
     mock_get_db_conn.assert_not_called()
     mock_extract.assert_not_called()
+
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
@@ -308,6 +301,7 @@ async def test_process_document_extraction_error(
 
     # Ensure DB add_document was NOT called
     mock_add_doc.assert_not_called()
+
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
@@ -386,6 +380,7 @@ async def test_process_document_embedding_error(
 
     # Ensure indexing was NOT called
     mock_add_chunks.assert_not_called()
+
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
@@ -471,6 +466,7 @@ async def test_process_document_indexing_error(
 
     # Ensure reference parsing was NOT called
     mock_parse_references.assert_not_called()
+
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
@@ -518,6 +514,7 @@ async def test_process_document_db_check_error(
 
     # Ensure extraction was NOT called
     mock_extract.assert_not_called()
+
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
@@ -584,6 +581,7 @@ async def test_process_document_db_add_doc_error(
 
     # Ensure subsequent steps were NOT called
     mock_add_section.assert_not_called()
+
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
@@ -656,6 +654,7 @@ async def test_process_document_db_add_section_error(
 
     # Ensure subsequent steps were NOT called
     mock_chunk_text.assert_not_called()
+
 @patch("philograph.ingestion.pipeline.config.SOURCE_FILE_DIR_ABSOLUTE", Path("/test/source"))
 @patch("philograph.ingestion.pipeline.file_utils.check_directory_exists")
 @patch("philograph.ingestion.pipeline.file_utils.check_file_exists")
