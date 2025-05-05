@@ -478,6 +478,138 @@ async def test_handle_confirmation_request_rate_limit_exceeded(mock_config):
         assert service.discovery_sessions[discovery_id]['status'] == 'pending_confirmation'
 
 
+@pytest.mark.asyncio
+async def test_handle_confirmation_request_empty_selection(mock_config):
+    """Test confirmation request with an empty selection list."""
+    discovery_id = service.create_discovery_session()
+    service.discovery_sessions[discovery_id]['status'] = 'pending_confirmation'
+    service.discovery_sessions[discovery_id]['candidates'] = [{"id": "zlib1", "md5": "md5_1"}] # Add some candidates
+
+    result = await service.handle_confirmation_request(discovery_id, [])
+
+    assert result == {
+        "status": "invalid_selection",
+        "message": "No items selected."
+    }
+    # Session status should ideally remain pending or become error? Pseudocode implies error. Implementation returns before update.
+    # Let's assert it remains pending for now, based on current implementation path.
+    assert service.discovery_sessions[discovery_id]['status'] == 'pending_confirmation'
+    # assert False # Intentionally fail for Red phase if needed
+
+@pytest.mark.asyncio
+async def test_handle_confirmation_request_mixed_valid_invalid_selection(mock_config):
+    """Test confirmation with a mix of valid and invalid selections."""
+    discovery_id = service.create_discovery_session()
+    valid_book = {"id": "zlib1", "title": "Valid Book", "md5": "valid_md5", "download_url": "http://valid.dl"}
+    invalid_book_details = {"id": "zlib2", "title": "Invalid Details", "md5": None, "download_url": None} # Fails validation
+    invalid_id_book = {"id": "zlib3", "title": "Invalid ID", "md5": "invalid_id_md5", "download_url": "http://invalid.id"} # Not in candidates
+    service.discovery_sessions[discovery_id]['candidates'] = [valid_book, invalid_book_details]
+    service.discovery_sessions[discovery_id]['status'] = 'pending_confirmation'
+
+    mock_mcp_download_response = {"success": True, "processed_path": "/path/valid_book.txt"}
+    mock_ingestion_response = {"status": "Success", "document_id": "doc-valid"}
+
+    with patch('src.philograph.utils.mcp_utils.call_mcp_tool', new_callable=AsyncMock, return_value=mock_mcp_download_response) as mock_call_mcp, \
+         patch('src.philograph.ingestion.pipeline.process_document', new_callable=AsyncMock, return_value=mock_ingestion_response) as mock_process_doc:
+
+        result = await service.handle_confirmation_request(discovery_id, [valid_book, invalid_book_details, invalid_id_book])
+
+        # Expect processing to start only for the valid book
+        assert result == {"status": "processing_started"}
+        session = service.discovery_sessions[discovery_id]
+        assert session['status'] == 'complete' # Only valid book processed successfully
+        assert len(session['selected_items']) == 1 # Only valid book selected
+        assert session['selected_items'][0]['md5'] == 'valid_md5'
+        assert len(session['processed_items']) == 1
+        assert session['processed_items'][0]['status'] == 'ingested'
+        assert session['processed_items'][0]['id'] == 'valid_md5'
+
+        mock_call_mcp.assert_awaited_once() # Called only for valid book
+        mock_process_doc.assert_awaited_once() # Called only for valid book
+        # assert False # Intentionally fail for Red phase if needed
+
+@pytest.mark.asyncio
+async def test_handle_confirmation_request_ingestion_skipped(mock_config):
+    """Test confirmation where ingestion pipeline returns 'Skipped'."""
+    discovery_id = service.create_discovery_session()
+    book_to_skip = {"id": "zlib_skip", "title": "Skip Me", "md5": "skip_md5", "download_url": "http://skip.dl"}
+    service.discovery_sessions[discovery_id]['candidates'] = [book_to_skip]
+    service.discovery_sessions[discovery_id]['status'] = 'pending_confirmation'
+
+    mock_mcp_download_response = {"success": True, "processed_path": "/path/skip_me.txt"}
+    mock_ingestion_response = {"status": "Skipped", "message": "Already exists"}
+
+    with patch('src.philograph.utils.mcp_utils.call_mcp_tool', new_callable=AsyncMock, return_value=mock_mcp_download_response) as mock_call_mcp, \
+         patch('src.philograph.ingestion.pipeline.process_document', new_callable=AsyncMock, return_value=mock_ingestion_response) as mock_process_doc:
+
+        result = await service.handle_confirmation_request(discovery_id, [book_to_skip])
+
+        assert result == {"status": "processing_started"}
+        session = service.discovery_sessions[discovery_id]
+        # Skipped is still considered a successful processing run overall
+        assert session['status'] == 'complete'
+        assert len(session['processed_items']) == 1
+        item_status = session['processed_items'][0]
+        assert item_status['status'] == 'skipped'
+        assert item_status['error'] is None # No error for skipped
+        assert item_status['document_id'] is None
+
+        mock_call_mcp.assert_awaited_once()
+        mock_process_doc.assert_awaited_once()
+        # assert False # Intentionally fail for Red phase if needed
+
+@pytest.mark.asyncio
+async def test_handle_confirmation_request_mcp_validation_error(mock_config):
+    """Test confirmation handles MCPValidationError during download."""
+    discovery_id = service.create_discovery_session()
+    book = {"id": "zlib_val_err", "title": "Validation Error Book", "md5": "val_err_md5", "download_url": "http://valerr.dl"}
+    service.discovery_sessions[discovery_id]['candidates'] = [book]
+    service.discovery_sessions[discovery_id]['status'] = 'pending_confirmation'
+
+    validation_error_msg = "Invalid MCP arguments"
+    with patch('src.philograph.utils.mcp_utils.call_mcp_tool', new_callable=AsyncMock, side_effect=mcp_utils.MCPValidationError(validation_error_msg)) as mock_call_mcp, \
+         patch('src.philograph.ingestion.pipeline.process_document', new_callable=AsyncMock) as mock_process_doc:
+
+        result = await service.handle_confirmation_request(discovery_id, [book])
+
+        assert result == {"status": "processing_started"}
+        session = service.discovery_sessions[discovery_id]
+        assert session['status'] == 'complete_with_errors'
+        assert len(session['processed_items']) == 1
+        item_status = session['processed_items'][0]
+        assert item_status['status'] == 'processing_error'
+        assert item_status['error'] == f"MCP Validation Error: {validation_error_msg}"
+
+        mock_call_mcp.assert_awaited_once()
+        mock_process_doc.assert_not_awaited() # Ingestion not called
+        # assert False # Intentionally fail for Red phase if needed
+
+@pytest.mark.asyncio
+async def test_handle_confirmation_request_generic_processing_error(mock_config):
+    """Test confirmation handles generic Exception during item processing."""
+    discovery_id = service.create_discovery_session()
+    book = {"id": "zlib_gen_err", "title": "Generic Error Book", "md5": "gen_err_md5", "download_url": "http://generr.dl"}
+    service.discovery_sessions[discovery_id]['candidates'] = [book]
+    service.discovery_sessions[discovery_id]['status'] = 'pending_confirmation'
+
+    generic_error_msg = "Something unexpected happened"
+    # Simulate error during ingestion call for simplicity
+    with patch('src.philograph.utils.mcp_utils.call_mcp_tool', new_callable=AsyncMock, return_value={"success": True, "processed_path": "/path/generic.txt"}) as mock_call_mcp, \
+         patch('src.philograph.ingestion.pipeline.process_document', new_callable=AsyncMock, side_effect=Exception(generic_error_msg)) as mock_process_doc:
+
+        result = await service.handle_confirmation_request(discovery_id, [book])
+
+        assert result == {"status": "processing_started"}
+        session = service.discovery_sessions[discovery_id]
+        assert session['status'] == 'complete_with_errors'
+        assert len(session['processed_items']) == 1
+        item_status = session['processed_items'][0]
+        assert item_status['status'] == 'processing_error' # Generic exception maps to processing_error
+        assert item_status['error'] == generic_error_msg
+
+        mock_call_mcp.assert_awaited_once()
+        mock_process_doc.assert_awaited_once()
+        # assert False # Intentionally fail for Red phase if needed
 # --- Tests for get_status ---
 
 @pytest.mark.asyncio

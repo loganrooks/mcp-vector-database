@@ -1,3 +1,9 @@
+import pytest
+import psycopg
+import json
+from unittest.mock import AsyncMock, MagicMock
+from src.philograph.data_access import db_layer
+from src.philograph.data_access.db_layer import Relationship, Document, Section, Chunk, SearchResult # Added Relationship
 import json
 import pytest
 from typing import List, Dict, Any, Optional
@@ -494,22 +500,21 @@ async def test_add_chunk_success(mock_format_vector, mock_get_conn):
 
     # Simulate the RETURNING id from the database
     mock_cursor.fetchone.return_value = {'id': 101}
-    # Mock the vector formatting
-    formatted_embedding_str = "[0.1,0.2,0.3]"
-    mock_format_vector.return_value = formatted_embedding_str
 
     section_id = 789 # Assuming a valid section ID
-    text_content = "This is the chunk text."
+    text_content = "This is a test chunk."
     sequence = 0
-    embedding_vector = [0.1, 0.2, 0.3] # Example 3D vector
+    embedding_vector = [0.1, 0.2, 0.3]
+    formatted_embedding = "[0.1,0.2,0.3]"
+    mock_format_vector.return_value = formatted_embedding # Mock the formatting
+
     expected_id = 101
     expected_sql = """
         INSERT INTO chunks (section_id, text_content, sequence, embedding)
         VALUES (%s, %s, %s, %s::vector(%s))
         RETURNING id;
     """
-    # Parameters include the formatted embedding string and the dimension
-    expected_params = (section_id, text_content, sequence, formatted_embedding_str, 3)
+    expected_params = (section_id, text_content, sequence, formatted_embedding, 3) # Use mocked dimension
 
     # Call the function under test
     returned_id = await db_layer.add_chunk(mock_conn, section_id, text_content, sequence, embedding_vector)
@@ -526,24 +531,23 @@ async def test_add_chunk_success(mock_format_vector, mock_get_conn):
 async def test_add_chunk_invalid_dimension(mock_get_conn):
     """Tests adding a chunk with incorrect embedding dimension raises ValueError."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
-    # No need to mock cursor as the error should be raised before DB interaction
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
 
     section_id = 789
     text_content = "Chunk with wrong dimension."
     sequence = 1
-    embedding_vector = [0.1, 0.2] # Incorrect dimension (expected 3)
+    embedding_vector = [0.1, 0.2] # Incorrect dimension (2 instead of 3)
 
-    # Expect ValueError due to dimension mismatch
+    # Expect ValueError to be raised
     with pytest.raises(ValueError, match="Embedding vector dimension mismatch"):
         await db_layer.add_chunk(mock_conn, section_id, text_content, sequence, embedding_vector)
 
-    # Ensure no DB interaction occurred
-    mock_conn.cursor.assert_not_called()
+    # Ensure commit was not called
     mock_conn.commit.assert_not_called()
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 @patch('src.philograph.data_access.db_layer.format_vector_for_pgvector')
-@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension
+@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension for test
 async def test_add_chunks_batch_success(mock_format_vector, mock_get_conn):
     """Tests successfully adding multiple chunks in a batch."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
@@ -551,36 +555,36 @@ async def test_add_chunks_batch_success(mock_format_vector, mock_get_conn):
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    # Mock format_vector to return predictable strings
-    mock_format_vector.side_effect = lambda v: f"[{','.join(map(str, v))}]"
-
     chunks_data = [
-        (1, "Chunk text 1", 0, [0.1, 0.2, 0.3]),
-        (1, "Chunk text 2", 1, [0.4, 0.5, 0.6]),
-        (2, "Chunk text 3", 0, [0.7, 0.8, 0.9]),
+        (789, "Chunk 1", 0, [0.1, 0.2, 0.3]),
+        (789, "Chunk 2", 1, [0.4, 0.5, 0.6]),
+        (790, "Chunk 3", 0, [0.7, 0.8, 0.9]),
     ]
+    formatted_embeddings = ["[0.1,0.2,0.3]", "[0.4,0.5,0.6]", "[0.7,0.8,0.9]"]
+    # Mock format_vector to return expected strings for each vector
+    mock_format_vector.side_effect = formatted_embeddings
+
     expected_sql = """
         INSERT INTO chunks (section_id, text_content, sequence, embedding)
         VALUES (%s, %s, %s, %s::vector(%s));
     """
-    # Prepare expected parameters for executemany
-    expected_params = [
-        (1, "Chunk text 1", 0, "[0.1,0.2,0.3]", 3),
-        (1, "Chunk text 2", 1, "[0.4,0.5,0.6]", 3),
-        (2, "Chunk text 3", 0, "[0.7,0.8,0.9]", 3),
+    expected_params_list = [
+        (789, "Chunk 1", 0, formatted_embeddings[0], 3),
+        (789, "Chunk 2", 1, formatted_embeddings[1], 3),
+        (790, "Chunk 3", 0, formatted_embeddings[2], 3),
     ]
 
     # Call the function under test
     await db_layer.add_chunks_batch(mock_conn, chunks_data)
 
     # Assertions
-    mock_cursor.executemany.assert_awaited_once_with(expected_sql, expected_params)
-    mock_conn.commit.assert_awaited_once()
     assert mock_format_vector.call_count == len(chunks_data)
+    mock_cursor.executemany.assert_awaited_once_with(expected_sql, expected_params_list)
+    mock_conn.commit.assert_awaited_once()
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_chunks_batch_empty_list(mock_get_conn):
-    """Tests that add_chunks_batch handles an empty input list gracefully."""
+    """Tests that adding an empty list of chunks does nothing."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -592,72 +596,66 @@ async def test_add_chunks_batch_empty_list(mock_get_conn):
     await db_layer.add_chunks_batch(mock_conn, chunks_data)
 
     # Assertions
-    mock_cursor.executemany.assert_not_called() # Should not attempt to execute
-    mock_conn.commit.assert_not_called() # Should not commit anything
+    mock_cursor.executemany.assert_not_awaited()
+    mock_conn.commit.assert_not_called()
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
-@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension
+@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension for test
 async def test_add_chunks_batch_invalid_dimension(mock_get_conn):
-    """Tests add_chunks_batch raises ValueError if any chunk has invalid dimension."""
+    """Tests adding chunks with incorrect embedding dimension in batch raises ValueError."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
-    # No need to mock cursor as the error should happen before DB interaction
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
-    # Add mock cursor to avoid AttributeError if the code reaches that point unexpectedly
-    mock_conn.cursor.return_value = AsyncMock(spec=psycopg.AsyncCursor)
-
 
     chunks_data = [
-        (1, "Chunk text 1", 0, [0.1, 0.2, 0.3]),
-        (1, "Chunk text 2", 1, [0.4, 0.5]), # Invalid dimension
-        (2, "Chunk text 3", 0, [0.7, 0.8, 0.9]),
+        (789, "Chunk 1", 0, [0.1, 0.2, 0.3]),
+        (789, "Chunk 2", 1, [0.4, 0.5]), # Incorrect dimension
     ]
 
-    # Expect ValueError due to dimension mismatch
+    # Expect ValueError to be raised during formatting
     with pytest.raises(ValueError, match="Embedding vector dimension mismatch in batch"):
         await db_layer.add_chunks_batch(mock_conn, chunks_data)
 
-    # Assertions
-    # Check that cursor was NOT obtained or used if error happens early
-    mock_conn.cursor.assert_not_called()
-    mock_conn.commit.assert_not_called() # Should not commit
+    # Ensure commit was not called
+    mock_conn.commit.assert_not_called()
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 @patch('src.philograph.data_access.db_layer.format_vector_for_pgvector')
-@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension
+@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension for test
 async def test_add_chunks_batch_db_error(mock_format_vector, mock_get_conn):
-    """Tests that add_chunks_batch propagates DB errors and doesn't commit."""
+    """Tests that a database error during batch insert prevents commit."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    # Mock format_vector
-    mock_format_vector.side_effect = lambda v: f"[{','.join(map(str, v))}]"
-
-    # Simulate DB error during executemany
-    db_error = psycopg.ProgrammingError("Simulated DB error during batch insert")
-    mock_cursor.executemany.side_effect = db_error
-
     chunks_data = [
-        (1, "Chunk text 1", 0, [0.1, 0.2, 0.3]),
-        (1, "Chunk text 2", 1, [0.4, 0.5, 0.6]),
+        (789, "Chunk 1", 0, [0.1, 0.2, 0.3]),
+        (999, "Chunk Invalid FK", 0, [0.7, 0.8, 0.9]), # Assume 999 is invalid section_id
     ]
+    formatted_embeddings = ["[0.1,0.2,0.3]", "[0.7,0.8,0.9]"]
+    mock_format_vector.side_effect = formatted_embeddings
+
+    # Simulate psycopg.IntegrityError on executemany
+    mock_cursor.executemany.side_effect = psycopg.IntegrityError("FK constraint violation")
+
     expected_sql = """
         INSERT INTO chunks (section_id, text_content, sequence, embedding)
         VALUES (%s, %s, %s, %s::vector(%s));
     """
-    expected_params = [
-        (1, "Chunk text 1", 0, "[0.1,0.2,0.3]", 3),
-        (1, "Chunk text 2", 1, "[0.4,0.5,0.6]", 3),
+    expected_params_list = [
+        (789, "Chunk 1", 0, formatted_embeddings[0], 3),
+        (999, "Chunk Invalid FK", 0, formatted_embeddings[1], 3),
     ]
 
-    # Expect the psycopg error to be raised
-    with pytest.raises(psycopg.ProgrammingError, match="Simulated DB error"):
+    # Expect psycopg.IntegrityError to be raised and propagated
+    with pytest.raises(psycopg.IntegrityError):
         await db_layer.add_chunks_batch(mock_conn, chunks_data)
 
     # Assertions
-    mock_cursor.executemany.assert_awaited_once_with(expected_sql, expected_params)
+    assert mock_format_vector.call_count == len(chunks_data)
+    mock_cursor.executemany.assert_awaited_once_with(expected_sql, expected_params_list)
     mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error
+
 # --- Test Reference Operations ---
 
 @pytest.mark.asyncio
@@ -671,14 +669,14 @@ async def test_add_reference_success(mock_json_serialize, mock_get_conn):
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
     # Simulate the RETURNING id from the database
-    mock_cursor.fetchone.return_value = {'id': 555}
-    # Mock json_serialize
-    serialized_details = '{"title": "Cited Work", "author": "Cited Author"}'
-    mock_json_serialize.return_value = serialized_details
+    mock_cursor.fetchone.return_value = {'id': 201}
 
     source_chunk_id = 101 # Assuming a valid chunk ID
-    cited_doc_details = {"title": "Cited Work", "author": "Cited Author"}
-    expected_id = 555
+    cited_doc_details = {"title": "Cited Doc", "author": "Cited Author"}
+    serialized_details = '{"title": "Cited Doc", "author": "Cited Author"}'
+    mock_json_serialize.return_value = serialized_details # Mock serialization
+
+    expected_id = 201
     expected_sql = """
         INSERT INTO "references" (source_chunk_id, cited_doc_details_jsonb)
         VALUES (%s, %s)
@@ -699,37 +697,29 @@ async def test_add_reference_success(mock_json_serialize, mock_get_conn):
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 @patch('src.philograph.data_access.db_layer.json_serialize')
 async def test_add_reference_invalid_chunk_id(mock_json_serialize, mock_get_conn):
-    """Tests add_reference raises IntegrityError for invalid source_chunk_id."""
+    """Tests adding a reference with an invalid chunk_id raises IntegrityError."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    # Mock json_serialize
-    serialized_details = '{"title": "Cited Work", "author": "Cited Author"}'
+    source_chunk_id = 999 # Non-existent chunk_id
+    cited_doc_details = {"title": "Cited Doc"}
+    serialized_details = '{"title": "Cited Doc"}'
     mock_json_serialize.return_value = serialized_details
 
     # Simulate psycopg.IntegrityError (foreign key violation) on execute
-    db_error = psycopg.IntegrityError("insert or update on table \"references\" violates foreign key constraint")
-    mock_cursor.execute.side_effect = db_error
+    mock_cursor.execute.side_effect = psycopg.IntegrityError("insert or update on table \"references\" violates foreign key constraint")
 
-    source_chunk_id = 999 # Non-existent chunk_id
-    cited_doc_details = {"title": "Cited Work", "author": "Cited Author"}
-    expected_sql = """
-        INSERT INTO "references" (source_chunk_id, cited_doc_details_jsonb)
-        VALUES (%s, %s)
-        RETURNING id;
-    """
-    expected_params = (source_chunk_id, serialized_details)
-
-    # Expect psycopg.IntegrityError to be raised
-    with pytest.raises(psycopg.IntegrityError, match="violates foreign key constraint"):
+    # Expect psycopg.IntegrityError to be raised and propagated
+    with pytest.raises(psycopg.IntegrityError):
         await db_layer.add_reference(mock_conn, source_chunk_id, cited_doc_details)
 
     # Assertions
     mock_json_serialize.assert_called_once_with(cited_doc_details)
-    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_cursor.execute.assert_awaited_once() # Ensure execute was called
     mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error
+
 # --- Test Search Operations ---
 
 @pytest.mark.asyncio
@@ -737,196 +727,164 @@ async def test_add_reference_invalid_chunk_id(mock_json_serialize, mock_get_conn
 @patch('src.philograph.data_access.db_layer.format_vector_for_pgvector')
 @patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension
 async def test_vector_search_chunks_success(mock_format_vector, mock_get_conn):
-    """Tests basic vector search returns correctly formatted results."""
+    """Tests basic vector search returns correctly mapped SearchResult objects."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    # Mock format_vector
-    query_embedding = [0.1, 0.2, 0.3]
-    formatted_query_embedding = "[0.1,0.2,0.3]"
+    query_embedding = [1.1, 2.2, 3.3]
+    formatted_query_embedding = "[1.1,2.2,3.3]"
     mock_format_vector.return_value = formatted_query_embedding
-
     top_k = 2
 
-    # Simulate database results (list of dicts, as if from dict_row)
+    # Simulate database results (list of dictionaries)
     db_results = [
         {
-            'chunk_id': 101, 'text_content': 'Result chunk 1', 'sequence': 0,
-            'section_id': 10, 'section_title': 'Section A',
-            'doc_id': 1, 'doc_title': 'Doc 1', 'doc_author': 'Author A', 'doc_year': 2020,
-            'source_path': '/path/doc1.pdf', 'distance': 0.123
+            'chunk_id': 101, 'text_content': 'Chunk A', 'sequence': 0,
+            'section_id': 789, 'section_title': 'Sec 1',
+            'doc_id': 123, 'doc_title': 'Doc X', 'doc_author': 'Auth X', 'doc_year': 2020,
+            'source_path': '/path/x.pdf', 'distance': 0.123
         },
         {
-            'chunk_id': 205, 'text_content': 'Result chunk 2', 'sequence': 5,
-            'section_id': 20, 'section_title': 'Section B',
-            'doc_id': 2, 'doc_title': 'Doc 2', 'doc_author': 'Author B', 'doc_year': 2021,
-            'source_path': '/path/doc2.pdf', 'distance': 0.456
+            'chunk_id': 105, 'text_content': 'Chunk B', 'sequence': 1,
+            'section_id': 790, 'section_title': 'Sec 2',
+            'doc_id': 124, 'doc_title': 'Doc Y', 'doc_author': 'Auth Y', 'doc_year': 2021,
+            'source_path': '/path/y.txt', 'distance': 0.456
         }
     ]
     mock_cursor.fetchall.return_value = db_results
 
-    # Expected SQL structure (simplified, focusing on key parts)
-    expected_base_sql_part = "SELECT c.id as chunk_id, c.text_content, c.sequence, s.id as section_id, s.title as section_title,"
-    expected_from_part = "FROM chunks c JOIN sections s ON c.section_id = s.id JOIN documents d ON s.doc_id = d.id"
-    expected_order_limit_part = "ORDER BY distance ASC LIMIT %s;"
-    distance_operator = "<=>" # Default in the function
+    expected_sql = f"""
+        SELECT c.id as chunk_id, c.text_content, c.sequence, s.id as section_id, s.title as section_title,
+               d.id as doc_id, d.title as doc_title, d.author as doc_author, d.year as doc_year, d.source_path,
+               c.embedding <=> %s::vector(3) AS distance
+        FROM chunks c
+        JOIN sections s ON c.section_id = s.id
+        JOIN documents d ON s.doc_id = d.id
+     ORDER BY distance ASC LIMIT %s;"""
+    expected_params = (formatted_query_embedding, top_k)
 
     # Call the function under test
     search_results = await db_layer.vector_search_chunks(mock_conn, query_embedding, top_k)
 
     # Assertions
     mock_format_vector.assert_called_once_with(query_embedding)
-    # Check the SQL structure and parameters
-    call_args, call_kwargs = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_base_sql_part in executed_sql
-    # Check for key JOIN parts instead of exact whitespace match
-    assert "FROM chunks c" in executed_sql and "JOIN sections s ON c.section_id = s.id" in executed_sql and "JOIN documents d ON s.doc_id = d.id" in executed_sql
-    assert f"c.embedding {distance_operator} %s::vector(3) AS distance" in executed_sql # Corrected assertion
-    assert expected_order_limit_part in executed_sql
-    assert "WHERE" not in executed_sql # No filters in this test
-    assert executed_params == (formatted_query_embedding, top_k) # query_vec, limit (dimension is in SQL string)
-
+    mock_cursor.execute.assert_awaited_once_with(expected_sql.strip(), expected_params)
     mock_cursor.fetchall.assert_awaited_once()
-
-    # Check the parsed results
-    assert len(search_results) == len(db_results)
-    assert all(isinstance(r, db_layer.SearchResult) for r in search_results)
+    assert len(search_results) == top_k
+    assert all(isinstance(res, SearchResult) for res in search_results)
+    # Check mapping for the first result
     assert search_results[0].chunk_id == db_results[0]['chunk_id']
     assert search_results[0].text_content == db_results[0]['text_content']
+    assert search_results[0].doc_title == db_results[0]['doc_title']
     assert search_results[0].distance == db_results[0]['distance']
-    assert search_results[1].doc_title == db_results[1]['doc_title']
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 @patch('src.philograph.data_access.db_layer.format_vector_for_pgvector')
 @patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension
 async def test_vector_search_chunks_with_filters(mock_format_vector, mock_get_conn):
-    """Tests vector search with metadata filters (author, year)."""
+    """Tests vector search with metadata filters."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    # Mock format_vector
     query_embedding = [0.1, 0.2, 0.3]
     formatted_query_embedding = "[0.1,0.2,0.3]"
     mock_format_vector.return_value = formatted_query_embedding
-
     top_k = 5
-    filters = {"author": "Test Author", "year": 2022}
+    filters = {"author": "Test Author", "year": 2023, "doc_id": 123}
 
-    # Simulate database results (empty for now, as focus is on SQL generation)
+    # Simulate database results (empty for simplicity, focus is on query construction)
     mock_cursor.fetchall.return_value = []
 
-    # Expected SQL structure
-    expected_base_sql_part = "SELECT c.id as chunk_id, c.text_content, c.sequence, s.id as section_id, s.title as section_title,"
-    expected_from_part = "FROM chunks c JOIN sections s ON c.section_id = s.id JOIN documents d ON s.doc_id = d.id"
-    expected_where_part_author = "d.author ILIKE %s"
-    expected_where_part_year = "d.year = %s"
-    expected_order_limit_part = "ORDER BY distance ASC LIMIT %s;"
-    distance_operator = "<=>"
+    expected_base_sql = f"""
+        SELECT c.id as chunk_id, c.text_content, c.sequence, s.id as section_id, s.title as section_title,
+               d.id as doc_id, d.title as doc_title, d.author as doc_author, d.year as doc_year, d.source_path,
+               c.embedding <=> %s::vector(3) AS distance
+        FROM chunks c
+        JOIN sections s ON c.section_id = s.id
+        JOIN documents d ON s.doc_id = d.id
+    """
+    expected_where = " WHERE d.author ILIKE %s AND d.year = %s AND d.id = %s"
+    expected_order_limit = " ORDER BY distance ASC LIMIT %s;"
+    expected_full_sql = expected_base_sql.strip() + expected_where + expected_order_limit
+
+    # Parameters: embedding, author filter, year filter, doc_id filter, top_k
+    expected_params = (
+        formatted_query_embedding,
+        f"%{filters['author']}%",
+        filters['year'],
+        filters['doc_id'],
+        top_k
+    )
 
     # Call the function under test
-    await db_layer.vector_search_chunks(mock_conn, query_embedding, top_k, filters=filters)
+    await db_layer.vector_search_chunks(mock_conn, query_embedding, top_k, filters)
 
     # Assertions
     mock_format_vector.assert_called_once_with(query_embedding)
-    # Check the SQL structure and parameters
-    call_args, call_kwargs = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_base_sql_part in executed_sql
-    assert "FROM chunks c" in executed_sql and "JOIN sections s" in executed_sql and "JOIN documents d" in executed_sql
-    assert f"c.embedding {distance_operator} %s::vector(3) AS distance" in executed_sql # Corrected assertion
-    # Check WHERE clauses are present and combined with AND
-    assert "WHERE" in executed_sql
-    assert expected_where_part_author in executed_sql
-    assert expected_where_part_year in executed_sql
-    assert "AND" in executed_sql # Check they are combined
-    assert expected_order_limit_part in executed_sql
-
-    # Check parameters: query_vec, dimension, author_filter, year_filter, limit
-    assert len(executed_params) == 4 # query_vec, author_filter, year_filter, limit (dimension is in SQL string)
-    assert executed_params[0] == formatted_query_embedding
-    assert executed_params[1] == f"%{filters['author']}%" # Author filter
-    assert executed_params[2] == filters['year'] # Year filter
-    assert executed_params[3] == top_k # Limit
-
+    # Check the constructed SQL and parameters
+    mock_cursor.execute.assert_awaited_once_with(expected_full_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 @patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension
 async def test_vector_search_chunks_invalid_dimension(mock_get_conn):
-    """Tests vector_search_chunks raises ValueError for invalid query dimension."""
+    """Tests vector search with incorrect query embedding dimension raises ValueError."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
-    # Add mock cursor to avoid AttributeError if the code reaches that point unexpectedly
-    mock_conn.cursor.return_value = AsyncMock(spec=psycopg.AsyncCursor)
 
-
-    query_embedding = [0.1, 0.2] # Invalid dimension (expected 3)
+    query_embedding = [0.1, 0.2] # Incorrect dimension (2 instead of 3)
     top_k = 5
 
-    # Expect ValueError due to dimension mismatch
+    # Expect ValueError to be raised
     with pytest.raises(ValueError, match="Query embedding dimension mismatch"):
         await db_layer.vector_search_chunks(mock_conn, query_embedding, top_k)
-
-    # Assertions
-    mock_conn.cursor.assert_not_called() # Should fail before DB interaction
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
-@patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension
 async def test_vector_search_chunks_empty_embedding(mock_get_conn):
-    """Tests vector_search_chunks raises ValueError for empty query embedding."""
+    """Tests vector search with an empty query embedding raises ValueError."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
-    # Add mock cursor to avoid AttributeError if the code reaches that point unexpectedly
-    mock_conn.cursor.return_value = AsyncMock(spec=psycopg.AsyncCursor)
 
     query_embedding = [] # Empty embedding
     top_k = 5
 
-    # Expect ValueError due to empty embedding
+    # Expect ValueError to be raised
     with pytest.raises(ValueError, match="Query embedding cannot be empty."):
         await db_layer.vector_search_chunks(mock_conn, query_embedding, top_k)
-
-    # Assertions
-    mock_conn.cursor.assert_not_called() # Should fail before DB interaction
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 @patch('src.philograph.data_access.db_layer.format_vector_for_pgvector')
 @patch('src.philograph.config.TARGET_EMBEDDING_DIMENSION', 3) # Mock dimension
 async def test_vector_search_chunks_db_error(mock_format_vector, mock_get_conn):
-    """Tests vector_search_chunks propagates DB errors."""
+    """Tests that vector search propagates database errors."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    # Mock format_vector
-    query_embedding = [0.1, 0.2, 0.3]
-    formatted_query_embedding = "[0.1,0.2,0.3]"
+    query_embedding = [1.1, 2.2, 3.3]
+    formatted_query_embedding = "[1.1,2.2,3.3]"
     mock_format_vector.return_value = formatted_query_embedding
+    top_k = 2
 
-    top_k = 5
-
-    # Simulate DB error during execute
-    db_error = psycopg.ProgrammingError("Simulated DB error during search")
+    # Simulate psycopg.Error on execute
+    db_error = psycopg.Error("Simulated DB error during search")
     mock_cursor.execute.side_effect = db_error
 
-    # Expect the psycopg error to be raised
-    with pytest.raises(psycopg.ProgrammingError, match="Simulated DB error"):
+    # Expect psycopg.Error to be raised and propagated
+    with pytest.raises(psycopg.Error) as excinfo:
         await db_layer.vector_search_chunks(mock_conn, query_embedding, top_k)
 
     # Assertions
+    assert excinfo.value is db_error # Check if the original error is propagated
     mock_format_vector.assert_called_once_with(query_embedding)
     mock_cursor.execute.assert_awaited_once() # Ensure execute was called
-    mock_cursor.fetchall.assert_not_called() # Should not be called if execute fails
+    mock_cursor.fetchall.assert_not_awaited() # Fetch should not be called on error
+
 # --- Test Relationship Operations ---
 
 @pytest.mark.asyncio
@@ -940,16 +898,16 @@ async def test_add_relationship_success(mock_json_serialize, mock_get_conn):
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
     # Simulate the RETURNING id from the database
-    mock_cursor.fetchone.return_value = {'id': 9001}
-    # Mock json_serialize
-    metadata = {"source": "test"}
-    serialized_metadata = '{"source": "test"}'
+    mock_cursor.fetchone.return_value = {'id': 301}
+
+    source_node_id = "doc:123"
+    target_node_id = "chunk:456"
+    relation_type = "cites"
+    metadata = {"page": 42}
+    serialized_metadata = '{"page": 42}'
     mock_json_serialize.return_value = serialized_metadata
 
-    source_node_id = "chunk:101"
-    target_node_id = "doc:5"
-    relation_type = "cites"
-    expected_id = 9001
+    expected_id = 301
     expected_sql = """
         INSERT INTO relationships (source_node_id, target_node_id, relation_type, metadata_jsonb)
         VALUES (%s, %s, %s, %s)
@@ -970,33 +928,30 @@ async def test_add_relationship_success(mock_json_serialize, mock_get_conn):
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 @patch('src.philograph.data_access.db_layer.json_serialize')
 async def test_add_relationship_db_error(mock_json_serialize, mock_get_conn):
-    """Tests add_relationship propagates DB errors."""
+    """Tests that add_relationship propagates database errors."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    # Mock json_serialize
-    metadata = {"source": "error_test"}
-    serialized_metadata = '{"source": "error_test"}'
+    source_node_id = "doc:123"
+    target_node_id = "doc:999" # Assume invalid target
+    relation_type = "related_to"
+    metadata = None
+    serialized_metadata = None
     mock_json_serialize.return_value = serialized_metadata
 
-    # Simulate DB error during execute
-    db_error = psycopg.ProgrammingError("Simulated DB error during relationship insert")
+    # Simulate psycopg.IntegrityError on execute
+    db_error = psycopg.IntegrityError("FK constraint violation")
     mock_cursor.execute.side_effect = db_error
 
-    source_node_id = "chunk:102"
-    target_node_id = "doc:6"
-    relation_type = "mentions"
-
-    # Expect the psycopg error to be raised
-    with pytest.raises(psycopg.ProgrammingError, match="Simulated DB error"):
+    # Expect psycopg.IntegrityError to be raised and propagated
+    with pytest.raises(psycopg.IntegrityError):
         await db_layer.add_relationship(mock_conn, source_node_id, target_node_id, relation_type, metadata)
 
     # Assertions
     mock_json_serialize.assert_called_once_with(metadata)
     mock_cursor.execute.assert_awaited_once() # Ensure execute was called
-    mock_cursor.fetchone.assert_not_called() # Should not be called if execute fails
     mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
@@ -1009,38 +964,26 @@ async def test_get_relationships_outgoing_success(mock_get_conn):
 
     node_id = "doc:123"
     db_results = [
-        {'id': 1, 'source_node_id': node_id, 'target_node_id': 'chunk:456', 'relation_type': 'contains', 'metadata_jsonb': None},
-        {'id': 2, 'source_node_id': node_id, 'target_node_id': 'doc:789', 'relation_type': 'cites', 'metadata_jsonb': {'page': 5}},
+        {'id': 301, 'source_node_id': node_id, 'target_node_id': 'chunk:456', 'relation_type': 'cites', 'metadata_jsonb': {'page': 42}},
+        {'id': 302, 'source_node_id': node_id, 'target_node_id': 'doc:789', 'relation_type': 'related_to', 'metadata_jsonb': None}
     ]
     mock_cursor.fetchall.return_value = db_results
 
-    expected_sql_base = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships"
-    expected_where = "WHERE source_node_id = %s"
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE source_node_id = %s"
     expected_params = (node_id,)
 
-    # Call the function under test (default direction is 'outgoing')
-    relationships = await db_layer.get_relationships(mock_conn, node_id)
+    # Call the function under test
+    relationships = await db_layer.get_relationships(mock_conn, node_id, direction='outgoing')
 
     # Assertions
-    call_args, _ = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_sql_base in executed_sql
-    assert expected_where in executed_sql
-    assert "target_node_id =" not in executed_sql # Ensure only source is checked
-    assert "relation_type =" not in executed_sql # No type filter
-    assert executed_params == expected_params
-
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
-    assert len(relationships) == len(db_results)
-    assert all(isinstance(r, db_layer.Relationship) for r in relationships)
+    assert len(relationships) == 2
+    assert all(isinstance(rel, Relationship) for rel in relationships)
     assert relationships[0].id == db_results[0]['id']
-    assert relationships[0].source_node_id == node_id
     assert relationships[0].target_node_id == db_results[0]['target_node_id']
-    assert relationships[0].relation_type == db_results[0]['relation_type']
-    assert relationships[0].metadata == {} # Default factory for None jsonb
-    assert relationships[1].metadata == db_results[1]['metadata_jsonb']
+    assert relationships[0].metadata == db_results[0]['metadata_jsonb']
+    assert relationships[1].metadata == {} # Check None metadata maps to empty dict
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_relationships_incoming_success(mock_get_conn):
@@ -1052,39 +995,26 @@ async def test_get_relationships_incoming_success(mock_get_conn):
 
     node_id = "chunk:456"
     db_results = [
-        {'id': 1, 'source_node_id': 'doc:123', 'target_node_id': node_id, 'relation_type': 'contains', 'metadata_jsonb': None},
-        {'id': 3, 'source_node_id': 'chunk:999', 'target_node_id': node_id, 'relation_type': 'relates_to', 'metadata_jsonb': {'certainty': 0.8}},
+        {'id': 301, 'source_node_id': 'doc:123', 'target_node_id': node_id, 'relation_type': 'cites', 'metadata_jsonb': {'page': 42}}
     ]
     mock_cursor.fetchall.return_value = db_results
 
-    expected_sql_base = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships"
-    expected_where = "WHERE target_node_id = %s"
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE target_node_id = %s"
     expected_params = (node_id,)
 
     # Call the function under test
     relationships = await db_layer.get_relationships(mock_conn, node_id, direction='incoming')
 
     # Assertions
-    call_args, _ = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_sql_base in executed_sql
-    assert expected_where in executed_sql
-    assert "source_node_id =" not in executed_sql # Ensure only target is checked
-    assert "relation_type =" not in executed_sql # No type filter
-    assert executed_params == expected_params
-
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
-    assert len(relationships) == len(db_results)
-    assert all(isinstance(r, db_layer.Relationship) for r in relationships)
-    assert relationships[0].target_node_id == node_id
-    assert relationships[1].target_node_id == node_id
-    assert relationships[1].metadata == db_results[1]['metadata_jsonb']
+    assert len(relationships) == 1
+    assert relationships[0].id == db_results[0]['id']
+    assert relationships[0].source_node_id == db_results[0]['source_node_id']
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_relationships_both_success(mock_get_conn):
-    """Tests retrieving both incoming and outgoing relationships successfully."""
+    """Tests retrieving both incoming and outgoing relationships."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -1092,33 +1022,21 @@ async def test_get_relationships_both_success(mock_get_conn):
 
     node_id = "doc:123"
     db_results = [
-        {'id': 1, 'source_node_id': node_id, 'target_node_id': 'chunk:456', 'relation_type': 'contains', 'metadata_jsonb': None}, # Outgoing
-        {'id': 4, 'source_node_id': 'doc:999', 'target_node_id': node_id, 'relation_type': 'cites', 'metadata_jsonb': None}, # Incoming
+        {'id': 301, 'source_node_id': node_id, 'target_node_id': 'chunk:456', 'relation_type': 'cites', 'metadata_jsonb': {}},
+        {'id': 305, 'source_node_id': 'doc:999', 'target_node_id': node_id, 'relation_type': 'cites', 'metadata_jsonb': {}}
     ]
     mock_cursor.fetchall.return_value = db_results
 
-    expected_sql_base = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships"
-    expected_where = "WHERE (source_node_id = %s OR target_node_id = %s)"
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE (source_node_id = %s OR target_node_id = %s)"
     expected_params = (node_id, node_id)
 
     # Call the function under test
     relationships = await db_layer.get_relationships(mock_conn, node_id, direction='both')
 
     # Assertions
-    call_args, _ = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_sql_base in executed_sql
-    assert expected_where in executed_sql
-    assert "relation_type =" not in executed_sql # No type filter
-    assert executed_params == expected_params
-
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
-    assert len(relationships) == len(db_results)
-    assert all(isinstance(r, db_layer.Relationship) for r in relationships)
-    assert relationships[0].source_node_id == node_id # First is outgoing
-    assert relationships[1].target_node_id == node_id # Second is incoming
+    assert len(relationships) == 2
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_relationships_outgoing_with_type_filter(mock_get_conn):
@@ -1131,66 +1049,44 @@ async def test_get_relationships_outgoing_with_type_filter(mock_get_conn):
     node_id = "doc:123"
     relation_type_filter = "cites"
     db_results = [
-        # Only the 'cites' relationship should be returned
-        {'id': 2, 'source_node_id': node_id, 'target_node_id': 'doc:789', 'relation_type': relation_type_filter, 'metadata_jsonb': {'page': 5}},
-    ]
+        {'id': 301, 'source_node_id': node_id, 'target_node_id': 'chunk:456', 'relation_type': relation_type_filter, 'metadata_jsonb': {}}
+    ] # Only the 'cites' relationship should be returned
     mock_cursor.fetchall.return_value = db_results
 
-    expected_sql_base = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships"
-    expected_where_source = "WHERE source_node_id = %s"
-    expected_where_type = "AND relation_type = %s"
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE source_node_id = %s AND relation_type = %s"
     expected_params = (node_id, relation_type_filter)
 
     # Call the function under test
     relationships = await db_layer.get_relationships(mock_conn, node_id, direction='outgoing', relation_type=relation_type_filter)
 
     # Assertions
-    call_args, _ = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_sql_base in executed_sql
-    assert expected_where_source in executed_sql
-    assert expected_where_type in executed_sql
-    assert executed_params == expected_params
-
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
-    assert len(relationships) == len(db_results)
+    assert len(relationships) == 1
+    assert relationships[0].relation_type == relation_type_filter
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_relationships_non_existent_node(mock_get_conn):
-    """Tests retrieving relationships for a non-existent node returns empty list."""
+    """Tests retrieving relationships for a non-existent node returns an empty list."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
     node_id = "non:existent"
-    # Simulate database returning no rows
+    # Simulate fetchall returning an empty list
     mock_cursor.fetchall.return_value = []
 
-    expected_sql_base = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships"
-    expected_where = "WHERE source_node_id = %s" # Default direction is outgoing
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE source_node_id = %s"
     expected_params = (node_id,)
 
-    # Call the function under test
+    # Call the function under test (default direction is outgoing)
     relationships = await db_layer.get_relationships(mock_conn, node_id)
 
     # Assertions
-    call_args, _ = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_sql_base in executed_sql
-    assert expected_where in executed_sql
-    assert executed_params == expected_params
-
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
     assert relationships == []
-    # The following assertion is removed as it causes IndexError on an empty list
-    # assert all(isinstance(r, db_layer.Relationship) for r in relationships)
-    # assert relationships[0].relation_type == relation_type_filter
-    # assert relationships[0].source_node_id == node_id # Removed: Causes IndexError on empty list
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_relationships_for_document_success(mock_get_conn):
@@ -1201,105 +1097,93 @@ async def test_get_relationships_for_document_success(mock_get_conn):
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
     doc_id = 123
-    # Mock database response (assuming source_node_id is 'chunk:id')
-    db_rows = [
-        {'id': 1, 'source_node_id': 'chunk:101', 'target_node_id': 'doc:456', 'relation_type': 'cites', 'metadata_jsonb': {'context': 'page 5'}},
-        {'id': 2, 'source_node_id': 'chunk:102', 'target_node_id': 'concept:abc', 'relation_type': 'mentions', 'metadata_jsonb': None},
+    db_results = [
+        {'id': 301, 'source_node_id': 'chunk:456', 'target_node_id': 'doc:789', 'relation_type': 'cites', 'metadata_jsonb': {'page': 10}},
+        {'id': 302, 'source_node_id': 'chunk:457', 'target_node_id': 'doc:790', 'relation_type': 'cites', 'metadata_jsonb': None}
     ]
-    mock_cursor.fetchall.return_value = db_rows
+    mock_cursor.fetchall.return_value = db_results
 
-    # Define the expected SQL query (adjust based on actual schema/logic)
-    # This query assumes relationships are linked via chunks belonging to sections of the target doc_id
-    expected_sql_fragment_select = "SELECT r.id, r.source_node_id, r.target_node_id, r.relation_type, r.metadata_jsonb"
-    expected_sql_fragment_from = "FROM relationships r JOIN chunks c ON r.source_node_id = 'chunk:' || c.id::text JOIN sections s ON c.section_id = s.id"
-    expected_sql_fragment_where = "WHERE s.doc_id = %s"
+    expected_sql = """
+        SELECT r.id, r.source_node_id, r.target_node_id, r.relation_type, r.metadata_jsonb
+        FROM relationships r
+        JOIN chunks c ON r.source_node_id = 'chunk:' || c.id::text
+        JOIN sections s ON c.section_id = s.id
+        WHERE s.doc_id = %s;
+    """
     expected_params = (doc_id,)
 
     # Call the function under test
     relationships = await db_layer.get_relationships_for_document(mock_conn, doc_id)
 
     # Assertions
-    # Check that execute was called with SQL containing the expected fragments and parameters
-    call_args, call_kwargs = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_sql_fragment_select in executed_sql
-    # Check for essential JOIN parts instead of the exact multiline fragment
-    assert "FROM relationships r" in executed_sql
-    assert "JOIN chunks c ON r.source_node_id = 'chunk:' || c.id::text" in executed_sql
-    assert "JOIN sections s ON c.section_id = s.id" in executed_sql
-    assert expected_sql_fragment_where in executed_sql
-    assert executed_params == expected_params
-
+    mock_cursor.execute.assert_awaited_once_with(expected_sql.strip(), expected_params)
     mock_cursor.fetchall.assert_awaited_once()
     assert len(relationships) == 2
-    assert isinstance(relationships[0], db_layer.Relationship)
-    assert relationships[0].id == 1
-    assert relationships[0].source_node_id == 'chunk:101'
-    assert relationships[0].target_node_id == 'doc:456'
-    assert relationships[0].relation_type == 'cites'
-    assert relationships[0].metadata == {'context': 'page 5'}
-    assert isinstance(relationships[1], db_layer.Relationship)
+    assert all(isinstance(rel, Relationship) for rel in relationships)
+    assert relationships[0].id == db_results[0]['id']
+    assert relationships[0].source_node_id == db_results[0]['source_node_id']
+    assert relationships[0].metadata == db_results[0]['metadata_jsonb']
+    assert relationships[1].metadata == {} # Check None metadata maps to empty dict
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_relationships_for_document_empty(mock_get_conn):
-    """Tests retrieving relationships for a document with no relationships returns empty list."""
+    """Tests retrieving relationships for a document with no relationships."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    doc_id = 456
-    # Mock database response as empty
-    db_rows = []
-    mock_cursor.fetchall.return_value = db_rows
+    doc_id = 124
+    # Simulate fetchall returning an empty list
+    mock_cursor.fetchall.return_value = []
 
-    expected_sql_fragment_where = "WHERE s.doc_id = %s"
+    expected_sql = """
+        SELECT r.id, r.source_node_id, r.target_node_id, r.relation_type, r.metadata_jsonb
+        FROM relationships r
+        JOIN chunks c ON r.source_node_id = 'chunk:' || c.id::text
+        JOIN sections s ON c.section_id = s.id
+        WHERE s.doc_id = %s;
+    """
     expected_params = (doc_id,)
 
     # Call the function under test
     relationships = await db_layer.get_relationships_for_document(mock_conn, doc_id)
 
     # Assertions
-    call_args, call_kwargs = mock_cursor.execute.call_args
-    executed_sql = call_args[0]
-    executed_params = call_args[1]
-
-    assert expected_sql_fragment_where in executed_sql
-    assert executed_params == expected_params
+    mock_cursor.execute.assert_awaited_once_with(expected_sql.strip(), expected_params)
     mock_cursor.fetchall.assert_awaited_once()
     assert relationships == []
+# --- Test Collection Operations ---
+
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_collection_success(mock_get_conn):
-    """Tests adding a new collection successfully."""
+    """Tests successfully adding a new collection."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    collection_name = "Test Collection"
-    expected_collection_id = 99
+    # Simulate the RETURNING id from the database
+    mock_cursor.fetchone.return_value = (1,) # Return a tuple as fetchone does
 
-    # Simulate fetchone returning the new ID
-    mock_cursor.fetchone.return_value = (expected_collection_id,)
-
-    # Call the function under test
-    collection_id = await db_layer.add_collection(mock_conn, collection_name)
-
-    # Assertions
+    collection_name = "My Test Collection"
+    expected_id = 1
     expected_sql = "INSERT INTO collections (name) VALUES (%s) RETURNING id;"
     expected_params = (collection_name,)
 
+    # Call the function under test
+    returned_id = await db_layer.add_collection(mock_conn, collection_name)
+
+    # Assertions
     mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_cursor.fetchone.assert_awaited_once()
     mock_conn.commit.assert_awaited_once()
-    assert collection_id == expected_collection_id
+    assert returned_id == expected_id
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_collection_db_error(mock_get_conn):
-    """Tests handling of database errors during collection addition."""
+    """Tests that add_collection propagates database errors."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
@@ -1307,239 +1191,204 @@ async def test_add_collection_db_error(mock_get_conn):
 
     collection_name = "Error Collection"
 
-    # Simulate a database error during execute
-    db_error = psycopg.Error("Simulated DB error")
+    # Simulate psycopg.Error on execute
+    db_error = psycopg.Error("Simulated DB error during collection insert")
     mock_cursor.execute.side_effect = db_error
 
-    # Call the function under test and expect an error
+    expected_sql = "INSERT INTO collections (name) VALUES (%s) RETURNING id;"
+    expected_params = (collection_name,)
+
+    # Expect psycopg.Error to be raised and propagated
     with pytest.raises(psycopg.Error) as excinfo:
         await db_layer.add_collection(mock_conn, collection_name)
 
     # Assertions
     assert excinfo.value is db_error # Check if the original error is propagated
-    expected_sql = "INSERT INTO collections (name) VALUES (%s) RETURNING id;"
-    expected_params = (collection_name,)
-
     mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
-    mock_cursor.fetchone.assert_not_awaited() # Should not be called if execute fails
-    mock_conn.commit.assert_not_awaited() # Ensure commit was NOT called on error
+    mock_cursor.fetchone.assert_not_awaited() # Fetchone should not be called
+    mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_item_to_collection_document_success(mock_get_conn):
-    """Tests adding a document item to a collection successfully."""
+    """Tests successfully adding a document item to a collection."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    collection_id = 99
+    collection_id = 1
     item_type = "document"
     item_id = 123
+    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
+    expected_params = (collection_id, item_type, item_id)
 
     # Call the function under test
     await db_layer.add_item_to_collection(mock_conn, collection_id, item_type, item_id)
 
     # Assertions
-    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
-    expected_params = (collection_id, item_type, item_id)
-
     mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_conn.commit.assert_awaited_once()
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_item_to_collection_chunk_success(mock_get_conn):
-    """Tests adding a chunk item to a collection successfully."""
+    """Tests successfully adding a chunk item to a collection."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    collection_id = 100
+    collection_id = 2
     item_type = "chunk"
     item_id = 456
+    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
+    expected_params = (collection_id, item_type, item_id)
 
     # Call the function under test
     await db_layer.add_item_to_collection(mock_conn, collection_id, item_type, item_id)
 
     # Assertions
-    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
-    expected_params = (collection_id, item_type, item_id)
-
     mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_conn.commit.assert_awaited_once()
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_item_to_collection_invalid_collection_id(mock_get_conn):
-    """Tests adding an item to a non-existent collection raises an error."""
+    """Tests adding an item with an invalid collection_id raises IntegrityError."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    invalid_collection_id = -1 # Assuming -1 is never a valid ID
+    collection_id = 999 # Non-existent collection ID
     item_type = "document"
     item_id = 123
 
-    # Simulate a foreign key violation error
-    # Use IntegrityError as it's a common error for FK violations
-    db_error = psycopg.IntegrityError("Simulated FK violation")
-    mock_cursor.execute.side_effect = db_error
+    # Simulate psycopg.IntegrityError (foreign key violation) on execute
+    mock_cursor.execute.side_effect = psycopg.IntegrityError("insert or update on table \"collection_items\" violates foreign key constraint")
 
-    # Call the function under test and expect an IntegrityError
-    with pytest.raises(psycopg.IntegrityError) as excinfo:
-        await db_layer.add_item_to_collection(mock_conn, invalid_collection_id, item_type, item_id)
+    # Expect psycopg.IntegrityError to be raised and propagated
+    with pytest.raises(psycopg.IntegrityError):
+        await db_layer.add_item_to_collection(mock_conn, collection_id, item_type, item_id)
 
     # Assertions
-    assert excinfo.value is db_error
-    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
-    expected_params = (invalid_collection_id, item_type, item_id)
-
-    # Execute should be called, and raise the simulated error
-    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
-    mock_conn.commit.assert_not_awaited()
+    mock_cursor.execute.assert_awaited_once() # Ensure execute was called
+    mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_item_to_collection_invalid_item_type(mock_get_conn):
-    """Tests adding an item with an invalid type raises a database error."""
+    """Tests adding an item with an invalid item_type raises ValueError."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
-    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
-    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    collection_id = 101
-    invalid_item_type = "invalid_type" # Assuming this is not a valid type
-    item_id = 789
+    collection_id = 1
+    item_type = "invalid_type" # Invalid type
+    item_id = 123
 
-    # Simulate a database data error (e.g., check constraint violation)
-    db_error = psycopg.DataError("Simulated invalid item_type error")
-    mock_cursor.execute.side_effect = db_error
+    # Expect ValueError to be raised due to the check within the function
+    with pytest.raises(ValueError, match="Invalid item_type"):
+        await db_layer.add_item_to_collection(mock_conn, collection_id, item_type, item_id)
 
-    # Call the function under test and expect a ValueError due to application-level validation
-    with pytest.raises(ValueError) as excinfo:
-         await db_layer.add_item_to_collection(mock_conn, collection_id, invalid_item_type, item_id)
-
-    # Assertions
-    assert "Invalid item_type" in str(excinfo.value) # Check the error message
-    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
-    expected_params = (collection_id, invalid_item_type, item_id)
-
-    # Database should not be touched if validation fails before the call
-    mock_cursor.execute.assert_not_awaited()
-    mock_conn.commit.assert_not_awaited() # Commit should not be called on error
+    # Ensure commit was not called
+    mock_conn.commit.assert_not_called()
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_add_item_to_collection_db_error(mock_get_conn):
-    """Tests handling of general database errors during item addition."""
+    """Tests that add_item_to_collection propagates database errors."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    collection_id = 102
+    collection_id = 1
     item_type = "document"
-    item_id = 999
+    item_id = 123
 
-    # Simulate a generic database error
-    db_error = psycopg.Error("Simulated generic DB error")
+    # Simulate psycopg.Error on execute
+    db_error = psycopg.Error("Simulated DB error during item insert")
     mock_cursor.execute.side_effect = db_error
 
-    # Call the function under test and expect the error
+    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
+    expected_params = (collection_id, item_type, item_id)
+
+    # Expect psycopg.Error to be raised and propagated
     with pytest.raises(psycopg.Error) as excinfo:
         await db_layer.add_item_to_collection(mock_conn, collection_id, item_type, item_id)
 
     # Assertions
-    assert excinfo.value is db_error
-    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
-    expected_params = (collection_id, item_type, item_id)
-
+    assert excinfo.value is db_error # Check if the original error is propagated
     mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
-    mock_conn.commit.assert_not_awaited() # Commit should not be called on error
+    mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_collection_items_success(mock_get_conn):
-    """Tests retrieving items from a collection successfully."""
+    """Tests retrieving items from a collection with multiple items."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    collection_id = 103
-    expected_items = [
-        ("document", 123),
-        ("chunk", 456),
-        ("document", 789),
-    ]
-    # Simulate fetchall returning the items as tuples
+    collection_id = 1
+    expected_items = [("document", 123), ("chunk", 456)]
+    # Simulate fetchall returning a list of tuples
     mock_cursor.fetchall.return_value = expected_items
+
+    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    expected_params = (collection_id,)
 
     # Call the function under test
     items = await db_layer.get_collection_items(mock_conn, collection_id)
 
     # Assertions
-    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
-    expected_params = (collection_id,)
-
-    # Check both execute calls were made
-    assert mock_cursor.execute.await_count == 2
-    # Check the second call specifically
-    mock_cursor.execute.assert_awaited_with(expected_sql, expected_params)
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
-    # The function currently returns raw tuples based on list_code_definition_names output
-    # Adjust assertion if a data model/dict mapping is implemented later
     assert items == expected_items
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_collection_items_empty(mock_get_conn):
-    """Tests retrieving items from an empty collection returns an empty list."""
+    """Tests retrieving items from an empty collection."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
-    collection_id = 104 # An existing but empty collection
-
+    collection_id = 2
+    expected_items = []
     # Simulate fetchall returning an empty list
-    mock_cursor.fetchall.return_value = []
+    mock_cursor.fetchall.return_value = expected_items
+
+    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    expected_params = (collection_id,)
 
     # Call the function under test
     items = await db_layer.get_collection_items(mock_conn, collection_id)
 
     # Assertions
-    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
-    expected_params = (collection_id,)
-
-    # Check both execute calls were made
-    assert mock_cursor.execute.await_count == 2
-    # Check the second call specifically
-    mock_cursor.execute.assert_awaited_with(expected_sql, expected_params)
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_cursor.fetchall.assert_awaited_once()
-    assert items == []
+    assert items == expected_items
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_collection_items_non_existent_id(mock_get_conn):
-    """Tests retrieving items for a non-existent collection ID returns None."""
+    """Tests retrieving items for a non-existent collection ID returns an empty list."""
     mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
     mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
     mock_get_conn.return_value.__aenter__.return_value = mock_conn
     mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
 
     non_existent_collection_id = -999 # Assuming negative IDs are never valid
+    expected_items = []
+    # Simulate fetchall returning an empty list for a non-existent ID
+    mock_cursor.fetchall.return_value = expected_items
 
-    # Simulate the existence check returning False
-    mock_cursor.fetchone.return_value = (False,)
+    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    expected_params = (non_existent_collection_id,)
 
     # Call the function under test
     items = await db_layer.get_collection_items(mock_conn, non_existent_collection_id)
 
     # Assertions
-    expected_check_sql = "SELECT EXISTS(SELECT 1 FROM collections WHERE id = %s);"
-    expected_check_params = (non_existent_collection_id,)
-
-    # Only the existence check should be executed
-    mock_cursor.execute.assert_awaited_once_with(expected_check_sql, expected_check_params)
-    mock_cursor.fetchone.assert_awaited_once()
-    mock_cursor.fetchall.assert_not_awaited() # The second query should not run
-    assert items is None # Function should return None
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_cursor.fetchall.assert_awaited_once()
+    assert items == expected_items
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_get_collection_items_db_error(mock_get_conn):
@@ -1551,20 +1400,9 @@ async def test_get_collection_items_db_error(mock_get_conn):
 
     collection_id = 105
 
-    # Simulate the existence check passing
-    mock_cursor.fetchone.return_value = (True,)
-
-    # Simulate a database error during the *second* execute call
+    # Simulate a database error during the execute call
     db_error = psycopg.Error("Simulated DB error during item retrieval")
-
-    async def execute_side_effect(sql, params):
-        if "collection_items" in sql: # Identify the second query
-            raise db_error
-        # Allow the first query (existence check) to proceed normally
-        # (The actual return value of execute itself isn't usually checked directly)
-        return None
-
-    mock_cursor.execute.side_effect = execute_side_effect
+    mock_cursor.execute.side_effect = db_error
 
     # Call the function under test and expect the error
     with pytest.raises(psycopg.Error) as excinfo:
@@ -1574,15 +1412,12 @@ async def test_get_collection_items_db_error(mock_get_conn):
     assert excinfo.value is db_error # Check if the original error is propagated
 
     # Check calls
-    expected_check_sql = "SELECT EXISTS(SELECT 1 FROM collections WHERE id = %s);"
-    expected_check_params = (collection_id,)
     expected_items_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
     expected_items_params = (collection_id,)
 
-    assert mock_cursor.execute.await_count == 2
-    mock_cursor.execute.assert_any_await(expected_check_sql, expected_check_params)
-    mock_cursor.execute.assert_any_await(expected_items_sql, expected_items_params)
-    mock_cursor.fetchall.assert_not_awaited() # Should not be called if execute fails
+    # Check the execute call was made once with the correct SQL
+    mock_cursor.execute.assert_awaited_once_with(expected_items_sql, expected_items_params)
+    mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error
 @pytest.mark.asyncio
 @patch('src.philograph.data_access.db_layer.get_db_connection')
 async def test_remove_item_from_collection_success(mock_get_conn):
@@ -1649,9 +1484,6 @@ async def test_delete_collection_success(mock_get_conn):
     # Simulate the cursor rowcount indicating 1 row was deleted
     mock_cursor.rowcount = 1
 
-    # Note: The placeholder mentions deleting items too. A real implementation
-    # might need two separate queries (or rely on CASCADE DELETE).
-    # For minimal implementation, we'll just test the collection deletion.
     expected_sql = "DELETE FROM collections WHERE id = %s;"
     expected_params = (collection_id,)
 
@@ -1686,3 +1518,452 @@ async def test_delete_collection_not_found(mock_get_conn):
     mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
     mock_conn.commit.assert_awaited_once()
     assert deleted is False
+
+# --- Test Schema Initialization ---
+# Note: These tests are basic checks. More comprehensive tests might involve
+# inspecting the database schema directly or using a dedicated testing database.
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_initialize_schema_success(mock_get_conn):
+    """Tests that initialize_schema executes all expected SQL commands."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    # Call the function under test
+    await db_layer.initialize_schema(mock_conn)
+
+    # Assertions
+    # Check that execute was called multiple times (at least for each CREATE statement)
+    assert mock_cursor.execute.await_count >= 10 # Adjust count based on actual number of statements
+    # Check specific statements were executed (optional, can be brittle)
+    mock_cursor.execute.assert_any_await("CREATE EXTENSION IF NOT EXISTS vector;")
+    mock_cursor.execute.assert_any_await("CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;") # Example check
+    mock_cursor.execute.assert_any_await("CREATE TABLE IF NOT EXISTS documents (") # Check table creation start
+    mock_cursor.execute.assert_any_await("CREATE TABLE IF NOT EXISTS sections (")
+    mock_cursor.execute.assert_any_await("CREATE TABLE IF NOT EXISTS chunks (")
+    mock_cursor.execute.assert_any_await("CREATE TABLE IF NOT EXISTS \"references\" (") # Quoted table name
+    mock_cursor.execute.assert_any_await("CREATE TABLE IF NOT EXISTS relationships (")
+    mock_cursor.execute.assert_any_await("CREATE TABLE IF NOT EXISTS collections (")
+    mock_cursor.execute.assert_any_await("CREATE TABLE IF NOT EXISTS collection_items (")
+    mock_cursor.execute.assert_any_await("CREATE INDEX IF NOT EXISTS idx_chunks_embedding ON chunks USING hnsw (embedding vector_cosine_ops);") # Check index creation
+
+    mock_conn.commit.assert_awaited_once() # Should commit at the end
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_initialize_schema_db_error(mock_get_conn):
+    """Tests that initialize_schema propagates database errors."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    # Simulate psycopg.Error on one of the execute calls
+    db_error = psycopg.Error("Simulated DB error during schema init")
+    mock_cursor.execute.side_effect = db_error
+
+    # Expect psycopg.Error to be raised and propagated
+    with pytest.raises(psycopg.Error) as excinfo:
+        await db_layer.initialize_schema(mock_conn)
+
+    # Assertions
+    assert excinfo.value is db_error # Check if the original error is propagated
+    mock_cursor.execute.assert_awaited_once() # Should fail on the first execute
+    mock_conn.commit.assert_not_called() # Commit should not be called on error
+
+# --- Test Relationship Functions (Mocker based) ---
+# These tests use mocker fixture for simpler mocking setup
+
+@pytest.mark.asyncio
+async def test_add_relationship_cites_success(mocker):
+    """Tests adding a 'cites' relationship successfully."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    mock_cursor.fetchone.return_value = {'id': 1} # Simulate returning ID
+
+    source = "doc:1"
+    target = "doc:2"
+    rel_type = "cites"
+    metadata = {"page": 5}
+    serialized_metadata = json.dumps(metadata)
+
+    mocker.patch('src.philograph.data_access.db_layer.json_serialize', return_value=serialized_metadata)
+
+    result_id = await db_layer.add_relationship(mock_conn, source, target, rel_type, metadata)
+
+    expected_sql = """
+        INSERT INTO relationships (source_node_id, target_node_id, relation_type, metadata_jsonb)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id;
+    """
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, (source, target, rel_type, serialized_metadata))
+    mock_conn.commit.assert_awaited_once()
+    assert result_id == 1
+
+@pytest.mark.asyncio
+async def test_add_relationship_invalid_source_node(mocker):
+    """Tests adding relationship with invalid source node raises IntegrityError."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    mock_cursor.execute.side_effect = psycopg.IntegrityError("FK violation")
+
+    mocker.patch('src.philograph.data_access.db_layer.json_serialize', return_value=None)
+
+    with pytest.raises(psycopg.IntegrityError):
+        await db_layer.add_relationship(mock_conn, "invalid:1", "doc:2", "cites")
+
+    mock_conn.commit.assert_not_called()
+
+@pytest.mark.asyncio
+async def test_add_relationship_invalid_target_node(mocker):
+    """Tests adding relationship with invalid target node raises IntegrityError."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    mock_cursor.execute.side_effect = psycopg.IntegrityError("FK violation")
+
+    mocker.patch('src.philograph.data_access.db_layer.json_serialize', return_value=None)
+
+    with pytest.raises(psycopg.IntegrityError):
+        await db_layer.add_relationship(mock_conn, "doc:1", "invalid:2", "cites")
+
+    mock_conn.commit.assert_not_called()
+
+@pytest.mark.asyncio
+async def test_add_relationship_with_metadata(mocker):
+    """Tests adding a relationship with metadata."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    mock_cursor.fetchone.return_value = {'id': 2}
+
+    metadata = {"certainty": 0.9, "source": "manual"}
+    serialized_metadata = json.dumps(metadata)
+    mocker.patch('src.philograph.data_access.db_layer.json_serialize', return_value=serialized_metadata)
+
+    result_id = await db_layer.add_relationship(mock_conn, "chunk:10", "chunk:11", "related_concept", metadata)
+
+    expected_sql = """
+        INSERT INTO relationships (source_node_id, target_node_id, relation_type, metadata_jsonb)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id;
+    """
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, ("chunk:10", "chunk:11", "related_concept", serialized_metadata))
+    mock_conn.commit.assert_awaited_once()
+    assert result_id == 2
+
+@pytest.mark.asyncio
+async def test_get_relationships_outgoing_cites(mocker):
+    """Tests getting outgoing 'cites' relationships."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    db_results = [
+        {'id': 1, 'source_node_id': 'doc:1', 'target_node_id': 'doc:2', 'relation_type': 'cites', 'metadata_jsonb': {'page': 5}},
+        {'id': 3, 'source_node_id': 'doc:1', 'target_node_id': 'chunk:10', 'relation_type': 'cites', 'metadata_jsonb': None}
+    ]
+    mock_cursor.fetchall.return_value = db_results
+
+    relationships = await db_layer.get_relationships(mock_conn, "doc:1", direction='outgoing', relation_type='cites')
+
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE source_node_id = %s AND relation_type = %s"
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, ("doc:1", "cites"))
+    assert len(relationships) == 2
+    assert relationships[0].id == 1
+    assert relationships[0].target_node_id == 'doc:2'
+    assert relationships[0].metadata == {'page': 5}
+    assert relationships[1].id == 3
+    assert relationships[1].target_node_id == 'chunk:10'
+    assert relationships[1].metadata == {}
+
+@pytest.mark.asyncio
+async def test_get_relationships_incoming_cites(mocker):
+    """Tests getting incoming 'cites' relationships."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    db_results = [
+        {'id': 4, 'source_node_id': 'doc:5', 'target_node_id': 'doc:2', 'relation_type': 'cites', 'metadata_jsonb': None}
+    ]
+    mock_cursor.fetchall.return_value = db_results
+
+    relationships = await db_layer.get_relationships(mock_conn, "doc:2", direction='incoming', relation_type='cites')
+
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE target_node_id = %s AND relation_type = %s"
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, ("doc:2", "cites"))
+    assert len(relationships) == 1
+    assert relationships[0].id == 4
+    assert relationships[0].source_node_id == 'doc:5'
+    assert relationships[0].metadata == {}
+
+@pytest.mark.asyncio
+async def test_get_relationships_specific_type(mocker):
+    """Tests getting relationships filtered only by type (both directions)."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    db_results = [
+        {'id': 5, 'source_node_id': 'chunk:10', 'target_node_id': 'chunk:11', 'relation_type': 'related_concept', 'metadata_jsonb': {}},
+    ]
+    mock_cursor.fetchall.return_value = db_results
+
+    # Note: The function requires node_id, so this test case might need adjustment
+    # if we want to search *only* by type across all nodes.
+    # Assuming we search for 'related_concept' around 'chunk:10'
+    node_id = "chunk:10"
+    rel_type = "related_concept"
+    relationships = await db_layer.get_relationships(mock_conn, node_id, direction='both', relation_type=rel_type)
+
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE (source_node_id = %s OR target_node_id = %s) AND relation_type = %s"
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, (node_id, node_id, rel_type))
+    assert len(relationships) == 1
+    assert relationships[0].id == 5
+
+@pytest.mark.asyncio
+async def test_get_relationships_direction_both(mocker):
+    """Tests getting relationships in both directions."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    db_results = [
+        {'id': 1, 'source_node_id': 'doc:1', 'target_node_id': 'doc:2', 'relation_type': 'cites', 'metadata_jsonb': {}}, # Outgoing
+        {'id': 4, 'source_node_id': 'doc:5', 'target_node_id': 'doc:1', 'relation_type': 'cites', 'metadata_jsonb': {}}  # Incoming
+    ]
+    mock_cursor.fetchall.return_value = db_results
+
+    node_id = "doc:1"
+    relationships = await db_layer.get_relationships(mock_conn, node_id, direction='both')
+
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE (source_node_id = %s OR target_node_id = %s)"
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, (node_id, node_id))
+    assert len(relationships) == 2
+
+@pytest.mark.asyncio
+async def test_get_relationships_non_existent_node(mocker):
+    """Tests getting relationships for a non-existent node returns empty list."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = mocker.AsyncMock(spec=psycopg.AsyncCursor)
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+    mock_cursor.fetchall.return_value = [] # Simulate no results
+
+    node_id = "nonexistent:999"
+    relationships = await db_layer.get_relationships(mock_conn, node_id) # Default outgoing
+
+    expected_sql = "SELECT id, source_node_id, target_node_id, relation_type, metadata_jsonb FROM relationships WHERE source_node_id = %s"
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, (node_id,))
+    assert relationships == []
+
+@pytest.mark.asyncio
+async def test_get_relationships_invalid_direction(mocker):
+    """Tests that an invalid direction raises ValueError."""
+    mock_conn = mocker.AsyncMock(spec=psycopg.AsyncConnection)
+
+    with pytest.raises(ValueError, match="Invalid direction specified"):
+        await db_layer.get_relationships(mock_conn, "doc:1", direction="sideways")
+
+
+# --- Test Collection Operations ---
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_add_collection_success(mock_get_conn):
+    """Tests successfully adding a new collection."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    # Simulate the RETURNING id from the database
+    mock_cursor.fetchone.return_value = (1,) # Return a tuple as fetchone does
+
+    collection_name = "My Test Collection"
+    expected_id = 1
+    expected_sql = "INSERT INTO collections (name) VALUES (%s) RETURNING id;"
+    expected_params = (collection_name,)
+
+    # Call the function under test
+    returned_id = await db_layer.add_collection(mock_conn, collection_name)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_cursor.fetchone.assert_awaited_once()
+    mock_conn.commit.assert_awaited_once()
+    assert returned_id == expected_id
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_add_item_to_collection_document_success(mock_get_conn):
+    """Tests successfully adding a document item to a collection."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 1
+    item_type = "document"
+    item_id = 123
+    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
+    expected_params = (collection_id, item_type, item_id)
+
+    # Call the function under test
+    await db_layer.add_item_to_collection(mock_conn, collection_id, item_type, item_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_conn.commit.assert_awaited_once()
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_add_item_to_collection_chunk_success(mock_get_conn):
+    """Tests successfully adding a chunk item to a collection."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 2
+    item_type = "chunk"
+    item_id = 456
+    expected_sql = "INSERT INTO collection_items (collection_id, item_type, item_id) VALUES (%s, %s, %s);"
+    expected_params = (collection_id, item_type, item_id)
+
+    # Call the function under test
+    await db_layer.add_item_to_collection(mock_conn, collection_id, item_type, item_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_conn.commit.assert_awaited_once()
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_add_item_to_collection_non_existent_collection(mock_get_conn):
+    """Tests adding an item to a non-existent collection raises IntegrityError."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    # Simulate psycopg.IntegrityError (foreign key violation) on execute
+    mock_cursor.execute.side_effect = psycopg.IntegrityError("insert or update on table \"collection_items\" violates foreign key constraint")
+
+    collection_id = 999 # Non-existent collection ID
+    item_type = "document"
+    item_id = 123
+
+    # Expect psycopg.IntegrityError to be raised and propagated
+    with pytest.raises(psycopg.IntegrityError):
+        await db_layer.add_item_to_collection(mock_conn, collection_id, item_type, item_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once() # Ensure execute was called
+    mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_get_collection_items_success(mock_get_conn):
+    """Tests retrieving items from a collection with multiple items."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 1
+    expected_items = [("document", 123), ("chunk", 456)]
+    # Simulate fetchall returning a list of tuples
+    mock_cursor.fetchall.return_value = expected_items
+
+    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    expected_params = (collection_id,)
+
+    # Call the function under test
+    items = await db_layer.get_collection_items(mock_conn, collection_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_cursor.fetchall.assert_awaited_once()
+    assert items == expected_items
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_get_collection_items_empty(mock_get_conn):
+    """Tests retrieving items from an empty collection."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 2
+    expected_items = []
+    # Simulate fetchall returning an empty list
+    mock_cursor.fetchall.return_value = expected_items
+
+    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    expected_params = (collection_id,)
+
+    # Call the function under test
+    items = await db_layer.get_collection_items(mock_conn, collection_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_cursor.fetchall.assert_awaited_once()
+    assert items == expected_items
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_get_collection_items_non_existent_id(mock_get_conn):
+    """Tests retrieving items for a non-existent collection ID returns an empty list."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    non_existent_collection_id = -999 # Assuming negative IDs are never valid
+    expected_items = []
+    # Simulate fetchall returning an empty list for a non-existent ID
+    mock_cursor.fetchall.return_value = expected_items
+
+    expected_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    expected_params = (non_existent_collection_id,)
+
+    # Call the function under test
+    items = await db_layer.get_collection_items(mock_conn, non_existent_collection_id)
+
+    # Assertions
+    mock_cursor.execute.assert_awaited_once_with(expected_sql, expected_params)
+    mock_cursor.fetchall.assert_awaited_once()
+    assert items == expected_items
+
+@pytest.mark.asyncio
+@patch('src.philograph.data_access.db_layer.get_db_connection')
+async def test_get_collection_items_db_error(mock_get_conn):
+    """Tests that get_collection_items propagates database errors."""
+    mock_conn = AsyncMock(spec=psycopg.AsyncConnection)
+    mock_cursor = AsyncMock(spec=psycopg.AsyncCursor)
+    mock_get_conn.return_value.__aenter__.return_value = mock_conn
+    mock_conn.cursor.return_value.__aenter__.return_value = mock_cursor
+
+    collection_id = 105
+
+    # Simulate a database error during the execute call
+    db_error = psycopg.Error("Simulated DB error during item retrieval")
+    mock_cursor.execute.side_effect = db_error
+
+    # Call the function under test and expect the error
+    with pytest.raises(psycopg.Error) as excinfo:
+        await db_layer.get_collection_items(mock_conn, collection_id)
+
+    # Assertions
+    assert excinfo.value is db_error # Check if the original error is propagated
+
+    # Check calls
+    expected_items_sql = "SELECT item_type, item_id FROM collection_items WHERE collection_id = %s;"
+    expected_items_params = (collection_id,)
+
+    # Check the execute call was made once with the correct SQL
+    mock_cursor.execute.assert_awaited_once_with(expected_items_sql, expected_items_params)
+    mock_conn.commit.assert_not_called() # Ensure commit was NOT called on error

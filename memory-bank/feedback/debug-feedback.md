@@ -1,3 +1,24 @@
+### Task Completion: Investigate Skipped Test `test_extract_md_frontmatter_no_yaml_installed` - [2025-05-04 20:01:19]
+- **Issue**: Investigate skipped test `tests/utils/test_text_processing.py::test_extract_md_frontmatter_no_yaml_installed` [Ref: Task 2025-05-04 19:59:09].
+- **Diagnosis**:
+    - Read test file `tests/utils/test_text_processing.py`. Confirmed test uses `@pytest.mark.skipif(HAS_YAML, ...)` which skips if `PyYAML` *is* installed.
+    - Read implementation file `src/philograph/utils/text_processing.py`. Confirmed `extract_text_content` function correctly handles optional `PyYAML` import using `try...except ImportError` and logs a warning if it's missing.
+    - Ran `pytest -v tests/utils/test_text_processing.py`. Confirmed the test was skipped with reason "PyYAML is installed, test requires it to be absent".
+- **Conclusion**: The test skip is correct and expected behavior. The test is designed to verify the code's fallback mechanism when the optional `PyYAML` dependency is not present, and it is correctly skipped because the dependency *is* present in the current environment.
+- **Fix**: None required.
+- **Verification**: `pytest` output confirmed the test was skipped for the correct reason. Code analysis confirmed the implementation handles the optional dependency correctly.
+- **Files Affected**: None.
+- **Memory Bank Updates**:
+    - `activeContext.md`: Logged task completion.
+    - `globalContext.md`: Updated Progress log.
+    - `debug.md`: Added Issue History entry INVESTIGATION-SKIP-YAML-TEST-20250504.
+    - `debug-feedback.md`: Added this entry.
+- **Status/Next Steps/Recommendations**:
+    - **Status**: Investigation complete. The skipped test is behaving as expected.
+    - **Recommendations**: None. No further action needed regarding this specific skipped test.
+- **Related Issues**: [Ref: Task 2025-05-04 19:59:09]
+
+---
 ### Task Completion: Resolve Outdated TODO in GET /collections/{id} Response - [2025-05-04 15:44:28]
 - **Issue**: Investigate and resolve outdated TODO comment in `src/philograph/api/main.py` regarding potential UUID casting issues for the `GET /collections/{collection_id}` response model [Ref: Task 2025-05-04 15:42:45].
 - **Diagnosis**:
