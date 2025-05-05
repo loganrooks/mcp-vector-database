@@ -8,10 +8,8 @@ ENV PYTHONUNBUFFERED 1
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies needed for compiling psycopg (if needed) and other potential packages
+# Install system dependencies needed for debugging and client tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq-dev \
-    build-essential \
     iputils-ping \
     telnet \
     netcat-openbsd \
@@ -25,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 # Copy tests directory explicitly
 COPY tests /app/tests
+# Copy application source code
+COPY src/ /app/src
 
 # Install Python dependencies AS root
 RUN pip install --no-cache-dir --upgrade pip && \
