@@ -27,7 +27,8 @@ COPY requirements.txt .
 COPY tests /app/tests
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir "fastapi[all]" # Explicitly install extras again
 
 # Copy the entire application context (Still useful for other files like README, etc.)
 # This ensures all files (src, tests, etc.) are in the image layer
