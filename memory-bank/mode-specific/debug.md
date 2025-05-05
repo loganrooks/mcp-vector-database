@@ -1,6 +1,16 @@
 # Debug Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Issue: INVESTIGATION-SKIP-YAML-TEST-20250504 - Investigate Skipped Test `test_extract_md_frontmatter_no_yaml_installed` - [Status: Closed (Verified Correct)] - [2025-05-04 20:01:02]
+- **Reported**: [2025-05-04 19:59:09] (via Task) / **Severity**: Low / **Symptoms**: Test skipped in `pytest` output.
+- **Investigation**:
+    1. Read test file `tests/utils/test_text_processing.py`. Analyzed test `test_extract_md_frontmatter_no_yaml_installed` and its skip condition (`@pytest.mark.skipif(HAS_YAML, ...)`).
+    2. Read implementation file `src/philograph/utils/text_processing.py`. Analyzed `extract_text_content` function, specifically the `try...except ImportError` block for `yaml`.
+    3. Ran `pytest -v tests/utils/test_text_processing.py`. Confirmed test was skipped with reason "PyYAML is installed, test requires it to be absent".
+- **Root Cause**: Not a bug. The test is correctly skipped because the optional dependency `PyYAML` is installed in the environment, and the test is designed to run only when `PyYAML` is absent. The skip condition accurately reflects this.
+- **Fix Applied**: None required.
+- **Verification**: `pytest` output confirmed the test was skipped for the correct reason. Code analysis confirmed implementation handles the optional dependency correctly.
+- **Related Issues**: [Ref: Task 2025-05-04 19:59:09]
 ### Issue: API-COLLECTION-UUID-TODO-FIX-20250504 - Resolve Outdated TODO in GET /collections/{id} Response - [Status: Resolved] - [2025-05-04 15:44:28]
 - **Reported**: [2025-05-04 15:42:45] (via Task) / **Severity**: Low / **Symptoms**: Outdated TODO comment suggesting potential UUID/int mismatch in `CollectionGetResponse` model.
 - **Investigation**:

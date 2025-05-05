@@ -1,3 +1,81 @@
+### [2025-05-04 19:58:12] - TDD Cycle: MCP Server
+- **Trigger**: Task to implement TDD cycle for MCP Server (`src/philograph/mcp/main.py`) [Ref: Task 2025-05-04 19:54:01].
+- **Context**: Memory Bank initialized. Reviewed `src/philograph/mcp/main.py`, `tests/mcp/test_mcp_main.py`, and `pseudocode/tier0/mcp_server.md`. Existing tests covered `acquire` tool.
+- **Action**:
+    1.  **Red**: Added 7 tests to `tests/mcp/test_mcp_main.py` for `handle_ingest_tool` and `handle_search_tool` (success, API error, validation).
+    2.  **Red Verification**: Ran `pytest`. All 15 tests passed unexpectedly (Red phase skipped).
+    3.  **Green**: N/A (Implementation already covered test cases).
+    4.  **Refactor**: Identified and removed 12 unnecessary `@pytest.mark.asyncio` decorators causing warnings using `apply_diff`.
+    5.  **Refactor Verification**: Ran `pytest`. All 15 tests passed, warnings resolved.
+    6.  **Memory Bank Update**: Updated `activeContext.md`, `globalContext.md`, `tdd.md`, `tdd-feedback.md`.
+- **Rationale**: Followed TDD process. Added tests for missing coverage. Since tests passed immediately, no implementation changes were needed. Refactored tests to remove warnings.
+- **Outcome**: TDD cycle for MCP Server completed. Test coverage added for `ingest` and `search` handlers. All 15 tests in `tests/mcp/test_mcp_main.py` pass.
+- **Follow-up**: Proceed with `attempt_completion`.
+### [2025-05-04 19:53:09] - CLI TDD Cycle Completion
+- **Trigger**: Task to review and complete TDD cycle for CLI [Ref: Task 2025-05-04 19:43:17].
+- **Context**: Memory Bank initialized. Reviewed `src/philograph/cli/main.py`, `tests/cli/test_cli_main.py`, and `pseudocode/tier0/cli.md`.
+- **Action**:
+    1.  Verified all 46 existing tests in `tests/cli/test_cli_main.py` passed.
+    2.  Identified 4 minor test gaps compared to pseudocode: `search --doc-id`, `search --limit`, `show` invalid ID format, `collection add` chunk type.
+    3.  Added `test_search_success_with_doc_id_filter`. Test passed immediately (Red skipped).
+    4.  Added `test_search_success_with_limit`. Encountered syntax errors due to `insert_content`/`apply_diff` issues. Fixed syntax errors using `apply_diff`. Test passed immediately (Red skipped).
+    5.  Added `test_show_document_invalid_id_format`. Encountered persistent file corruption/syntax errors due to `insert_content`/`apply_diff`. Resolved by using `apply_diff` to replace the corrupted section. Test passed immediately (Red skipped).
+    6.  Added `test_collection_add_item_chunk_success`. Encountered `NameError` due to leftover code from previous file corruption. Fixed using `apply_diff`. Test passed immediately (Red skipped).
+    7.  Confirmed all 50 tests in `tests/cli/test_cli_main.py` pass.
+    8.  Updated Memory Bank files (`activeContext.md`, `globalContext.md`, `tdd.md`, `tdd-feedback.md`).
+- **Rationale**: Followed TDD process. Verified existing state, identified gaps, added tests. Addressed tool-induced file corruption issues using targeted `apply_diff` and block replacement strategies. Since all new tests passed immediately, no implementation changes were required.
+- **Outcome**: TDD cycle for CLI completed. Test coverage improved for identified gaps. All 50 tests pass.
+- **Follow-up**: Proceed with `attempt_completion`.
+### [2025-05-04 19:42:31] - Acquisition Service Test Enhancement
+- **Trigger**: Task to review and enhance tests for `src/philograph/acquisition/service.py` [Ref: Task 2025-05-04 19:40:01].
+- **Context**: Memory Bank initialized. Reviewed implementation, existing tests, pseudocode, and ADR 009.
+- **Action**:
+    1. Identified 5 potential test gaps in `handle_confirmation_request` workflow (empty selection, mixed validity, ingestion skipped, MCP validation error, generic processing error).
+    2. Added 5 new test functions to `tests/acquisition/test_service.py` targeting these gaps.
+    3. Executed `pytest` on the file. All 36 tests passed, including the 5 new ones.
+- **Rationale**: Followed TDD process. Added tests for identified gaps. Since tests passed immediately (Red phase skipped), no Green or Refactor phases were needed for the implementation.
+- **Outcome**: Test coverage for `src/philograph/acquisition/service.py` enhanced. All 36 tests in `tests/acquisition/test_service.py` pass.
+- **Follow-up**: Update Memory Bank and proceed with `attempt_completion`.
+### [2025-05-04 19:24:53] - Verification: `process_document` Directory Handling
+- **Trigger**: Task to resume TDD for `process_document` directory handling [Ref: Task 2025-05-04 19:22:29].
+- **Context**: Memory Bank initialized. Task context referenced an earlier Early Return [Ref: TDD Feedback 2025-04-28 23:40:14] where directory processing was pending.
+- **Action**:
+    1. Reviewed `tests/ingestion/test_pipeline.py`. Found existing tests covering directory processing (empty, single, unsupported, mixed, subdirectories, permission errors).
+    2. Critically evaluated task objective against current code state and Memory Bank logs [Ref: TDD Completion 2025-04-28 23:57:03]. Concluded the required tests were already implemented.
+    3. Executed `pytest -v /app/tests/ingestion/test_pipeline.py` to verify existing tests.
+- **Rationale**: Confirmed that the task objective was based on outdated context. Verified the existing implementation and tests meet the requirements instead of adding redundant tests.
+- **Outcome**: All 29 tests in `tests/ingestion/test_pipeline.py` passed. No TDD cycle (Red/Green/Refactor) was necessary.
+- **Follow-up**: Update Memory Bank and proceed with `attempt_completion`.
+### [2025-05-04 19:21:32] - TDD Cycle: DB Layer Collections
+- **Trigger**: Task to implement TDD cycle for Collection operations [Ref: Task 2025-05-04 19:10:10].
+- **Context**: Memory Bank initialized. Pseudocode and existing tests reviewed.
+- **Action**:
+    1.  **Red**: Added 7 failing test stubs (`assert False`) to `tests/data_access/test_db_layer.py` for `add_collection`, `add_item_to_collection`, `get_collection_items`. Verified failure with `pytest`.
+    2.  **Green (Implementation)**: Added minimal implementation for `add_item_to_collection` and `get_collection_items` in `src/philograph/data_access/db_layer.py` using `apply_diff` (required retry due to file changes).
+    3.  **Green (Assertions)**: Implemented assertions for 7 tests using `apply_diff`.
+    4.  **Green (Verification)**: Ran `pytest`. 2 tests failed (`test_get_collection_items_non_existent_id`, `test_get_collection_items_db_error`).
+    5.  **Green (Fixes)**: Corrected the 2 failing tests using `apply_diff` (failed again due to line shifts). Used `write_to_file` to rewrite the entire test file with corrected logic.
+    6.  **Green (Verification)**: Ran `pytest`. All 16 targeted collection tests passed.
+    7.  **Refactor**: Reviewed new code and tests. No refactoring deemed necessary for this cycle. Noted test file length exceeds guidelines.
+    8.  **Memory Bank Update**: Updated `activeContext.md`, `globalContext.md`, `tdd.md`, `tdd-feedback.md`.
+- **Rationale**: Followed TDD Red-Green-Refactor cycle. Used `apply_diff` initially for efficiency, but switched to `write_to_file` when `apply_diff` proved unreliable for fixing test logic after multiple file modifications, ensuring correctness over potentially fragile incremental changes.
+- **Outcome**: TDD cycle completed successfully. Collection operations implemented and tested.
+- **Follow-up**: Proceed with `attempt_completion`.
+### [2025-05-04 19:05:47] - Relationship Service Green Phase Verification
+- **Trigger**: Task to verify Relationship Service implementation against tests added in Red phase [Ref: Task 2025-05-04 18:58:43].
+- **Context**: Red phase completed [Ref: TDD Feedback 2025-05-04 18:54:36], Green phase review completed [Ref: SPARC Feedback 2025-05-04 18:57:34].
+- **Action**:
+    1. Ran `pytest` targeting relationship tests. Result: 10 failed (`assert False`).
+    2. Read test stubs (`tests/data_access/test_db_layer.py`), implementation (`src/philograph/data_access/db_layer.py`), and pseudocode (`pseudocode/tier0/db_layer.md`).
+    3. Implemented assertions for 10 tests using `apply_diff`.
+    4. Ran `pytest` again. Result: 4 failed (incorrect rollback assertion, NameError, ValidationError).
+    5. Fixed `NameError` by adding `Relationship` import using `insert_content`.
+    6. Fixed incorrect rollback assertions using `apply_diff` (required retry due to line shift).
+    7. Fixed `ValidationError` by modifying `get_relationships` in `src/philograph/data_access/db_layer.py` to handle `metadata_jsonb` deserialization correctly (checking type before `json.loads`).
+    8. Ran `pytest` again. Result: 18 passed.
+- **Rationale**: Followed TDD process: ran failing tests, implemented assertions, identified and fixed errors iteratively until all tests passed. Addressed tool errors (`apply_diff` failure due to line shift) by re-reading and retrying. Critically evaluated contradictory test results (`TypeError` vs `ValidationError`) to implement robust deserialization logic.
+- **Outcome**: All 18 targeted relationship tests passed. Green phase verification successful.
+- **Follow-up**: Update Memory Bank and proceed with `attempt_completion`.
 ### [2025-05-04 15:47:40] - Final Regression Test Suite Verification (Post-Refactor Fixes)
 - **Trigger**: Manual execution of full `pytest` suite after Debug mode fixed 5 regressions [Ref: ActiveContext 2025-05-04 13:44:45].
 - **Context**: Task was to perform final verification, ensuring zero failures and only the 1 known non-CLI skip remained (originally 2, but one was intermittent). [Ref: Task 2025-05-04 15:37:47]

@@ -1,6 +1,14 @@
 # Code Mode Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-05-04 18:56:30] TDD Green Phase Review: Relationship Service
+- **Purpose**: Review existing implementation of `add_relationship` and `get_relationships` in `db_layer.py` against TDD Green phase requirements.
+- **Files**: `src/philograph/data_access/db_layer.py` (Lines 380-442 reviewed)
+- **Status**: Reviewed - Existing implementation meets requirements. No code changes needed.
+- **Dependencies**: None changed.
+- **API Surface**: None changed.
+- **Tests**: Tests in `tests/data_access/test_db_layer.py` (specifically relationship tests) should now pass.
+- **Details**: Verified that the existing functions handle SQL execution, parameter passing, JSON serialization, dynamic WHERE clauses, error propagation, and return values as required by the task and pseudocode. [Ref: Task 2025-05-04 18:55:07, ActiveContext 2025-05-04 18:54:00]
 ### [2025-05-04 03:16:29] Acquisition Workflow (ADR 009) - TDD Green Phase
 - **Purpose**: Implement minimal code for the two-stage discovery/confirmation acquisition workflow to pass failing tests.
 - **Files**:

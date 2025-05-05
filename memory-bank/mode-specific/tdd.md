@@ -1,3 +1,182 @@
+### Test Execution: Unit (MCP Server - Post Refactor) - [2025-05-04 19:57:00]
+- **Trigger**: Manual Verification Run (Post-Refactor)
+- **Outcome**: PASS / **Summary**: 15 passed, 0 failed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified all tests in `tests/mcp/test_mcp_main.py` pass after removing unnecessary `@pytest.mark.asyncio` decorators. Warnings resolved.
+### Test Execution: Unit (CLI - collection add chunk) - [2025-05-04 19:51:59]
+- **Trigger**: Manual Verification Run (Red Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+### TDD Cycle: MCP Server (`ingest`, `search`) - [2025-05-04 19:57:00]
+- **Red**: Added 7 tests for `handle_ingest_tool` and `handle_search_tool` (success, API error, validation) to `tests/mcp/test_mcp_main.py`. Tests passed unexpectedly. / Test File: `tests/mcp/test_mcp_main.py`
+- **Green**: N/A (Implementation already covered test cases).
+- **Refactor**: Removed 12 unnecessary `@pytest.mark.asyncio` decorators from test functions in `tests/mcp/test_mcp_main.py`. / Files Changed: `tests/mcp/test_mcp_main.py`
+- **Outcome**: Cycle completed (Red/Green skipped). Test coverage added for `ingest` and `search` handlers. Refactoring removed warnings. All 15 tests in file pass. [Ref: Task 2025-05-04 19:54:01, Pseudocode `pseudocode/tier0/mcp_server.md`]
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_collection_add_item_chunk_success` passes after fixing file corruption. Red phase skipped.
+
+### TDD Cycle: CLI `collection add` (Chunk Item) - [2025-05-04 19:51:59]
+- **Red**: Added `test_collection_add_item_chunk_success` to `tests/cli/test_cli_main.py`. Test passed unexpectedly after fixing file corruption issues caused by previous tool use. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A (Implementation already covered test case).
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed (Red skipped). Verified CLI handles adding 'chunk' items to collections.
+
+### Test Execution: Unit (CLI - show invalid doc ID) - [2025-05-04 19:49:53]
+- **Trigger**: Manual Verification Run (Red Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_show_document_invalid_id_format` passes after fixing file corruption. Red phase skipped.
+
+### TDD Cycle: CLI `show` (Invalid Document ID Format) - [2025-05-04 19:49:53]
+- **Red**: Added `test_show_document_invalid_id_format` to `tests/cli/test_cli_main.py`. Test passed unexpectedly after fixing file corruption issues caused by previous tool use. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A (Implementation already covered test case).
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed (Red skipped). Verified CLI handles non-integer document IDs for the `show` command.
+
+### Test Execution: Unit (CLI - search --limit) - [2025-05-04 19:46:44]
+- **Trigger**: Manual Verification Run (Red Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_success_with_limit` passes after fixing syntax errors. Red phase skipped.
+
+### TDD Cycle: CLI `search` (--limit Option) - [2025-05-04 19:46:44]
+- **Red**: Added `test_search_success_with_limit` to `tests/cli/test_cli_main.py`. Test passed unexpectedly after fixing syntax errors caused by previous tool use. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A (Implementation already covered test case).
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed (Red skipped). Verified CLI handles the `--limit` option correctly.
+
+### Test Execution: Unit (CLI - search --doc-id) - [2025-05-04 19:44:56]
+- **Trigger**: Manual Verification Run (Red Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_success_with_doc_id_filter` passes. Red phase skipped.
+
+### TDD Cycle: CLI `search` (--doc-id Filter) - [2025-05-04 19:44:56]
+- **Red**: Added `test_search_success_with_doc_id_filter` to `tests/cli/test_cli_main.py`. Test passed unexpectedly. / Test File: `tests/cli/test_cli_main.py`
+- **Green**: N/A (Implementation already covered test case).
+- **Refactor**: N/A.
+- **Outcome**: Cycle completed (Red skipped). Verified CLI handles the `--doc-id` filter correctly.
+
+### Test Execution: Unit (CLI Verification) - [2025-05-04 19:44:11]
+- **Trigger**: Manual Verification Run [Ref: Task 2025-05-04 19:43:17]
+- **Outcome**: PASS / **Summary**: 46 passed, 0 failed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified all existing tests in `tests/cli/test_cli_main.py` pass before adding new tests.
+### Test Execution: Unit (Acquisition Service Enhancement Verification) - [2025-05-04 19:41:59]
+- **Trigger**: Manual Verification Run (Post Test Addition)
+- **Outcome**: PASS / **Summary**: 36 passed, 0 failed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified all tests in `tests/acquisition/test_service.py` pass, including 5 newly added tests covering confirmation edge cases (empty selection, mixed validity, ingestion skipped, MCP validation error, generic processing error). Confirmed existing implementation covered these scenarios (Red phase skipped).
+
+### TDD Cycle: Acquisition Service (Confirmation Edge Cases) - [2025-05-04 19:41:59]
+- **Red**: Added 5 tests (`test_handle_confirmation_request_empty_selection`, `test_handle_confirmation_request_mixed_valid_invalid_selection`, `test_handle_confirmation_request_ingestion_skipped`, `test_handle_confirmation_request_mcp_validation_error`, `test_handle_confirmation_request_generic_processing_error`) to `tests/acquisition/test_service.py`. Tests passed unexpectedly upon verification run. / Test File: `tests/acquisition/test_service.py`
+- **Green**: N/A (Implementation already covered test cases).
+- **Refactor**: N/A (No refactoring deemed necessary for tested paths).
+- **Outcome**: Cycle completed (Red skipped). Confirmed test coverage for identified confirmation workflow edge cases. Existing implementation was sufficient. [Ref: Task 2025-05-04 19:40:01]
+### Test Execution: Unit (Search Service Verification) - [2025-05-04 19:38:19]
+- **Trigger**: Manual Verification Run (Post-Refactor)
+- **Outcome**: PASS / **Summary**: 7 passed, 0 failed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified all 7 tests in `tests/search/test_service.py` pass after refactoring error handling in `src/philograph/search/service.py`.
+
+### TDD Cycle: Search Service (`perform_search`) - [2025-05-04 19:38:19]
+- **Red**: Created `tests/search/test_service.py` with 7 failing test stubs (`assert False`) covering success, filters, embedding errors (connection, API), DB errors (connection, query), and empty results. Verified initial failures.
+- **Green**: Implemented assertions for all 7 tests. Added minimal `SearchService` class and `SearchResult` placeholder to `src/philograph/search/service.py` to resolve import errors. Corrected test code (imports, mock setup, assertions) iteratively. All tests passed against existing implementation logic.
+- **Refactor**: Refactored `perform_search` in `src/philograph/search/service.py` to add specific `try...except` blocks for `httpx.RequestError` and `httpx.HTTPStatusError` during embedding generation, raising `RuntimeError` with more specific messages. Updated corresponding test assertions (`test_search_litellm_connection_error`, `test_search_litellm_api_error`) to match new error messages.
+- **Outcome**: Cycle completed. Search service core logic and error handling tested. All 7 tests passing. [Ref: Task 2025-05-04 19:30:33, Pseudocode `pseudocode/tier0/search_module.md`]
+
+### Test Execution: Unit (Search Service - Empty Results) - [2025-05-04 19:37:21]
+- **Trigger**: Manual Verification Run (Green Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_empty_results` passes.
+
+### Test Execution: Unit (Search Service - DB Query Error) - [2025-05-04 19:36:47]
+- **Trigger**: Manual Verification Run (Green Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_db_query_error` passes.
+
+### Test Execution: Unit (Search Service - DB Connection Error) - [2025-05-04 19:36:20]
+- **Trigger**: Manual Verification Run (Green Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_db_connection_error` passes.
+
+### Test Execution: Unit (Search Service - LiteLLM API Error) - [2025-05-04 19:35:52]
+- **Trigger**: Manual Verification Run (Green Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_litellm_api_error` passes after correcting assertion.
+
+### Test Execution: Unit (Search Service - LiteLLM Connection Error) - [2025-05-04 19:35:27]
+- **Trigger**: Manual Verification Run (Green Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_litellm_connection_error` passes after correcting assertion.
+
+### Test Execution: Unit (Search Service - Filters) - [2025-05-04 19:34:24]
+- **Trigger**: Manual Verification Run (Green Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_with_filters` passes.
+
+### Test Execution: Unit (Search Service - Success) - [2025-05-04 19:34:00]
+- **Trigger**: Manual Verification Run (Green Phase)
+- **Outcome**: PASS / **Summary**: 1 passed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified `test_search_success` passes after adding `config` import.
+
+### Test Execution: Unit (Search Service - Red Phase Verification) - [2025-05-04 19:33:08]
+- **Trigger**: Manual Verification Run (Red Phase)
+- **Outcome**: FAIL / **Summary**: 7 failed
+- **Failed Tests**: All 7 test stubs failed with `assert False`.
+- **Coverage Change**: Not Measured
+- **Notes**: Confirmed initial test stubs fail as expected after fixing collection errors. Red phase complete.
+### Test Execution: Unit (Ingestion Pipeline Verification) - [2025-05-04 19:23:49]
+- **Trigger**: Manual Verification Run [Ref: Task 2025-05-04 19:22:29]
+- **Outcome**: PASS / **Summary**: 29 passed, 0 failed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified that all 29 tests in `tests/ingestion/test_pipeline.py` pass. Confirmed that tests for `process_document` directory handling (recursion, errors) were already present and passing, indicating the task objective was based on outdated context. No TDD cycle needed.
+### Test Execution: Unit (DB Layer Collections - Green Phase Verification) - [2025-05-04 19:20:44]
+- **Trigger**: Manual Verification Run [Ref: Task 2025-05-04 19:10:10]
+- **Outcome**: PASS / **Summary**: 16 passed, 56 deselected
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified that all 16 tests related to `add_collection`, `add_item_to_collection`, and `get_collection_items` in `tests/data_access/test_db_layer.py` pass after implementing minimal code and fixing test assertions. Green phase verified.
+
+### TDD Cycle: DB Layer Collections (`add_collection`, `add_item_to_collection`, `get_collection_items`) - Green Phase - [2025-05-04 19:20:44]
+- **Red**: Added 7 failing test stubs to `tests/data_access/test_db_layer.py` [Ref: TDD Feedback 2025-05-04 19:11:56].
+- **Green**: Implemented minimal code for `add_item_to_collection` and `get_collection_items` in `src/philograph/data_access/db_layer.py` based on pseudocode. Implemented assertions for 7 tests in `tests/data_access/test_db_layer.py`. Fixed 2 failing tests (`test_get_collection_items_non_existent_id`, `test_get_collection_items_db_error`) using `write_to_file` after `apply_diff` failures. / Test File: `tests/data_access/test_db_layer.py` / Code File: `src/philograph/data_access/db_layer.py`
+- **Refactor**: N/A (No refactoring needed for new code/tests).
+- **Outcome**: Cycle completed. All 16 targeted collection tests passing. Green phase verified for DB Layer Collection operations. [Ref: Task 2025-05-04 19:10:10]
+### Test Execution: Unit (Relationship Service - Green Phase Verification) - [2025-05-04 19:05:47]
+- **Trigger**: Manual Verification Run [Ref: Task 2025-05-04 18:58:43]
+- **Outcome**: PASS / **Summary**: 18 passed, 51 deselected
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified that all 18 tests related to `add_relationship` and `get_relationships` in `tests/data_access/test_db_layer.py` pass after implementing assertions and fixing test/code errors. Green phase verified.
+
+### TDD Cycle: Relationship Service (`add_relationship`, `get_relationships`) - Green Phase - [2025-05-04 19:05:47]
+- **Red**: 10 failing test stubs added previously [Ref: TDD Cycle 2025-05-04 18:54:00].
+- **Green**: Implemented assertions for 10 tests in `tests/data_access/test_db_layer.py`. Fixed `NameError` (missing import) and incorrect `rollback` assertions in tests. Fixed `ValidationError` in `src/philograph/data_access/db_layer.py` by adding robust type checking for `metadata_jsonb` deserialization. / Test File: `tests/data_access/test_db_layer.py` / Code File: `src/philograph/data_access/db_layer.py`
+- **Refactor**: N/A
+- **Outcome**: Cycle completed. All 18 targeted relationship tests passing. Green phase verified for Relationship Service. [Ref: Task 2025-05-04 18:58:43]
 ### Test Execution: Regression (Full Suite - Final Verification Post-Debug Fix) - [2025-05-04 15:47:40]
 - **Trigger**: Manual Final Verification Post-Debug Fix [Ref: Task 2025-05-04 15:37:47, ActiveContext 2025-05-04 13:44:45]
 - **Outcome**: PASS / **Summary**: 329 passed, 0 failed, 1 skipped
@@ -67,6 +246,18 @@
 - **Coverage Change**: Not Measured
 - **Notes**: Renamed `tests/mcp/test_main.py` to `tests/mcp/test_mcp_main.py` to fix collection error. Failures indicate tests need updating to match Green phase implementation (ADR 009). Old tests reference removed attributes/functions. New tests are still stubs (`assert False`). Verification step complete, next step is test implementation/refactoring.
 ## Test Execution Results
+### Test Execution: Unit (API Final Verification) - [2025-05-04 19:28:52]
+- **Trigger**: Manual Verification Run [Ref: Task 2025-05-04 19:25:44]
+- **Outcome**: PASS / **Summary**: 69 passed, 0 failed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Final verification run for `tests/api/test_main.py` after adding `test_acquire_confirm_invalid_state`. All tests pass. No regressions found.
+### Test Execution: Unit (API Verification) - [2025-05-04 19:26:40]
+- **Trigger**: Manual Verification Run [Ref: Task 2025-05-04 19:25:44]
+- **Outcome**: PASS / **Summary**: 68 passed, 0 failed
+- **Failed Tests**: None
+- **Coverage Change**: Not Measured
+- **Notes**: Verified stability of `tests/api/test_main.py` before resuming TDD. No regressions found.
 ### Test Execution: Regression (Full Suite - Final Verification Post-Debug Fix) - [2025-05-04 15:41:00]
 - **Trigger**: Manual Final Verification Post-Debug Fix [Ref: Task 2025-05-04 15:37:47, ActiveContext 2025-05-04 13:44:45]
 - **Outcome**: PASS / **Summary**: 329 passed, 0 failed, 1 skipped
@@ -171,12 +362,22 @@
 - **Outcome**: PASS (for added tests) / FAIL (pre-existing unrelated tests)
 - **Summary**: 7 new tests passed, 2 existing tests in `test_service.py` failed, 11 other tests failed/errored in suite.
 - **Failed Tests**:
+### TDD Cycle: API POST /acquire/confirm (Invalid State) - [2025-05-04 19:28:37]
+- **Red**: Added test `test_acquire_confirm_invalid_state` to `tests/api/test_main.py`. Test failed as expected (AssertionError on detail message). / Test File: `tests/api/test_main.py`
+- **Green**: Corrected assertion in `test_acquire_confirm_invalid_state` to match actual API response detail (added period). Test passed. / Test File: `tests/api/test_main.py`
+- **Refactor**: N/A (No implementation code changed).
+- **Outcome**: Cycle completed. Test for invalid state (409 Conflict) added and passing. Confirmed existing API implementation handles this case. [Ref: Task 2025-05-04 19:25:44, Pseudocode `pseudocode/tier0/backend_api.md`:288]
     - `tests/acquisition/test_service.py::test_confirm_and_trigger_download_success`: AssertionError
     - `tests/acquisition/test_service.py::test_confirm_and_trigger_download_mcp_download_error`: AssertionError
     - (Other failures outside scope of this task)
 - **Notes**: New tests for input validation and rate limiting passed, confirming security fixes. Pre-existing failures require separate investigation.
 
 ## TDD Cycles Log
+### TDD Cycle: Relationship Service (`add_relationship`, `get_relationships`) - [2025-05-04 18:54:00]
+- **Red**: Added 10 failing test stubs (`assert False`) to `tests/data_access/test_db_layer.py` for `add_relationship` and `get_relationships` functions, covering success, error (invalid FK, invalid direction), metadata, filtering, and edge cases (non-existent node) based on `pseudocode/tier0/db_layer.md` TDD anchors. / Test File: `tests/data_access/test_db_layer.py`
+- **Green**: N/A
+- **Refactor**: N/A
+- **Outcome**: Red phase complete. Failing tests added. Ready for implementation phase. [Ref: Task 2025-05-04 18:52:44]
 ### TDD Cycle: Updated Acquisition Workflow (ADR 009) - [2025-05-04 03:05:58]
 - **Red**: Added failing test stubs (`assert False`) for new/revised functions/endpoints in `tests/acquisition/test_service.py`, `tests/api/test_main.py`, and `tests/mcp/test_main.py` (created file). Covered service logic (discovery, session, confirmation, status), API endpoints (`/acquire/discover`, `/acquire/confirm/*`, `/acquire/status/*`), and MCP tool (`philograph_acquire` discovery/confirmation calls, error handling, validation). / Test Files: `tests/acquisition/test_service.py`, `tests/api/test_main.py`, `tests/mcp/test_main.py`
 - **Green**: N/A
