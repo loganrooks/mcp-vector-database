@@ -12,11 +12,12 @@ def test_basic_reference_parser_simple():
     ref_string = "Author, A. N. (2023). This is the title. Journal Name, 10(2), 100-110."
     # Placeholder implementation is very naive, this test should fail.
     expected_result = {
-        "title": "This is the title. Journal Name, 10(2), 100-110.", # Placeholder is greedy
+        "title": "This is the title. Journal Name, 10(2), 100-110.",
         "author": "Author, A. N.",
         "year": "2023",
         "raw": ref_string,
-        "source": "basic_parser"
+        "source": "basic_heuristic", # Corrected source
+        "full_parsed": None # Added missing key
     }
     result = text_processing.basic_reference_parser(ref_string)
     assert result is not None

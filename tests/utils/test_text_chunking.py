@@ -8,11 +8,9 @@ def test_chunk_text_semantically_basic():
     """Tests the placeholder paragraph splitting."""
     text = "This is the first paragraph.\n\nThis is the second paragraph."
     chunk_size = 100 # Placeholder size, not used by current implementation
-    expected_chunks = [
-        "This is the first paragraph.",
-        "This is the second paragraph."
-    ]
-    # This test should pass against the placeholder implementation
+    # With semchunk and word count, the whole text fits in one chunk
+    expected_chunks = [text]
+    # This test verifies the actual semchunk behavior with the simple counter
     result = text_processing.chunk_text_semantically(text, chunk_size)
     assert result == expected_chunks
 

@@ -319,7 +319,8 @@ def chunk_text_semantically(text: str, chunk_size: int) -> List[str]:
     try:
         # Assuming semchunk.chunk is the primary function based on library name
         # The library might have different functions or parameters, adjust if tests fail.
-        chunks = semchunk.chunk(text, chunk_size)
+        # Pass a simple word counter (split by space) as the token counter
+        chunks = semchunk.chunk(text, chunk_size, token_counter=lambda t: len(t.split()))
         logger.debug(f"Successfully chunked text into {len(chunks)} chunks.")
         return chunks
     except Exception as e:
