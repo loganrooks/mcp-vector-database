@@ -32,6 +32,9 @@ The `generate_data.py` script has been expanded and currently creates:
     *   Headers with Edition Markers (`epub/headers/headers_edition_markers.epub`)
     *   Same-Page Hyperlinked Footnotes (`epub/notes/same_page_footnotes.epub`)
     *   Endnotes in Separate File (`epub/notes/endnotes_separate_file.epub`)
+    *   Kant-Style Same-Page Footnotes (`epub/notes/kant_style_footnotes.epub`)
+    *   Hegel SoL-Style Same-Page Footnotes (`epub/notes/hegel_sol_footnotes.epub`)
+    *   Dual Note System (Author Footnotes, Editor Endnotes) (`epub/notes/dual_note_system.epub`)
     *   Minimal/Missing Metadata (`epub/structure_metadata/minimal_metadata.epub`)
     *   Poetry Formatting (`epub/content_types/poetry_formatting.epub`)
 *   PDF files:
