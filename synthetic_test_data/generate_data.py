@@ -37,19 +37,25 @@ os.makedirs(os.path.join(MD_DIR, "extended"), exist_ok=True)
 os.makedirs(os.path.join(MD_DIR, "frontmatter"), exist_ok=True)
 os.makedirs(os.path.join(MD_DIR, "general_edge_cases"), exist_ok=True)
 
-def _create_epub_book(identifier, title, author="Synthetic Data Generator", lang="en"):
+def _create_epub_book(identifier, title, author="Synthetic Data Generator", lang="en", custom_metadata=None, add_default_metadata=True):
     """Helper function to create a basic EpubBook object with common metadata."""
     book = epub.EpubBook()
-    book.set_identifier(identifier)
-    book.set_title(title)
-    book.set_language(lang)
-    book.add_author(author)
-    book.add_metadata('DC', 'publisher', 'PhiloGraph Testing Inc.')
-    book.add_metadata('DC', 'date', '2025-05-09', others={'event': 'publication'})
+    if add_default_metadata:
+        if identifier: book.set_identifier(identifier)
+        if title: book.set_title(title)
+        if lang: book.set_language(lang)
+        if author: book.add_author(author)
+        book.add_metadata('DC', 'publisher', 'PhiloGraph Testing Inc.')
+        book.add_metadata('DC', 'date', '2025-05-09', others={'event': 'publication'})
+    
+    if custom_metadata: # For adding specific or overriding metadata
+        for prefix, name, value, others in custom_metadata:
+            book.add_metadata(prefix, name, value, others=others)
     return book
 
-def _add_epub_chapters(book, chapter_details):
-    """Helper to add chapters to the book and return chapter objects."""
+def _add_epub_chapters(book, chapter_details, default_style_item=None):
+    """Helper to add chapters to the book and return chapter objects.
+       Can link a default style item to all chapters."""
     chapters = []
     for i, detail in enumerate(chapter_details):
         ch_title = detail.get("title", f"Chapter {i+1}")
@@ -58,6 +64,8 @@ def _add_epub_chapters(book, chapter_details):
         
         chapter = epub.EpubHtml(title=ch_title, file_name=ch_filename, lang=book.language)
         chapter.content = ch_content
+        if default_style_item:
+            chapter.add_item(default_style_item)
         book.add_item(chapter)
         chapters.append(chapter)
     return chapters
@@ -244,6 +252,323 @@ def create_epub_html_toc_linked(filename="html_toc_linked.epub"):
 
     book.spine = ['nav', html_toc_page] + chapters
     
+    _write_epub_file(book, filepath)
+
+def create_epub_p_tag_headers(filename="p_tag_headers.epub"):
+    """
+    Creates an EPUB where headers are styled <p> tags.
+    """
+    filepath = os.path.join(EPUB_DIR, "headers", filename)
+    book = _create_epub_book("synth-epub-p-headers-001", "P Tag Headers EPUB")
+
+    # Define CSS for p-tag headers
+    css_content = """
+    body { font-family: sans-serif; }
+    p.h1-style { font-size: 2em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
+    p.h2-style { font-size: 1.5em; font-weight: bold; margin-top: 0.8em; margin-bottom: 0.4em; }
+    p.h3-style { font-size: 1.2em; font-weight: bold; margin-top: 0.6em; margin-bottom: 0.3em; }
+    """
+    style_item = epub.EpubItem(uid="style_main", file_name="style/main.css", media_type="text/css", content=css_content)
+    book.add_item(style_item)
+
+    chapter_details = [
+        {
+            "title": "Chapter 1 with P-Tag Headers",
+            "filename": "chap_01_p_headers.xhtml",
+            "content": """
+<p class="h1-style">Chapter 1: The Illusion of Structure</p>
+<p>This chapter uses paragraph tags styled as headers. This tests the system's ability to identify headers based on styling or contextual cues rather than just standard h1-h6 tags.</p>
+<p class="h2-style">Section 1.1: Semantic Ambiguity</p>
+<p>When is a paragraph not just a paragraph? When it's a header in disguise. Philosophical texts sometimes employ such stylistic choices, either by design or as artifacts of conversion.</p>
+<p class="h3-style">Subsection 1.1.1: The Baudrillard Effect</p>
+<p>Consider texts where the visual hierarchy is paramount, and HTML semantics are secondary. This subsection delves into that concept.</p>
+<p>Some normal paragraph text to follow.</p>
+"""
+        },
+        {
+            "title": "Chapter 2: More P-Styled Fun",
+            "filename": "chap_02_p_headers.xhtml",
+            "content": """
+<p class="h1-style">Chapter 2: Deconstructing Norms</p>
+<p>Continuing the theme of non-standard headers.</p>
+<p class="h2-style">Section 2.1: The Heideggerian Question Mark</p>
+<p>Heidegger's "Basic Questions of Philosophy" sometimes uses styled paragraphs for thematic divisions. This section emulates that.</p>
+<p>Another paragraph of standard text.</p>
+"""
+        }
+    ]
+    chapters = []
+    for i, detail in enumerate(chapter_details):
+        ch_title = detail.get("title", f"Chapter {i+1}")
+        ch_filename = detail.get("filename", f"chap_{i+1:02}.xhtml")
+        ch_content = detail.get("content", f"<h1>{ch_title}</h1><p>Content for {ch_title}.</p>")
+        
+        chapter = epub.EpubHtml(title=ch_title, file_name=ch_filename, lang=book.language)
+        chapter.content = ch_content
+        chapter.add_item(style_item) # Link CSS to this chapter
+        book.add_item(chapter)
+        chapters.append(chapter)
+    
+    book.toc = tuple(epub.Link(ch.file_name, ch.title, ch.file_name.split('.')[0]) for ch in chapters)
+
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    book.spine = ['nav'] + chapters
+    _write_epub_file(book, filepath)
+
+def create_epub_headers_with_edition_markers(filename="headers_edition_markers.epub"):
+    """
+    Creates an EPUB with headers containing embedded edition markers (e.g., Kant's A/B).
+    """
+    filepath = os.path.join(EPUB_DIR, "headers", filename)
+    book = _create_epub_book("synth-epub-edition-markers-001", "Headers with Edition Markers")
+
+    chapter_details = [
+        {
+            "title": "Critique of Pure Reason [A]",
+            "filename": "kant_a_section.xhtml",
+            "content": """
+<h1 id="a1">The Transcendental Aesthetic [A 19 / B 33]</h1>
+<p>This section begins the first part of the Critique, following the A edition pagination. The markers [A 19 / B 33] are embedded directly in the header.</p>
+<h2 id="a1_sec1">Section I: Of Space [A 22 / B 37]</h2>
+<p>Here we discuss space. Note the edition markers.</p>
+<p>Some text about space... [A 23 / B 38]</p>
+<p>More text... [A 24 / B 39]</p>
+"""
+        },
+        {
+            "title": "Critique of Pure Reason [B]",
+            "filename": "kant_b_section.xhtml",
+            "content": """
+<h1 id="b1">The Transcendental Aesthetic [B 33 / A 19] - Revised</h1>
+<p>This section follows the B edition pagination, with cross-reference to A. The markers are again in the header.</p>
+<h2 id="b1_sec1">Section I: Of Space (Revised) [B 37 / A 22]</h2>
+<p>The discussion of space, revised for the B edition.</p>
+<p>Some B edition text about space... [B 38 / A 23]</p>
+<p>More B edition text... [B 39 / A 24]</p>
+"""
+        }
+    ]
+    chapters = _add_epub_chapters(book, chapter_details)
+    
+    book.toc = (
+        epub.Link(chapters[0].file_name, "Critique A Section", "kant_a"),
+        epub.Link(chapters[1].file_name, "Critique B Section", "kant_b")
+    )
+
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    style = 'BODY {color: darkred;}'
+    nav_css = epub.EpubItem(uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+    book.add_item(nav_css)
+
+    book.spine = ['nav'] + chapters
+    _write_epub_file(book, filepath)
+
+def create_epub_same_page_footnotes(filename="same_page_footnotes.epub"):
+    """
+    Creates an EPUB with same-page, hyperlinked footnotes.
+    """
+    filepath = os.path.join(EPUB_DIR, "notes", filename)
+    book = _create_epub_book("synth-epub-same-page-fn-001", "Same-Page Footnotes EPUB")
+
+    css_content = """
+    body { font-family: serif; }
+    .footnote { font-size: 0.8em; margin-top: 1em; border-top: 1px solid #ccc; padding-top: 0.5em; }
+    sup a { text-decoration: none; color: blue; }
+    """
+    style_item = epub.EpubItem(uid="style_notes", file_name="style/notes.css", media_type="text/css", content=css_content)
+    book.add_item(style_item)
+
+    chapter_details = [
+        {
+            "title": "Chapter with Footnotes",
+            "filename": "chap_footnotes.xhtml",
+            "content": """
+<h1>Chapter 1: The Burden of Proof</h1>
+<p>In philosophical discourse, the burden of proof often shifts. Consider the assertion that synthetic data can fully replicate the nuances of human-generated text.<sup id="fnref1"><a href="#fn1">1</a></sup> This is a strong claim.</p>
+<p>One might argue that the very act of synthesis, being a programmed endeavor, inherently limits the scope of what can be produced. It lacks the serendipity of human thought.<sup id="fnref2"><a href="#fn2">2</a></sup></p>
+<hr class="footnote-separator" />
+<div class="footnotes">
+  <p id="fn1" class="footnote"><a href="#fnref1">1.</a> This claim is often debated in AI ethics circles, particularly concerning generative models.</p>
+  <p id="fn2" class="footnote"><a href="#fnref2">2.</a> See Turing's arguments on "Lady Lovelace's Objection" regarding machine originality.</p>
+</div>
+"""
+        }
+    ]
+    # Use the modified _add_epub_chapters to link CSS
+    chapters = _add_epub_chapters(book, chapter_details, default_style_item=style_item)
+    
+    book.toc = (epub.Link(chapters[0].file_name, chapters[0].title, "chap_fn"),)
+
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    book.spine = ['nav'] + chapters
+    _write_epub_file(book, filepath)
+
+def create_epub_endnotes_separate_file(filename="endnotes_separate_file.epub"):
+    """
+    Creates an EPUB with endnotes in a separate file, hyperlinked.
+    """
+    filepath = os.path.join(EPUB_DIR, "notes", filename)
+    book = _create_epub_book("synth-epub-endnotes-sep-001", "Separate Endnotes EPUB")
+
+    css_content = """
+    body { font-family: serif; }
+    sup a { text-decoration: none; color: green; }
+    .endnote-item { margin-bottom: 0.5em; }
+    """
+    style_item = epub.EpubItem(uid="style_endnotes", file_name="style/endnotes.css", media_type="text/css", content=css_content)
+    book.add_item(style_item)
+
+    # Create Endnotes HTML file
+    endnotes_content = """
+<h1>Endnotes</h1>
+<div id="en1" class="endnote-item">
+  <p><a href="chap_main.xhtml#enref1">1.</a> The concept of "Dasein" is central to Heidegger's Being and Time.</p>
+</div>
+<div id="en2" class="endnote-item">
+  <p><a href="chap_main.xhtml#enref2">2.</a> This refers to the Socratic paradox, "I know that I know nothing."</p>
+</div>
+<div id="en3" class="endnote-item">
+  <p><a href="chap_main_page2.xhtml#enref3">3.</a> Foucault's analysis of power structures is detailed in "Discipline and Punish".</p>
+</div>
+"""
+    endnotes_page = epub.EpubHtml(title="Endnotes", file_name="endnotes.xhtml", lang="en")
+    endnotes_page.content = endnotes_content
+    endnotes_page.add_item(style_item)
+    book.add_item(endnotes_page)
+
+    chapter_details = [
+        {
+            "title": "Main Content - Page 1",
+            "filename": "chap_main.xhtml",
+            "content": """
+<h1>Chapter 1: Existential Inquiries</h1>
+<p>Heidegger's notion of being-in-the-world presents a complex phenomenological account.<sup id="enref1"><a href="endnotes.xhtml#en1">1</a></sup> It challenges traditional subject-object dichotomies.</p>
+<p>The pursuit of wisdom often begins with acknowledging ignorance.<sup id="enref2"><a href="endnotes.xhtml#en2">2</a></sup> This is a recurring theme in ancient philosophy.</p>
+"""
+        },
+        {
+            "title": "Main Content - Page 2",
+            "filename": "chap_main_page2.xhtml",
+            "content": """
+<h1>Chapter 2: Power and Knowledge</h1>
+<p>Foucault explored the intricate relationship between power and knowledge systems.<sup id="enref3"><a href="endnotes.xhtml#en3">3</a></sup> His work has been influential in various disciplines.</p>
+"""
+        }
+    ]
+    chapters = _add_epub_chapters(book, chapter_details, default_style_item=style_item)
+    
+    book.toc = (
+        epub.Link(chapters[0].file_name, "Chapter 1", "chap1_end"),
+        epub.Link(chapters[1].file_name, "Chapter 2", "chap2_end"),
+        epub.Link(endnotes_page.file_name, "Endnotes", "endnotes_toc_link")
+    )
+
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    # Add endnotes page to spine if it should be part of linear reading flow
+    book.spine = ['nav'] + chapters + [endnotes_page]
+    _write_epub_file(book, filepath)
+
+def create_epub_minimal_metadata(filename="minimal_metadata.epub"):
+    """
+    Creates an EPUB with minimal or missing metadata.
+    """
+    filepath = os.path.join(EPUB_DIR, "structure_metadata", filename)
+    # Intentionally pass None or empty strings for some metadata fields
+    book = _create_epub_book(
+        identifier="synth-epub-min-meta-001",
+        title="A Book With Little Info",
+        author=None, # Missing author
+        lang="zxx", # Undetermined language
+        add_default_metadata=False # Turn off most default metadata
+    )
+    # Manually add only a very sparse set of metadata
+    book.set_identifier("synth-epub-min-meta-001") # Required by ebooklib
+    book.set_title("A Book With Little Info") # Required by ebooklib
+    book.set_language("en") # Required by ebooklib
+
+    chapter_details = [
+        {
+            "title": "Vague Chapter",
+            "filename": "chap_vague.xhtml",
+            "content": """<h1>A Vague Chapter</h1><p>This chapter exists in a book with very little identifying information.
+            The purpose is to test how the system handles missing or sparse metadata fields.</p>
+            <p>What can be inferred? What defaults are assumed?</p>"""
+        }
+    ]
+    chapters = _add_epub_chapters(book, chapter_details)
+    
+    book.toc = (epub.Link(chapters[0].file_name, chapters[0].title, "vague_chap_toc"),)
+
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    style = 'BODY {color: gray;}'
+    nav_css = epub.EpubItem(uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
+    book.add_item(nav_css)
+
+    book.spine = ['nav'] + chapters
+    _write_epub_file(book, filepath)
+
+def create_epub_poetry(filename="poetry_formatting.epub"):
+    """
+    Creates an EPUB with poetry formatting.
+    """
+    filepath = os.path.join(EPUB_DIR, "content_types", filename)
+    book = _create_epub_book("synth-epub-poetry-001", "Verses of Synthesis")
+
+    css_content = """
+    body { font-family: 'Times New Roman', Times, serif; }
+    .poem { margin-left: 2em; margin-bottom: 1em; }
+    .poem-title { font-style: italic; text-align: center; margin-bottom: 0.5em; }
+    .stanza { margin-bottom: 1em; }
+    .poemline { display: block; text-indent: -1em; margin-left: 1em; } /* Basic hanging indent */
+    p.poemline.indent1 { margin-left: 2em; text-indent: -1em; }
+    p.poemline.indent2 { margin-left: 3em; text-indent: -1em; }
+    """
+    style_item = epub.EpubItem(uid="style_poetry", file_name="style/poetry.css", media_type="text/css", content=css_content)
+    book.add_item(style_item)
+
+    chapter_details = [
+        {
+            "title": "Ode to a Synthetic Text",
+            "filename": "ode_synthetic.xhtml",
+            "content": """
+<h1>Ode to a Synthetic Text</h1>
+<div class="poem">
+  <p class="poem-title">Ode to a Synthetic Text</p>
+  <div class="stanza">
+    <p class="poemline">Born of code, not feathered quill,</p>
+    <p class="poemline">Your purpose clear, your content still.</p>
+    <p class="poemline">You test the logic, sharp and keen,</p>
+    <p class="poemline">A silent actor on the digital scene.</p>
+  </div>
+  <div class="stanza">
+    <p class="poemline">No muse's fire, no poet's ache,</p>
+    <p class="poemline indent1">Just algorithms, for goodness sake!</p>
+    <p class="poemline">Yet in your structure, we might find,</p>
+    <p class="poemline indent1">A mimicry of heart and mind.</p>
+  </div>
+</div>
+<p>This section tests poetry formatting, including stanzas and line indentations.</p>
+"""
+        }
+    ]
+    chapters = _add_epub_chapters(book, chapter_details, default_style_item=style_item)
+    
+    book.toc = (epub.Link(chapters[0].file_name, chapters[0].title, "ode_toc"),)
+
+    book.add_item(epub.EpubNcx())
+    book.add_item(epub.EpubNav())
+
+    book.spine = ['nav'] + chapters
     _write_epub_file(book, filepath)
 
 def create_pdf_text_single_column(filename="single_column.pdf"):
@@ -491,10 +816,22 @@ These are different ways to create horizontal rules.
 if __name__ == "__main__":
     print("Starting synthetic data generation...")
     
-    # EPUBs
+    # EPUBs - TOC
     create_epub_ncx_simple()
     create_epub_ncx_nested()
     create_epub_html_toc_linked()
+
+    # EPUBs - Headers
+    create_epub_p_tag_headers()
+    create_epub_headers_with_edition_markers()
+
+    # EPUBs - Notes
+    create_epub_same_page_footnotes()
+    create_epub_endnotes_separate_file()
+
+    # EPUBs - Metadata & Content Types
+    create_epub_minimal_metadata()
+    create_epub_poetry()
 
     # PDFs
     create_pdf_text_single_column()
@@ -504,9 +841,9 @@ if __name__ == "__main__":
     create_md_extended_elements()
     
     # Future: Add calls to generate other EPUB files
-    # e.g., create_epub_ncx_page_list(), create_epub_p_tag_headings()
+    # e.g., create_epub_ncx_page_list()
     
-    # Future: Add calls to generate PDF files
+    # Future: Add calls to generate other PDF files
     # e.g., create_pdf_multi_column_text(), create_pdf_with_images_tables()
     
     # Future: Add calls to generate other Markdown files

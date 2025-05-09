@@ -28,6 +28,12 @@ The `generate_data.py` script has been expanded and currently creates:
     *   Simple NCX ToC (`epub/toc/ncx_simple.epub`)
     *   Nested NCX ToC (`epub/toc/ncx_nested.epub`)
     *   HTML Linked ToC (`epub/toc/html_toc_linked.epub`)
+    *   Styled `<p>` Tag Headers (`epub/headers/p_tag_headers.epub`)
+    *   Headers with Edition Markers (`epub/headers/headers_edition_markers.epub`)
+    *   Same-Page Hyperlinked Footnotes (`epub/notes/same_page_footnotes.epub`)
+    *   Endnotes in Separate File (`epub/notes/endnotes_separate_file.epub`)
+    *   Minimal/Missing Metadata (`epub/structure_metadata/minimal_metadata.epub`)
+    *   Poetry Formatting (`epub/content_types/poetry_formatting.epub`)
 *   PDF files:
     *   Simple single-column text PDF (`pdf/text_based/single_column.pdf`)
 *   Markdown files:
