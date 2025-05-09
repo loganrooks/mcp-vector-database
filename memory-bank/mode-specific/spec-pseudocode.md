@@ -1,6 +1,12 @@
 # Specification Writer Specific Memory
 
 ## Functional Requirements
+### Feature: Synthetic Test Data Specification
+- Added: 2025-05-09 05:32:14
+- Description: Defined requirements for a synthetic test data suite to test parsing, preprocessing, chunking, metadata, and relationship extraction for EPUB, PDF, and Markdown files. This includes various formatting, content types, edge cases, and a proposed directory structure.
+- Acceptance criteria: 1. Specification document exists at [`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md). 2. Specification is based on analysis of [`docs/reports/epub_formatting_analysis_report.md`](docs/reports/epub_formatting_analysis_report.md). 3. Specification covers EPUB, PDF, and Markdown. 4. Specification details types of variations needed.
+- Dependencies: [`docs/reports/epub_formatting_analysis_report.md`](docs/reports/epub_formatting_analysis_report.md), QA Tester Recommendation [Ref: QA Tester Completion Summary 2025-05-09 05:30:01 AM, see also [`memory-bank/globalContext.md:54`](memory-bank/globalContext.md:54)].
+- Status: Implemented
 ### Feature: Tier 0 MVP Definition (Local Core + Cloud Embeddings)
 - Added: 2025-04-27 21:11:10 (Revised from 18:21:09)
 - Description: Defined the Tier 0 Minimum Viable Product focused on local deployment (Intel i7-1260P, 16GB RAM, Integrated Graphics via WSL2) but leveraging free cloud embedding APIs via middleware for improved performance. This specification is detailed in `docs/project-specifications.md` v2.2.

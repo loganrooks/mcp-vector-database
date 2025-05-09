@@ -246,6 +246,21 @@
 - **Coverage Change**: Not Measured
 - **Notes**: Renamed `tests/mcp/test_main.py` to `tests/mcp/test_mcp_main.py` to fix collection error. Failures indicate tests need updating to match Green phase implementation (ADR 009). Old tests reference removed attributes/functions. New tests are still stubs (`assert False`). Verification step complete, next step is test implementation/refactoring.
 ## Test Execution Results
+### Test Execution: Regression (Full Suite - Final Verification) - [2025-05-05 20:46:17]
+- **Trigger**: Manual Final Verification [Ref: Task 2025-05-05 20:45:14]
+- **Outcome**: PASS / **Summary**: 357 passed, 8 skipped
+- **Failed Tests**: None
+- **Skipped Tests**:
+    - `tests/cli/test_cli_acquire.py::test_acquire_discover_yes_flag_single_option_auto_confirms` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_discover_yes_flag_multiple_options_errors` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_success` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_api_error` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_prompt_invalid_input` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_invalid_input_out_of_range` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_cancel` (Known Typer Issue)
+    - `tests/utils/test_text_extraction.py::test_extract_md_frontmatter_no_yaml_installed` (Missing Dependency - Expected)
+- **Coverage Change**: Not Measured
+- **Notes**: Final verification run on integrated `feature/relationship-service` branch. Confirmed test suite stability matches expected state post-integration. 8 skips are known and expected (7 Typer CLI, 1 missing dependency).
 ### Test Execution: Unit (API Final Verification) - [2025-05-04 19:28:52]
 - **Trigger**: Manual Verification Run [Ref: Task 2025-05-04 19:25:44]
 - **Outcome**: PASS / **Summary**: 69 passed, 0 failed

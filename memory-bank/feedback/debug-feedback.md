@@ -1,3 +1,44 @@
+### Task Completion: Resolve `semchunk` Errors and Test Failures - [2025-05-05 20:39:04]
+- **Issue**: Resolve `ModuleNotFoundError: No module named 'semchunk'`, subsequent `SIGKILL` errors, and related test failures (`TypeError`, `AssertionError`) encountered during task 'Resume text_processing.py TODOs' [Ref: Task 2025-05-05 19:25:32].
+- **Diagnosis**:
+    - Container logs showed `ModuleNotFoundError: No module named 'semchunk'` causing crash loop.
+    - `requirements.txt` confirmed `semchunk` was missing.
+    - After adding `semchunk` and rebuilding, `pytest tests/utils/` showed `TypeError: chunk() missing 1 required positional argument: 'token_counter'`, despite code changes appearing correct on host. Traceback showed old code running in container.
+    - Rebuilding with `--no-cache` and restarting containers (`down` & `up`) still showed the `TypeError` with old code in traceback.
+    - `read_file` confirmed host code *was* correct.
+    - Hypothesized persistent Docker cache/environment issue or `SIGKILL` masking the `ModuleNotFoundError`.
+    - Increased memory limit in `docker-compose.yml` to 4g, restarted containers. `pytest` still resulted in `SIGKILL`.
+    - Checked container logs again, confirming `ModuleNotFoundError: No module named 'semchunk'` was the root cause of the crash loop, leading to the `SIGKILL` when trying to execute `pytest`.
+    - Added `semchunk==3.1.1` to `requirements.txt`.
+    - Rebuilt image with `--no-cache`, restarted containers.
+    - `pytest tests/utils/` now ran but failed `test_chunk_text_semantically_basic` with `AssertionError` due to outdated test expectation.
+- **Fix**:
+    1. Added `semchunk==3.1.1` to `requirements.txt`.
+    2. Corrected `semchunk.chunk` call in `src/philograph/utils/text_processing.py` to use `token_counter=lambda t: len(t.split())`.
+    3. Corrected assertion in `tests/utils/test_text_chunking.py::test_chunk_text_semantically_basic` to expect a single chunk.
+    4. Corrected assertion in `tests/utils/test_text_references.py::test_basic_reference_parser_simple` (done by Code mode before handover).
+    5. Used `docker-compose build --no-cache philograph-backend` and `docker-compose down && docker-compose up -d` to ensure dependency installation and environment consistency.
+    6. Reverted temporary memory increase in `docker-compose.yml`.
+- **Verification**:
+    - `pytest tests/utils/` passed (28 passed, 1 skipped).
+    - Full `pytest` suite passed (357 passed, 8 skipped).
+    - Manual check confirms `semchunk` is imported and used correctly in `src/philograph/utils/text_processing.py`.
+- **Files Affected**:
+    - `requirements.txt`
+    - `src/philograph/utils/text_processing.py`
+    - `tests/utils/test_text_chunking.py`
+    - `tests/utils/test_text_references.py`
+    - `docker-compose.yml` (reverted memory change)
+- **Memory Bank Updates**:
+    - `activeContext.md`: Logged task completion.
+    - `globalContext.md`: Updated Progress log.
+    - `debug.md`: Added Issue History entry SEMCHUNK-ENV-FIX-20250505.
+    - `debug-feedback.md`: Added this entry.
+- **Status/Next Steps/Recommendations**:
+    - **Status**: The environment issues (`ModuleNotFoundError`, `SIGKILL`) and related test failures are resolved. The `semchunk` dependency is correctly installed and used. The original task objectives appear complete.
+    - **Recommendations**:
+        1.  **(Mandatory per rules)** Recommend a `tdd` run to double-check the fixes and ensure overall test suite health. Objective: "Verify fixes for `semchunk` integration and related tests in `fix/text-processing-todos` branch [Ref: Debug Feedback 2025-05-05 20:39:04]".
+- **Related Issues**: [Ref: Task 2025-05-05 19:25:32]
 ### Task Completion: Resolve TypeError in test_connection.py - [2025-05-05 06:24:07]
 - **Issue**: Resolve `TypeError: 'coroutine' object does not support the asynchronous context manager protocol` in `tests/data_access/test_connection.py` (`test_get_db_connection_success`, `test_get_db_connection_psycopg_error`) [Ref: Task 2025-05-05 06:19:47].
 - **Diagnosis**:

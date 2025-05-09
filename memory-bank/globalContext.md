@@ -1,3 +1,24 @@
+### [2025-05-09 05:38:00] - Code - Progress Update
+- **Task:** Generate initial suite of synthetic EPUB, PDF, and Markdown test files.
+- **Status:** Initial files generated.
+- **Details:** Created `feat/synthetic-test-data` branch. Reviewed `docs/qa/synthetic_data_requirements.md`. Created directory structure in `./synthetic_test_data/`. Developed `synthetic_test_data/generate_data.py` which currently produces `synthetic_test_data/epub/toc/ncx_simple.epub` and `synthetic_test_data/markdown/basic/all_basic_elements.md`. Added `synthetic_test_data/README.md`.
+- **Files Affected:** `synthetic_test_data/generate_data.py`, `synthetic_test_data/README.md`, `synthetic_test_data/epub/toc/ncx_simple.epub`, `synthetic_test_data/markdown/basic/all_basic_elements.md`.
+- **Branch:** `feat/synthetic-test-data`
+- **Related Issues:** [Ref: Spec-Pseudocode Completion Summary 2025-05-09 05:32:50 AM], [Ref: ActiveContext 2025-05-09 05:38:00]
+### [2025-05-05 20:43:18] - Integration - Progress Update
+- **Task:** Resume and complete integration of remaining feature/fix branches into `feature/relationship-service`.
+- **Status:** Completed & Verified.
+- **Details:** Merged `docs/readme-fixes`, `fix/devops-holistic-review`, `feat/cli-api-alignment` (all already up-to-date), and `fix/text-processing-todos` (fast-forwarded) into `feature/relationship-service`. Ran `pytest` suite (`docker-compose exec philograph-backend pytest`). Result: 357 passed, 8 skipped, confirming successful integration. The 8 skips are expected due to the known Typer issue (7 tests) and one unrelated skip.
+- **Files Affected:** `requirements.txt`, `src/philograph/utils/text_processing.py`, `tests/cli/test_cli_acquire.py`, `tests/utils/test_text_chunking.py`, `tests/utils/test_text_references.py` (from `fix/text-processing-todos` merge).
+- **Branch:** `feature/relationship-service`
+- **Related Issues:** [Ref: Task 2025-05-05 20:40:31], [Ref: Integration Early Return Summary 2025-05-05 08:27:02 AM], [Ref: TDD Completion Summary 2025-05-05 01:42:08 PM]
+### [2025-05-05 20:23:48] - Debug - Progress Update
+- **Task:** Resolve test failures and environment issues blocking completion of `text_processing.py` TODOs on `fix/text-processing-todos`.
+- **Status:** Completed & Verified.
+- **Details:** Diagnosed container crash loop (`ModuleNotFoundError: No module named 'semchunk'`) as root cause of `SIGKILL` errors. Added `semchunk` to `requirements.txt`. Corrected `semchunk.chunk` usage in `src/philograph/utils/text_processing.py`. Fixed outdated assertions in `tests/utils/test_text_chunking.py` and `tests/utils/test_text_references.py`. Used `--no-cache` build and container restarts to ensure environment consistency. Verified fixes with `pytest tests/utils/` (28 passed, 1 skipped) and full `pytest` suite (357 passed, 8 skipped). Committed fixes.
+- **Files Affected:** `requirements.txt`, `src/philograph/utils/text_processing.py`, `tests/utils/test_text_chunking.py`, `tests/utils/test_text_references.py`, `docker-compose.yml` (temporary memory increase reverted).
+- **Branch:** `fix/text-processing-todos`
+- **Related Issues:** [Ref: Task 2025-05-05 19:25:32]
 ### [2025-05-05 06:59:00] - DevOps - Progress Update
 - **Task:** Address DevOps issues from Holistic Review (Pin dependencies, fix Dockerfile COPY, fix docker-compose volume mount).
 - **Status:** Completed & Verified.
@@ -19,6 +40,7 @@
 - **[2025-05-05 06:23:08]** - Debug: Resolved `TypeError: 'coroutine' object does not support the asynchronous context manager protocol` in 2 tests within `tests/data_access/test_connection.py`. Fix involved correcting the mock setup for `pool.connection()` to return the context manager directly. Verified with full `pytest` suite (363 passed, 1 skipped). [Ref: Task 2025-05-05 06:19:47]
 - **[2025-05-05 06:50:31]** - Code: Refactored CLI commands (`acquire`, `status`) and tests (`tests/cli/`) to align with ADR 009 two-stage acquisition API. Used subcommands `acquire discover` and `acquire confirm`. Verified with `pytest` (49 passed). [Ref: Task 2025-05-05 06:45:17]
 - **[2025-05-05 07:03:44]** - Optimizer: Completed verification of holistic review refactoring tasks. Confirmed `tests/utils/test_text_processing.py` and `tests/ingestion/test_pipeline.py` were already refactored. Deleted empty remnant `tests/ingestion/test_pipeline.py`. Verified with `pytest` (362 passed, 1 skipped). [Ref: Task 2025-05-05 07:01:30]
+- **[2025-05-05 20:46:17]** - TDD: Completed final test suite verification on integrated `feature/relationship-service` branch. Result: 357 passed, 8 skipped (expected). Confirmed stability post-integration. [Ref: Task 2025-05-05 20:45:14]
 ## Progress
 - **[2025-05-04 19:23:49]** - TDD: Verified existing tests for `process_document` directory handling (`tests/ingestion/test_pipeline.py`). All 29 tests passed. Confirmed required functionality was already covered. [Ref: Task 2025-05-04 19:22:29]
 - **[2025-05-04 19:20:44]** - TDD: Completed TDD cycle for DB Layer Collection operations (`add_collection`, `add_item_to_collection`, `get_collection_items`). Added 7 tests, implemented minimal code, fixed 2 test assertions. All 16 targeted collection tests pass. [Ref: Task 2025-05-04 19:10:10]
@@ -36,6 +58,11 @@
 - **[2025-05-04 03:37:14] - Optimizer - Refactoring Decision:** Refactored acquisition workflow components (`acquisition/service.py`, `api/main.py`, `mcp/main.py`) for improved modularity and readability. Extracted helper functions in `service.py` (`_check_rate_limit`, `_validate_selected_items`, `_process_single_item`). Standardized UUID usage and type hints in `api/main.py`. Removed redundant TDD comments across all files. Rationale: Enhance maintainability and adhere to code quality standards post-TDD Green phase. [Ref: Task 2025-05-04 03:31:41]
 - **[2025-05-04 13:44:45] - Debug - Decision:** Corrected type hints in `src/philograph/api/main.py` for the `GET /collections/{collection_id}` endpoint and related Pydantic models (`CollectionItem`, `CollectionGetResponse`). Changed `collection_id` path parameter from `UUID` to `int`. Changed `item_id` in `CollectionItem` from `UUID` to `int`. Changed `collection_id` in `CollectionGetResponse` from `UUID` to `int`. Rationale: The refactoring incorrectly standardized these IDs to UUID, while the database layer and tests expect integers, causing 422/500 errors. [Ref: Task 2025-05-04 03:41:35]
 ## Decision Log
+### [2025-05-09 05:11:05] - QA - Test Data Strategy Shift
+- **Decision:** Shift from using downloaded real-world documents to generating comprehensive synthetic EPUB, PDF, and Markdown test files.
+- **Rationale:** To systematically cover a wide range of formatting possibilities detailed in `docs/reports/epub_formatting_analysis_report.md`, improving robustness of ingestion and preprocessing.
+- **Impact:** Current E2E testing deferred. New task required for synthetic data generation. E2E test plan `docs/qa/tier0_e2e_plan_20250506.md` will need updating once data is available. This approach will also feed into more robust unit testing via TDD.
+- **Source:** User directive during E2E test planning.
 - **[2025-05-04 03:16:29] - Code - Implementation:** Implemented the two-stage acquisition workflow (discovery/confirmation) based on ADR 009 and pseudocode (`pseudocode/tier0/acquisition_service.md`, `pseudocode/tier0/backend_api.md`, `pseudocode/tier0/mcp_server.md`).
     - `acquisition/service.py`: Added session management (in-memory dict), `handle_discovery_request`, `handle_confirmation_request`, `get_status` functions.
     - `api/main.py`: Added `/acquire/discover`, `/acquire/confirm/{discovery_id}`, `/acquire/status/{discovery_id}` endpoints and corresponding Pydantic models. Marked old `/acquire` and `/acquire/confirm/{acquisition_id}` endpoints as deprecated.

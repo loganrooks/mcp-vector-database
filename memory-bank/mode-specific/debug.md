@@ -1,6 +1,29 @@
 # Debug Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### Issue: SEMCHUNK-ENV-FIX-20250505 - Resolve `ModuleNotFoundError` and `SIGKILL` during `pytest` - [Status: Resolved] - [2025-05-05 20:23:48]
+- **Reported**: [2025-05-05 19:25:32] (via Code mode handover) / **Severity**: High / **Symptoms**: `pytest` failing with `ModuleNotFoundError: No module named 'semchunk'` causing container crash loop, previously manifesting as `SIGKILL` even with increased memory. Code changes not reflected in container despite rebuilds.
+- **Investigation**:
+    1. Loaded Memory Bank, reviewed Code mode attempts (code fixes, rebuilds, memory increase, `SIGKILL`).
+    2. Attempted `pytest tests/utils/` - Failed (`Container is restarting`).
+    3. Checked container logs (`docker-compose logs philograph-backend`) - Confirmed `ModuleNotFoundError: No module named 'semchunk'` during startup.
+    4. Checked `requirements.txt` - Confirmed `semchunk` was missing.
+    5. Added `semchunk==3.1.1` to `requirements.txt`.
+    6. Rebuilt image (`docker-compose build --no-cache philograph-backend`).
+    7. Restarted containers (`docker-compose down && docker-compose up -d`).
+    8. Ran `pytest tests/utils/` - 1 failure (`AssertionError` in `test_chunk_text_semantically_basic`).
+    9. Analyzed failure: Test expected split by paragraph, but `semchunk` correctly kept text as single chunk based on word count and chunk size.
+    10. Corrected assertion in `tests/utils/test_text_chunking.py`.
+    11. Ran `pytest tests/utils/` - Passed (28 passed, 1 skipped).
+    12. Ran full `pytest` suite - Passed (357 passed, 8 skipped).
+- **Root Cause**: 1) `semchunk` dependency was missing from `requirements.txt`, causing container startup failure (`ModuleNotFoundError`). 2) Previous `SIGKILL` errors were a symptom of the container crash-looping. 3) Test assertion in `test_chunk_text_semantically_basic` was outdated and did not reflect the actual behavior of the implemented `semchunk` logic.
+- **Fix Applied**:
+    1. Added `semchunk==3.1.1` to `requirements.txt`.
+    2. Corrected assertion in `tests/utils/test_text_chunking.py::test_chunk_text_semantically_basic`.
+    3. Rebuilt image without cache and restarted containers.
+    4. Reverted temporary memory increase in `docker-compose.yml`.
+- **Verification**: `pytest tests/utils/` passed (28/1/0). Full `pytest` suite passed (357/8/0).
+- **Related Issues**: [Ref: Task 2025-05-05 19:25:32]
 ### Issue: TEST-CONN-TYPEERROR-20250505 - TypeError mocking async context manager in test_connection.py - [Status: Resolved] - [2025-05-05 06:24:07]
 - **Reported**: [2025-05-05 06:19:47] (via Task) / **Severity**: Medium / **Symptoms**: `TypeError: 'coroutine' object does not support the asynchronous context manager protocol` in `tests/data_access/test_connection.py` (`test_get_db_connection_success`, `test_get_db_connection_psycopg_error`).
 - **Investigation**:

@@ -1,6 +1,18 @@
 # Code Mode Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-05-09 05:38:00] Synthetic Test Data Generation Script (Initial)
+- **Purpose**: Create initial script and sample files for synthetic test data.
+- **Files**:
+    - `synthetic_test_data/generate_data.py`
+    - `synthetic_test_data/README.md`
+    - `synthetic_test_data/epub/toc/ncx_simple.epub` (Generated)
+    - `synthetic_test_data/markdown/basic/all_basic_elements.md` (Generated)
+- **Status**: Implemented (Initial Version)
+- **Dependencies**: `ebooklib` (from `requirements.txt`).
+- **API Surface**: N/A (Script for local data generation).
+- **Tests**: N/A (This script generates test data, not tested itself in this step).
+- **Details**: Created a Python script `generate_data.py` to programmatically create synthetic test files. Currently, it generates a simple EPUB with an NCX ToC and a basic Markdown file. A README was added to explain usage. The script is designed to be extensible for more complex data generation as per `docs/qa/synthetic_data_requirements.md`.
 ### [2025-05-05 06:50:31] CLI Refactor: Acquire/Status Commands (ADR 009)
 - **Purpose**: Align CLI `acquire` and `status` commands with the two-stage acquisition API.
 - **Files**:
