@@ -4,11 +4,17 @@ This directory contains synthetic test data generated for testing the PhiloGraph
 
 ## Generation
 
-The files in this directory can be (re)generated using the `generate_data.py` script located in this directory.
+The files in this directory can be (re)generated using the `generate_all_data.py` script located in this directory.
+The generation logic has been refactored into modular scripts:
+*   `common.py`: Shared utilities and constants.
+*   `generate_epubs.py`: EPUB generation functions.
+*   `generate_pdfs.py`: PDF generation functions.
+*   `generate_markdown.py`: Markdown generation functions.
+*   `generate_all_data.py`: Main script to run all generation.
 
-To run the script:
+To run the main generation script:
 ```bash
-python3 generate_data.py
+python3 generate_all_data.py
 ```
 
 Ensure you have the necessary dependencies installed, particularly `EbookLib` for EPUB generation and `reportlab` for PDF generation. You can install dependencies from the project's main `requirements.txt`:
