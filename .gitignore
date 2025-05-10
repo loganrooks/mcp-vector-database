@@ -147,3 +147,6 @@ litellm_config.yaml
 deconstruction/
 docs/philosophy/
 docs/classes/
+
+# Synthetic test data (generated files, not the scripts)
+synthetic_test_data/generated/
