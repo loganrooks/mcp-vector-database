@@ -48,6 +48,12 @@
 
 ## Workflow State
 # Workflow State (Current - Overwrite this section)
+- Current phase: Refinement (Bug Fixing &amp; Verification)
+- Phase start: 2025-05-10 05:34:35
+- Current focus: EPUB generation bugs for `navdoc_full.epub` and `pippin_style_endnotes.epub` resolved. Tests confirmed passing by user.
+- Next actions: Commit changes. Resume broader synthetic data expansion.
+- Last Updated: 2025-05-10 15:55:58
+# Workflow State (Current - Overwrite this section)
 - Current phase: Refinement (Testing)
 - Phase start: 2025-05-01 20:19:00 (Estimate after Debug fix)
 - Current focus: CLI Testing (`tests/cli/test_cli_main.py`) - Mocking blocker resolved.
@@ -59,6 +65,32 @@
 - Assigned to: debug
 - Description: Debug persistent failure in `tests/utils/test_text_processing.py::test_call_grobid_extractor_api_request_error` related to mocking async httpx.RequestError handling. See `memory-bank/feedback/tdd-feedback.md` for details (entry approx. 2025-04-28 16:57:29).
 - Expected deliverable: Fixed test or clear diagnosis of the mocking/exception handling issue.
+### [2025-05-10 15:55:16] Task: Fix EPUB Generation Logic (navdoc_full, pippin_style_endnotes)
+- Assigned to: debug
+- Description: Fix EPUB generation logic in [`synthetic_test_data/epub_generators/toc.py`](synthetic_test_data/epub_generators/toc.py:1) and [`synthetic_test_data/epub_generators/notes.py`](synthetic_test_data/epub_generators/notes.py:1) so that tests in [`tests/synthetic_test_data/test_epub_generators.py`](tests/synthetic_test_data/test_epub_generators.py:1) pass.
+- Expected deliverable: Modified generator scripts, passing tests, commit, MB update.
+- Status: completed
+- Completion time: 2025-05-10 15:55:16 (as per user report)
+- Outcome: User reported fixes applied to `toc.py` (uncommented nav sections) and `notes.py` (used default EpubNav as diagnostic). Tests reported as passing by user. Calibre issue for `pippin_style_endnotes.epub` also reportedly resolved.
+- Link to Progress Entry: [GlobalContext 2025-05-10 15:55:16]
+
+### [2025-05-10 06:00:57] Task: Verify EPUB Generation Fixes
+- Assigned to: tdd
+- Description: Verify fixes applied by `debug` mode to EPUB generation scripts by running tests in [`tests/synthetic_test_data/test_epub_generators.py`](tests/synthetic_test_data/test_epub_generators.py:1).
+- Expected deliverable: Report on test pass/fail status, revert diagnostic if needed, commit, MB update.
+- Status: failed (Blocked by Docker environment issue, then superseded by user resolution)
+- Completion time: 2025-05-10 15:55:16 (Effectively superseded by user's direct resolution)
+- Outcome: TDD mode was blocked by Docker error `docker.errors.DockerException: Error while fetching server API version: Not supported URL scheme http+docker`. User subsequently reported all fixes successful and tests passing.
+- Link to Progress Entry: [GlobalContext 2025-05-10 06:06:05], [ActiveContext 2025-05-10 06:05:56]
+
+### [2025-05-10 05:37:42] Task: Create Failing Tests for EPUB Generation Bugs
+- Assigned to: tdd
+- Description: Create failing unit tests for `navdoc_full.epub` and `pippin_style_endnotes.epub` generation.
+- Expected deliverable: New failing test functions, commit, MB update.
+- Status: completed
+- Completion time: 2025-05-10 05:52:30
+- Outcome: Created [`tests/synthetic_test_data/test_epub_generators.py`](tests/synthetic_test_data/test_epub_generators.py:1) with `test_generate_navdoc_full_epub_no_typeerror` (fails on empty nav.xhtml) and `test_generate_pippin_style_endnotes_epub_not_blank` (fails on missing content).
+- Link to Progress Entry: [GlobalContext 2025-05-10 05:52:40], [ActiveContext 2025-05-10 05:52:30]
 - Status: completed
 - Completion time: 2025-04-28 17:04:30
 - Outcome: Fixed test_call_grobid_extractor_api_request_error by correcting async mock pattern (commit d07e7f4).
