@@ -10,10 +10,10 @@ from synthetic_test_data.epub_generators.toc import create_epub_navdoc_full
 from synthetic_test_data.epub_generators.notes import create_epub_pippin_style_endnotes
 
 # Define expected paths based on generator defaults
-# Generators output to synthetic_test_data/epub/(toc or notes)/filename.epub
+# Generators output to synthetic_test_data/generated/epub/(toc or notes)/filename.epub
 # Project root is Path(__file__).parent.parent.parent when __file__ is tests/synthetic_test_data/test_epub_generators.py
 PROJECT_ROOT = Path(__file__).parent.parent.parent
-BASE_SYNTHETIC_EPUB_DIR = PROJECT_ROOT / "synthetic_test_data" / "epub"
+BASE_SYNTHETIC_EPUB_DIR = PROJECT_ROOT / "synthetic_test_data" / "generated" / "epub"
 
 NAVDOC_FULL_EPUB_NAME = "navdoc_full.epub" # Default filename in generator
 NAVDOC_FULL_EPUB_PATH = BASE_SYNTHETIC_EPUB_DIR / "toc" / NAVDOC_FULL_EPUB_NAME

@@ -7,7 +7,7 @@ This directory contains synthetic test data generated for testing the PhiloGraph
 The files in this directory can be (re)generated using the `generate_all_data.py` script located in this directory.
 The generation logic has been refactored into modular scripts:
 *   `common.py`: Shared utilities and constants.
-*   `generate_epubs.py`: EPUB generation functions.
+*   `epub_generators/` (package): Contains modularized EPUB generation functions (e.g., `toc.py`, `headers.py`, etc.). The old `generate_epubs.py` is now a placeholder.
 *   `generate_pdfs.py`: PDF generation functions.
 *   `generate_markdown.py`: Markdown generation functions.
 *   `generate_all_data.py`: Main script to run all generation.
@@ -25,13 +25,13 @@ pip3 install -r ../requirements.txt
 
 ## Structure
 
-The data is organized by file type and then by the specific feature or edge case being tested. Refer to [`../../docs/qa/synthetic_data_requirements.md`](../../docs/qa/synthetic_data_requirements.md) for the detailed proposed structure.
+The data is organized by file type and then by the specific feature or edge case being tested. All generated files are output into the `generated/` subdirectory. Refer to [`../../docs/qa/synthetic_data_requirements.md`](../../docs/qa/synthetic_data_requirements.md) for the detailed proposed structure.
 
 ## Generated Files
 
-The `generate_all_data.py` script creates the following synthetic files:
+The `generate_all_data.py` script creates the following synthetic files within the `generated/` directory:
 
-### EPUB (`epub/`)
+### EPUB (`generated/epub/`)
 
 **Table of Contents (`toc/`):**
 *   `ncx_simple.epub`: Simple NCX ToC.
@@ -111,7 +111,7 @@ The `generate_all_data.py` script creates the following synthetic files:
 *   `content_internal_cross_refs.epub`: Internal cross-references.
 *   `content_forced_page_breaks.epub`: Forced page breaks using CSS.
 
-### PDF (`pdf/`)
+### PDF (`generated/pdf/`)
 
 **Text Based (`text_based/`):**
 *   `single_column.pdf`: Simple single-column text.
@@ -130,7 +130,7 @@ The `generate_all_data.py` script creates the following synthetic files:
 **Notes (`notes/`):**
 *   `bottom_page_footnotes.pdf`: Footnotes appearing at the bottom of the page (visual simulation).
 
-### Markdown (`markdown/`)
+### Markdown (`generated/markdown/`)
 
 **Basic (`basic/`):**
 *   `all_basic_elements.md`: Basic elements with YAML frontmatter.
