@@ -1,5 +1,132 @@
 # Code Mode Feedback Log
 <!-- Entries below should be added reverse chronologically (newest first) -->
+### [2025-05-10 03:01:30] Task: Correct HTML Entities &amp; Continue Synthetic Data Expansion
+- **Trigger**: User Task (Correct HTML entity encoding, fix `create_epub2_with_guide`, review ToCs, expand data).
+- **Context**: Previous work on `feat/synthetic-test-data` branch encountered HTML entity issues and errors in EPUB generation.
+- **Action Taken**:
+    - Verified current branch is `feat/synthetic-test-data`.
+    - Corrected HTML entity encoding in `synthetic_test_data/generate_epubs.py` by replacing `&amp;lt;` with `&lt;` and `&amp;gt;` with `&gt;` using `search_and_replace`. Other entities (`&amp;amp;`, `&amp;quot;`, `&amp;apos;`) did not require changes.
+    - Ran `python3 -m synthetic_test_data.generate_all_data` to test EPUB generation.
+    - Addressed "argument of type 'NoneType' is not iterable" error in `create_epub2_with_guide` by:
+        - Uncommenting the call in `generate_all_data.py`.
+        - Ensuring `book.epub_version = "2.0"` was set.
+        - Setting `book.guide = []` initially, then restoring a more complete guide definition.
+        - Correcting the spine to `[cover_page, toc_page] + chapters`.
+        - Commenting out `book.add_metadata('OPF', 'cover', 'cover-image')` as no actual cover image item was defined, which resolved the error.
+    - Reviewed ToC simplifications:
+        - Expanded `book.toc` for `create_epub_ncx_links_to_anchors` to be more representative.
+        - Expanded `book.toc` for `create_epub_html_toc_p_tags` to be more representative. This initially caused an `IndexError` due to a misapplied diff from a previous session, which was then corrected.
+    - Added new EPUB generation functions:
+        - `create_epub_html_toc_non_linked` for non-hyperlinked HTML ToCs.
+        - `create_epub_header_foucault_style` for Foucault-style headers.
+    - Added calls to new functions in `generate_all_data.py` and corrected indentation issues caused by `insert_content`.
+    - Updated `synthetic_test_data/README.md` with new files and changes.
+- **Rationale**: Addressing critical blockers and continuing feature development as per task requirements.
+- **Outcome**:
+    - HTML entity encoding in EPUB content strings corrected.
+    - `create_epub2_with_guide` now generates without the `NoneType` error and appears mostly functional.
+    - ToCs for `ncx_links_to_anchors` and `html_toc_p_tags` are improved.
+    - Two new EPUB variations added.
+    - README updated.
+    - Persistent rendering issues remain for `pippin_style_endnotes.epub` (empty content), `navdoc_full.epub` (JS error), and `adobe_artifacts.epub` (JS error). Further debugging of these was deferred due to complexity and time constraints.
+- **Follow-up**: Commit changes. Recommend TDD run. Suggest deferring further work on the three problematic EPUBs unless they block critical testing.
+### [2025-05-09 21:55:00] Task: Expand Synthetic Test Data Generation (EPUB, PDF, Markdown)
+- **Trigger**: User Task.
+- **Context**: Expand synthetic data scripts in `synthetic_test_data/` to cover detailed EPUB, PDF, and Markdown scenarios from `docs/qa/synthetic_data_requirements.md`. Continue on `feat/synthetic-test-data` branch.
+- **Action Taken**:
+    - Reviewed `docs/qa/synthetic_data_requirements.md` extensively.
+    - Added numerous new EPUB generation functions to `synthetic_test_data/generate_epubs.py` covering variations in ToC, Headers, Footnotes/Endnotes (various reference styles and locations), Citations/Bibliographies, Page Numbers/Edition Markers, Images/Fonts (simulated obfuscation, image as text), Structure/Metadata (EPUB2 guide, OPF meta, page-map ref, split files, Calibre/Adobe artifacts, accessibility types), and Content Types (dialogue, epigraphs, blockquotes, internal cross-refs, forced page breaks).
+    - Debugged several issues in EPUB generation, primarily related to `ebooklib`'s handling of ToC structures and guide elements. Simplified ToCs for `ncx_links_to_anchors` and `html_toc_p_tags` to resolve "'Link' object is not iterable" errors. Commented out `create_epub2_with_guide` due to a persistent "argument of type 'NoneType' is not iterable" error.
+    - Modified `synthetic_test_data/common.py` (`_write_epub_file`) to provide basic support for adding custom files (e.g., `encryption.xml`) and manifest items, noting limitations with `ebooklib` for precise placement outside `OEBPS`.
+    - Added new PDF generation functions to `synthetic_test_data/generate_pdfs.py` for multi-column text, text flow around images (simulated), simulated high-quality OCR, bookmark-based ToCs, visual hyperlinked ToCs, running headers/footers, bottom-page footnotes, and simple tables. Debugged `NameError` for `SimpleDocTemplate` and a `ValueError` for outline levels in bookmark generation.
+    - Added new Markdown generation functions to `synthetic_test_data/generate_markdown.py` for JSON frontmatter, erroneous frontmatter, no frontmatter, embedded HTML, and LaTeX expressions.
+    - Updated `synthetic_test_data/generate_all_data.py` to call all new generation functions (except the problematic `create_epub2_with_guide`).
+    - Successfully executed `python3 -m synthetic_test_data.generate_all_data` to generate the new suite of files.
+    - Updated `synthetic_test_data/README.md` with a comprehensive list of all generated files and their categories.
+- **Rationale**: Fulfilling task requirements to significantly expand synthetic test data coverage.
+- **Outcome**: Synthetic data generation scripts for EPUB, PDF, and Markdown substantially enhanced. A large number of new synthetic files generated. README updated. One EPUB function (`create_epub2_with_guide`) remains problematic and is temporarily disabled.
+- **Follow-up**: Commit changes. Recommend TDD run on PhiloGraph ingestion using this new data. Further investigation needed for `create_epub2_with_guide`.
+### [2025-05-09 09:09:18 PM] Task: Further Expand Synthetic EPUB Generation (Batch 2) &amp; Early Return
+- **Trigger**: User Feedback requesting more EPUB examples and variations.
+- **Context**: Continue expanding `synthetic_test_data/generate_epubs.py` based on `docs/qa/synthetic_data_requirements.md` and `docs/reports/epub_formatting_analysis_report.md`.
+- **Action Taken**:
+    - Re-read `docs/qa/synthetic_data_requirements.md` and `docs/reports/epub_formatting_analysis_report.md` for detailed EPUB formatting variations.
+    - Implemented EPUB generation functions in `synthetic_test_data/generate_epubs.py` for:
+        - NCX with `pageList` ([`create_epub_ncx_with_pagelist()`](synthetic_test_data/generate_epubs.py:91)).
+        - Missing NCX (relying on NavDoc) ([`create_epub_missing_ncx()`](synthetic_test_data/generate_epubs.py:150)).
+        - Full EPUB 3 NavDoc (ToC, Landmarks, PageList) ([`create_epub_navdoc_full()`](synthetic_test_data/generate_epubs.py:204)).
+        - Taylor/Hegel style headers (h3 with classes/spans) ([`create_epub_taylor_hegel_headers()`](synthetic_test_data/generate_epubs.py:369)).
+        - Sennet-style headers (h1/h2/h3 with specific classes) ([`create_epub_sennet_style_headers()`](synthetic_test_data/generate_epubs.py:1)).
+        - Div-style headers ([`create_epub_div_style_headers()`](synthetic_test_data/generate_epubs.py:1)).
+        - Pippin-style endnote references ([`create_epub_pippin_style_endnotes()`](synthetic_test_data/generate_epubs.py:1)).
+        - Heidegger (German Existentialism) style endnote references ([`create_epub_heidegger_ge_style_endnotes()`](synthetic_test_data/generate_epubs.py:1)).
+        - Heidegger (Metaphysics) style same-page footnote references and structure ([`create_epub_heidegger_metaphysics_style_footnotes()`](synthetic_test_data/generate_epubs.py:1)).
+    - Updated `synthetic_test_data/generate_all_data.py` to call these new EPUB generation functions.
+    - Successfully executed `python3 -m synthetic_test_data.generate_all_data` to generate all implemented synthetic files.
+    - Updated `synthetic_test_data/README.md` to list all newly generated EPUB types.
+    - Staged all new/modified scripts and newly generated EPUB files for commit.
+- **Rationale**: Addressing user feedback to increase coverage of EPUB test cases with diverse formatting.
+- **Outcome**: Script significantly enhanced with more EPUB generation functions for ToC, headers, and notes. New synthetic EPUB files generated. README updated. Changes committed (assumed complete by user feedback).
+- **Follow-up**: User requested Early Return. Prepare `attempt_completion` and recommend delegation of remaining work.
+### [2025-05-09 01:28:56 PM] Task: Refactor Synthetic Data Generation Scripts &amp; Add to .gitignore
+- **Trigger**: User Feedback after previous script execution.
+- **Context**: User requested modularization of the `generate_data.py` script and to add generated data to `.gitignore`.
+- **Action Taken**:
+    - Created `synthetic_test_data/common.py` and moved shared utilities (directory creation, EPUB helper functions, path constants) into it.
+    - Created `synthetic_test_data/generate_epubs.py` and moved all EPUB generation functions into it, importing from `common.py`.
+    - Created `synthetic_test_data/generate_pdfs.py` and moved PDF generation functions into it, importing from `common.py`.
+    - Created `synthetic_test_data/generate_markdown.py` and moved Markdown generation functions into it, importing from `common.py`.
+    - Created `synthetic_test_data/generate_all_data.py` as the new main runner script, which imports and calls functions from the specialized modules.
+    - Updated the original `synthetic_test_data/generate_data.py` to be a placeholder script pointing to `generate_all_data.py`.
+    - Updated `synthetic_test_data/README.md` to reflect the new modular script structure and how to run `generate_all_data.py`.
+    - Created `synthetic_test_data/__init__.py` to make the directory a package, resolving relative import issues.
+    - Successfully executed `python3 -m synthetic_test_data.generate_all_data` to generate all synthetic files using the new structure.
+    - Added `synthetic_test_data/epub/`, `synthetic_test_data/pdf/`, and `synthetic_test_data/markdown/` to the `.gitignore` file.
+    - Staged all new/modified scripts and the updated `.gitignore`. Committed changes.
+- **Rationale**: Improving maintainability and extensibility of the synthetic data generation process as per user request. Ensuring generated data is not tracked by Git.
+- **Outcome**: Synthetic data generation scripts refactored into a modular structure. Generated data directories added to `.gitignore`. All changes committed.
+- **Follow-up**: Prepare `attempt_completion`.
+### [2025-05-09 06:27:07] Task: Further Expand Synthetic Test Data Generation
+- **Trigger**: User Feedback after previous `attempt_completion` was interrupted.
+- **Context**: User requested more EPUB examples and greater variation to cover test cases from `docs/qa/synthetic_data_requirements.md` and `docs/reports/epub_formatting_analysis_report.md`.
+- **Action Taken**:
+    - Re-read `docs/qa/synthetic_data_requirements.md` and `docs/reports/epub_formatting_analysis_report.md`.
+    - Identified next EPUB scenarios: styled `<p>` tag headers, headers with edition markers, same-page footnotes, separate file endnotes, minimal metadata, poetry formatting.
+    - Modified `_create_epub_book` helper in `synthetic_test_data/generate_data.py` to allow more control over default and custom metadata.
+    - Implemented `create_epub_p_tag_headers()` for EPUBs with styled paragraph headers.
+    - Implemented `create_epub_headers_with_edition_markers()` for EPUBs with embedded edition markers.
+    - Implemented `create_epub_same_page_footnotes()` for EPUBs with same-page hyperlinked footnotes.
+    - Implemented `create_epub_endnotes_separate_file()` for EPUBs with hyperlinked endnotes in a separate file.
+    - Implemented `create_epub_minimal_metadata()` for EPUBs with sparse metadata.
+    - Implemented `create_epub_poetry()` for EPUBs with poetry formatting.
+    - Encountered and resolved issues with `apply_diff` and `write_to_file` not correctly updating the main execution block of the script. Used `search_and_replace` as a workaround to ensure all new generation functions were called.
+    - Successfully executed `python3 synthetic_test_data/generate_data.py` to generate all implemented file types.
+    - Updated `synthetic_test_data/README.md` to list all newly generated EPUB types.
+    - Staged all new/modified files (`generate_data.py`, `README.md`, and all generated `.epub` files) and committed them to the `feat/synthetic-test-data` branch.
+- **Rationale**: Addressing user feedback to increase coverage of EPUB test cases.
+- **Outcome**: Script significantly enhanced with more EPUB generation functions, new synthetic EPUB files generated, README updated, all changes committed.
+- **Follow-up**: Prepare `attempt_completion`.
+### [2025-05-09 05:51:07] Task: Expand Synthetic Test Data Generation
+- **Trigger**: User Task received [Ref: User Task 2025-05-09 05:38:58 AM]
+- **Context**: Expand `synthetic_test_data/generate_data.py` to cover more complex EPUB, PDF, and Markdown scenarios based on `docs/qa/synthetic_data_requirements.md`.
+- **Action Taken**:
+    - Ensured working on `feat/synthetic-test-data` branch.
+    - Read `docs/qa/synthetic_data_requirements.md` and `synthetic_test_data/generate_data.py`.
+    - Added helper functions (`_create_epub_book`, `_add_epub_chapters`, `_write_epub_file`) to `generate_data.py`.
+    - Added `create_epub_ncx_nested()` for EPUBs with 3-level nested NCX ToC.
+    - Added `create_epub_html_toc_linked()` for EPUBs with a separate HTML ToC.
+    - Added `reportlab` to `requirements.txt`.
+    - Added `create_pdf_text_single_column()` for basic single-column text PDF generation.
+    - Added `create_md_extended_elements()` for Markdown with tables, footnotes, task lists, code blocks, and TOML frontmatter.
+    - Updated YAML frontmatter in `create_md_basic_elements()` to include a custom field.
+    - Executed `pip3 install -r requirements.txt` to install `reportlab`.
+    - Corrected a `TypeError` in `create_epub_ncx_nested` related to `ebooklib.epub.Link` children argument.
+    - Executed `python3 synthetic_test_data/generate_data.py` to generate new files.
+    - Updated `synthetic_test_data/README.md` to reflect new script capabilities, dependencies, and generated files.
+    - Committed all changes (script, README, requirements, new synthetic files) to `feat/synthetic-test-data` branch.
+- **Rationale**: Fulfilling task requirements to expand synthetic data generation capabilities.
+- **Outcome**: Script enhanced, new synthetic files generated, README updated, changes committed.
+- **Follow-up**: Prepare `attempt_completion`.
 
 ### [2025-05-09 05:38:00] Task: Generate Synthetic Test Data (Initial)
 - **Trigger**: Task received from user/SPARC [Ref: User Task 2025-05-09 05:33:07 AM, Spec-Pseudocode Completion Summary 2025-05-09 05:32:50 AM].
