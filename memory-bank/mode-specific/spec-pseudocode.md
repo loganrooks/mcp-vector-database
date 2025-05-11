@@ -9,6 +9,11 @@
 - Status: Implemented
 ### Feature: Tier 0 MVP Definition (Local Core + Cloud Embeddings)
 - Added: 2025-04-27 21:11:10 (Revised from 18:21:09)
+### Strategy: Phased Approach for Synthetic Data Coverage
+- Added: 2025-05-09 14:42:26
+- Description: Following user feedback on the comprehensiveness of the initial synthetic data plan, a phased approach was discussed. Phase 1 will utilize the current detailed specifications in [`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md). Phase 2, as a potential future task, will involve analyzing EPUBs from a broader range of publishers to identify and incorporate any novel formatting patterns not covered by the initial 37 exemplars.
+- Rationale: Balances immediate testing needs with long-term robustness and coverage of diverse publisher-specific formatting.
+- Status: Discussed; Phase 1 requirements are considered complete for this task. Phase 2 is a future consideration.
 - Description: Defined the Tier 0 Minimum Viable Product focused on local deployment (Intel i7-1260P, 16GB RAM, Integrated Graphics via WSL2) but leveraging free cloud embedding APIs via middleware for improved performance. This specification is detailed in `docs/project-specifications.md` v2.2.
 - Acceptance criteria: 1. Tier 0 is clearly defined in the specification document. 2. Tier 0 stack aligns with revised strategy (PostgreSQL+pgvector, **Cloud Embeddings via LiteLLM Proxy (Vertex AI Free Tier)**, CPU Text Proc, Python Backend, CLI/MCP). 3. Tier 0 acknowledges local processing bottlenecks but improved embedding speed. 4. Tier 0 emphasizes the migration path to Tier 1.
 - Dependencies: `docs/reports/philograph_synthesis_and_recommendations.md`, `docs/reports/embedding_middleware_for_philograph.md`, `memory-bank/globalContext.md` Decision Log, User Feedback (2025-04-27 21:09:00).

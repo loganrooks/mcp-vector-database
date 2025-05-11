@@ -1,3 +1,46 @@
+### [2025-05-10 18:27:24] - SPARC - Decision Log: Major Task Pivot - Synthetic Test Data Package
+- **Decision:** Initiate a new sub-project to transform the `synthetic_test_data` directory into a standalone, configurable, and extensible Python package and Git repository. This will be handed over to a new SPARC instance.
+- **Rationale:** User request for a more robust and reusable synthetic data generation tool for broader use across multiple libraries/projects. Current SPARC instance context window (48%) also favors handover for a task of this scope.
+- **Impact:** Previously planned next steps (EPUB test planning, spec/ADR review by *this* SPARC instance) are superseded by this new, larger initiative. The new SPARC instance will orchestrate the package creation. Once that package is stable, the originally planned testing and spec reviews can resume, potentially leveraging the new package.
+- **Source:** User Feedback 2025-05-10 06:27:24 PM.
+- **Related Issues:** Previous objective to expand PDF/Markdown synthetic data ([`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md:1)).
+### [2025-05-10 18:15:16] - SPARC - Progress Update: User Feedback &amp; Handover Plan
+- **Task:** Process user feedback regarding next steps after EPUB bug fixes.
+- **Status:** Handover to new SPARC instance planned.
+- **Details:** User requested focus on:
+    1.  Creating a testing plan for EPUB preprocessing and metadata extraction.
+    2.  Reviewing and updating `docs/project-specifications.md` and ADRs against recent logs.
+    3.  Exploring further metadata extraction possibilities from EPUBs and updating specs/ADRs.
+- **Decision:** Due to the strategic nature of these tasks and current context window (46%), a handover to a new SPARC instance will be initiated.
+- **Files Affected:** N/A for this SPARC instance.
+- **Branch:** `feat/synthetic-test-data`
+- **Related Issues:** User Feedback 2025-05-10 06:15:16 PM.
+### [2025-05-10 16:41:29] - Code - Progress Update: Synthetic Data Path Refactor
+- **Task:** Modify synthetic data generation scripts to output to `synthetic_test_data/generated/` subdirectories.
+- **Status:** Completed.
+- **Details:** Updated path constants in [`synthetic_test_data/common.py`](synthetic_test_data/common.py:1). Verified other generation scripts use these constants. Updated paths in [`tests/synthetic_test_data/test_epub_generators.py`](tests/synthetic_test_data/test_epub_generators.py:1) and [`synthetic_test_data/README.md`](synthetic_test_data/README.md:1). Changes committed (37dea6b).
+- **Files Affected:** [`synthetic_test_data/common.py`](synthetic_test_data/common.py:1), [`tests/synthetic_test_data/test_epub_generators.py`](tests/synthetic_test_data/test_epub_generators.py:1), [`synthetic_test_data/README.md`](synthetic_test_data/README.md:1).
+- **Branch:** `feat/synthetic-test-data`
+- **Related Issues:** User request to reorganize synthetic data outputs and update `.gitignore`.
+### [2025-05-10 16:40:15] - Code - Progress Update: Synthetic Data Output Reorganization
+- **Task:** Modify synthetic data generation scripts and referencing files to use a new `synthetic_test_data/generated/` output structure.
+- **Status:** Completed.
+- **Details:**
+    - Updated path constants in `synthetic_test_data/common.py` to point to `synthetic_test_data/generated/<type>/`.
+    - Verified that individual generator scripts (`synthetic_test_data/epub_generators/*.py`, `synthetic_test_data/generate_pdfs.py`, etc.) and the main runner (`synthetic_test_data/generate_all_data.py`) will use the new paths via `common.py`.
+    - Updated path definitions in `tests/synthetic_test_data/test_epub_generators.py`.
+    - Confirmed `tests/ingestion/test_pipeline_single_file.py` did not require changes.
+    - Updated `synthetic_test_data/README.md` to reflect the new directory structure.
+- **Files Affected:** `synthetic_test_data/common.py`, `tests/synthetic_test_data/test_epub_generators.py`, `synthetic_test_data/README.md`.
+- **Commit:** 37dea6b ("refactor: Reorganize synthetic data output to 'generated' subdirectory")
+- **Branch:** `feat/synthetic-test-data`
+### [2025-05-10 16:28:48] - DevOps - Progress Update: .gitignore Refactor for Synthetic Data
+- **Task:** Modify .gitignore to use `synthetic_test_data/generated/` and commit changes.
+- **Status:** Completed.
+- **Details:** Replaced specific directory ignores (`synthetic_test_data/epub/`, `synthetic_test_data/pdf/`, `synthetic_test_data/markdown/`) with a single entry `synthetic_test_data/generated/` in [`.gitignore`](.gitignore:1).
+- **Files Affected:** [`.gitignore`](.gitignore:1)
+- **Commit:** 3d43cbd ("refactor: Update .gitignore for new synthetic_test_data/generated/ directory")
+- **Branch:** `feat/synthetic-test-data` (as per commit output)
 ### [2025-05-10 15:55:16] - SPARC - Progress Update: EPUB Bug Fixes &amp; Test Verification
 - **Task:** Orchestrate debugging and verification of EPUB generation bugs for `navdoc_full.epub` and `pippin_style_endnotes.epub`.
 - **Status:** Fixes applied by `debug` mode. Tests passed as per user report. Docker environment issue implicitly resolved by user.
@@ -97,6 +140,8 @@
 - **[2025-05-05 07:03:44]** - Optimizer: Completed verification of holistic review refactoring tasks. Confirmed `tests/utils/test_text_processing.py` and `tests/ingestion/test_pipeline.py` were already refactored. Deleted empty remnant `tests/ingestion/test_pipeline.py`. Verified with `pytest` (362 passed, 1 skipped). [Ref: Task 2025-05-05 07:01:30]
 - **[2025-05-05 20:46:17]** - TDD: Completed final test suite verification on integrated `feature/relationship-service` branch. Result: 357 passed, 8 skipped (expected). Confirmed stability post-integration. [Ref: Task 2025-05-05 20:45:14]
 ## Progress
+- **[2025-05-10 17:39:00]** - TDD - Regression Test: Full test suite run after synthetic data path refactoring and EPUB generation fixes. Result: 359 passed, 8 skipped. Confirmed stability and no new regressions.
+- **[2025-05-10 16:29:31]** - DevOps Task: Update .gitignore for synthetic_test_data/generated/ [Completed]
 - **[2025-05-04 19:23:49]** - TDD: Verified existing tests for `process_document` directory handling (`tests/ingestion/test_pipeline.py`). All 29 tests passed. Confirmed required functionality was already covered. [Ref: Task 2025-05-04 19:22:29]
 - **[2025-05-04 19:20:44]** - TDD: Completed TDD cycle for DB Layer Collection operations (`add_collection`, `add_item_to_collection`, `get_collection_items`). Added 7 tests, implemented minimal code, fixed 2 test assertions. All 16 targeted collection tests pass. [Ref: Task 2025-05-04 19:10:10]
 - **[2025-05-04 16:45:22]** - DevOps: Managed Git debt by staging and committing extensive uncommitted changes into 4 logical commits (feat(acquisition), fix(tests), chore(docs/config), chore(memory)). Verified clean working tree. [Ref: Task 2025-05-04 16:43:26]

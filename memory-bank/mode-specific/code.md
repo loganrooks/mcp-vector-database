@@ -1,6 +1,17 @@
 # Code Mode Specific Memory
 <!-- Entries below should be added reverse chronologically (newest first) -->
 
+### [2025-05-10 16:40:15] Synthetic Data Generation Path Refactor
+- **Purpose**: Reorganize output directory structure for all synthetic test data.
+- **Files**:
+    - `synthetic_test_data/common.py` (path definitions updated)
+    - `tests/synthetic_test_data/test_epub_generators.py` (test paths updated)
+    - `synthetic_test_data/README.md` (documentation updated)
+- **Status**: Implemented
+- **Dependencies**: N/A (internal path changes)
+- **API Surface**: N/A (internal path changes)
+- **Tests**: Test paths updated in `test_epub_generators.py`. Other tests using these files might need updates if they hardcode paths.
+- **Details**: All synthetic data (EPUBs, PDFs, Markdown) will now be generated into `synthetic_test_data/generated/<type>/<category>/` subdirectories. This change was primarily achieved by modifying base path constants in `common.py`.
 ### [2025-05-09 05:38:00] Synthetic Test Data Generation Script (Initial)
 - **Purpose**: Create initial script and sample files for synthetic test data.
 - **Files**:

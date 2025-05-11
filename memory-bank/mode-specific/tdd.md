@@ -1,3 +1,10 @@
+### Test Plan: Synthetic EPUB Generation Bugs (navdoc_full, pippin_style_endnotes) - [2025-05-10 05:52:16]
+- **Objective**: Create failing tests to target known bugs in `navdoc_full.epub` (TypeError/empty nav.xhtml) and `pippin_style_endnotes.epub` (renders blank).
+- **Scope**: `synthetic_test_data.epub_generators.toc.create_epub_navdoc_full`, `synthetic_test_data.epub_generators.notes.create_epub_pippin_style_endnotes`.
+- **Test Cases**:
+    - Case 1 (Failing - navdoc_full): Generate `navdoc_full.epub`. Assert `nav.xhtml` within it is not empty and parses as valid XML. / Expected: Test fails due to empty or malformed `nav.xhtml`. / Status: Red.
+    - Case 2 (Failing - pippin_style_endnotes): Generate `pippin_style_endnotes.epub`. Assert a key content HTML file contains expected text ("This is test chapter content with a note."). / Expected: Test fails due to missing content. / Status: Red.
+- **Related Requirements**: User Feedback 2025-05-10 05:33:34 AM, `docs/qa/synthetic_data_requirements.md`.
 ### Test Execution: Unit (MCP Server - Post Refactor) - [2025-05-04 19:57:00]
 - **Trigger**: Manual Verification Run (Post-Refactor)
 - **Outcome**: PASS / **Summary**: 15 passed, 0 failed
@@ -246,6 +253,22 @@
 - **Coverage Change**: Not Measured
 - **Notes**: Renamed `tests/mcp/test_main.py` to `tests/mcp/test_mcp_main.py` to fix collection error. Failures indicate tests need updating to match Green phase implementation (ADR 009). Old tests reference removed attributes/functions. New tests are still stubs (`assert False`). Verification step complete, next step is test implementation/refactoring.
 ## Test Execution Results
+### Test Execution: Regression (Full Suite - Post Synthetic Data Refactor) - [2025-05-10 17:39:00]
+- **Trigger**: Manual Regression Test Run (Post-Refactor of synthetic data paths and EPUB gen fixes)
+- **Outcome**: PASS
+- **Summary**: 359 passed, 8 skipped, 0 failed, 0 errors.
+- **Failed Tests**: None.
+- **Skipped Tests**:
+    - `tests/cli/test_cli_acquire.py::test_acquire_discover_yes_flag_single_option_auto_confirms` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_discover_yes_flag_multiple_options_errors` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_success` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_api_error` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_prompt_invalid_input` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_invalid_input_out_of_range` (Known Typer Issue)
+    - `tests/cli/test_cli_acquire.py::test_acquire_confirm_cancel` (Known Typer Issue)
+    - `tests/utils/test_text_extraction.py::test_extract_md_frontmatter_no_yaml_installed` (Missing Dependency - Expected)
+- **Coverage Change**: Not Measured.
+- **Notes**: Full test suite passes after fixes to `tests/conftest.py` (test_client scope and DB_HOST override) and `tests/synthetic_test_data/test_epub_generators.py` (ensure_output_directories). No new regressions identified from the synthetic data path refactoring or EPUB generation fixes.
 ### Test Execution: Regression (Full Suite - Final Verification) - [2025-05-05 20:46:17]
 - **Trigger**: Manual Final Verification [Ref: Task 2025-05-05 20:45:14]
 - **Outcome**: PASS / **Summary**: 357 passed, 8 skipped

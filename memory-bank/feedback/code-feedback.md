@@ -1,5 +1,31 @@
 # Code Mode Feedback Log
 <!-- Entries below should be added reverse chronologically (newest first) -->
+### [2025-05-10 16:40:15] Tool Usage Note: `apply_diff` Failures
+- **Trigger**: Attempting to modify `synthetic_test_data/common.py` and `tests/synthetic_test_data/test_epub_generators.py`.
+- **Context**: Task to refactor synthetic data output paths.
+- **Action Taken**: `apply_diff` tool failed multiple times with "Diff block is malformed: marker '=======' found in your diff content..." error, even when the diff content itself did not contain the marker within the search/replace blocks. Switched to using `write_to_file` with the full modified content as a workaround.
+- **Rationale**: `apply_diff` was unreliable for these specific changes.
+- **Outcome**: Modifications successfully applied using `write_to_file`.
+- **Follow-up**: Potential issue with `apply_diff` parsing or CDATA handling for multi-line diffs needs investigation if this recurs.
+### [2025-05-10 04:17:00] Task: Fix EPUB HTML Entities &amp; Refactor EPUB Generation Script - Debugging Follow-up
+- **Trigger**: User Feedback on persistent EPUB issues.
+- **Context**: After refactoring, `adobe_artifacts.epub`, `navdoc_full.epub`, and `pippin_style_endnotes.epub` remained problematic.
+- **Action Taken**:
+    - **`adobe_artifacts.epub`**:
+        - Identified that the "Duplicate name: 'EPUB/META-INF/template.xpgt'" warning was likely due to `custom_files_to_add` in `common.py` and `manifest_extra_items` in `create_epub_structure_adobe_artifacts` both trying to manage the `template.xpgt` file.
+        - Removed `manifest_extra_items` entry for `template.xpgt` in `create_epub_structure_adobe_artifacts`, relying on `custom_files_to_add`. This resolved the duplicate name warning.
+        - Changed spine in `create_epub_structure_adobe_artifacts` from `['nav'] + chapters` to `chapters` as 'nav' for NCX is not a spine item in EPUB2. User confirmed this fixed the TypeError for `adobe_artifacts.epub`.
+    - **`navdoc_full.epub`**:
+        - Hypothesized the "indexOf" TypeError might be related to landmarks or page-list in NavDoc. Commented these sections out. User reported a *new* TypeError ("reading 'next'").
+        - Restored the landmarks, page-list, and the fallback NCX. User reported the error reverted to the original "indexOf" TypeError. The issue remains unresolved.
+    - **`pippin_style_endnotes.epub`**:
+        - Hypothesized content might be the issue for blank rendering. Simplified chapter and endnote content significantly. User reported it's still blank. The issue remains unresolved.
+- **Rationale**: Attempting to isolate and fix reported EPUB rendering issues.
+- **Outcome**:
+    - `adobe_artifacts.epub` TypeError is now resolved.
+    - `navdoc_full.epub` continues to show a TypeError ("indexOf").
+    - `pippin_style_endnotes.epub` continues to be blank.
+- **Follow-up**: These two EPUBs (`navdoc_full`, `pippin_style_endnotes`) have persistent issues that may require deeper EPUB structural analysis or different generation approaches beyond simple trial-and-error.
 ### [2025-05-10 03:01:30] Task: Correct HTML Entities &amp; Continue Synthetic Data Expansion
 - **Trigger**: User Task (Correct HTML entity encoding, fix `create_epub2_with_guide`, review ToCs, expand data).
 - **Context**: Previous work on `feat/synthetic-test-data` branch encountered HTML entity issues and errors in EPUB generation.

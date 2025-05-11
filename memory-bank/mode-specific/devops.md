@@ -51,6 +51,12 @@
 <!-- Update strategy notes here (consider if this should be newest first or overwrite) -->
 
 ## Git History Initialization - [2025-04-28 10:28:30]
+### .gitignore Update for Synthetic Data - [2025-05-10 16:32:16]
+- **Action**: Modified [`.gitignore`](.gitignore:1) to consolidate synthetic test data ignore rules.
+- **Commit**: `3d43cbd` ("refactor: Update .gitignore for new synthetic_test_data/generated/ directory")
+- **Details**: Replaced `synthetic_test_data/epub/`, `synthetic_test_data/pdf/`, `synthetic_test_data/markdown/` with `synthetic_test_data/generated/`.
+- **Branch**: `feat/synthetic-test-data`
+- **Verification**: Committed successfully.
 - **Action**: Staged and committed existing uncommitted project files into logical commits to establish a clean baseline history.
 - **Commits Created**:
     - `feat: Initial project setup and configuration files` (README, .gitignore, .env.example, .roomodes)

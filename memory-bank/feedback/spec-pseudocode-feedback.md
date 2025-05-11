@@ -1,3 +1,31 @@
+## 2025-05-09 14:41:45 - User Feedback & Discussion: Sufficiency of Synthetic Data Specs & Publisher Analysis
+- **Trigger:** User feedback on `attempt_completion` regarding the sufficiency of the current synthetic data plan.
+- **Context:** User questioned if the current plan, based on ~37 analyzed EPUBs, is exhaustive enough, especially concerning publisher-specific formatting variations for elements like footnotes and headers. Suggested re-reviewing EPUBs on a per-publisher basis.
+- **Action/Discussion Points:**
+    - Acknowledged the validity of the concern: the current set is a strong start but not guaranteed to be exhaustive. Publisher formatting consistency is an assumption.
+    - Assessed current plan: Sufficient for a robust *initial* testing phase.
+    - Agreed with per-publisher analysis: Valuable for long-term robustness and identifying wider patterns or inconsistencies.
+    - Discussed potential missing elements (unique EPUB 2/3 feature combos, proprietary namespaces, complex tables/math, different toolchain outputs).
+    - Suggested a list of potential philosophy publishers for future analysis (University Presses, Academic Publishers, Specialist Philosophy Publishers).
+    - Proposed a **Phased Approach**:
+        1.  **Phase 1 (Current Foundation):** Generate synthetic data based on the current, enhanced `synthetic_data_requirements.md`.
+        2.  **Phase 2 (Future Expansion - New Task):** After initial testing, initiate a new task to analyze EPUBs from additional publishers, identify novel formatting, and update reports/requirements if needed.
+- **Rationale:** To provide a pragmatic path forward, leveraging current detailed analysis while planning for future expansion to increase test coverage and system robustness.
+- **Outcome:** Agreement on the value of the current detailed specification for initial testing and the merit of a future, broader publisher-focused analysis.
+- **Follow-up:** Proceed with `attempt_completion` for the current task (defining requirements based on the *existing* analysis), then update other memory bank files.
+## 2025-05-09 14:02:43 - User Intervention & Task Refinement: Insufficient Detail in Synthetic Data Specs
+- **Trigger:** User feedback after initial `attempt_completion` for synthetic data requirements.
+- **Context:** User indicated that the initial specification in [`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md) was too high-level, particularly for EPUB footnotes/endnotes and header variations. It lacked the specific HTML/XML tag structures, attributes, and nesting examples needed for effective synthetic data generation and parser testing. User also corrected the notion of "standard h1-h6 usage" in EPUBs.
+- **Action:**
+    1. Acknowledged the feedback and the need for more granular detail.
+    2. Re-read the existing [`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md).
+    3. Meticulously re-analyzed the entire [`docs/reports/epub_formatting_analysis_report.md`](docs/reports/epub_formatting_analysis_report.md) to extract concrete HTML/XML examples for all EPUB formatting variations (ToC, Headers, Footnotes/Endnotes, Citations, Page Numbers, Images/Fonts, Structure, Content Types).
+    4. Updated [`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md) with these specific snippets and more detailed descriptions for EPUBs.
+    5. Reviewed and enhanced the PDF and Markdown sections in [`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md) to also include more specific examples and edge cases.
+    6. Updated `memory-bank/activeContext.md` to reflect the refinement.
+- **Rationale:** To create a more actionable and precise specification document that directly addresses the complexities observed in real-world EPUBs, enabling better synthetic data generation for testing the PhiloGraph ingestion pipeline.
+- **Outcome:** The [`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md) document is now significantly more detailed and includes specific examples.
+- **Follow-up:** Update mode-specific memory bank and proceed with `attempt_completion`.
 ## 2025-05-09 05:32:26 - Task Completion: Synthetic Data Requirements Definition
 - **Trigger:** Completion of task: "Analyze EPUB formatting report and define requirements for a synthetic test data suite."
 - **Context:** The task involved analyzing [`docs/reports/epub_formatting_analysis_report.md`](docs/reports/epub_formatting_analysis_report.md) and creating a new specification document [`docs/qa/synthetic_data_requirements.md`](docs/qa/synthetic_data_requirements.md). This was based on a recommendation from the QA Tester mode [Ref: QA Tester Completion Summary 2025-05-09 05:30:01 AM, see also [`memory-bank/globalContext.md:54`](memory-bank/globalContext.md:54)].

@@ -1,3 +1,39 @@
+### [2025-05-10 17:39:00] - Test Suite Debugging &amp; Resolution for Regression Run
+- **Trigger**: Full regression test run post-synthetic data refactor.
+- **Context**: Initial run showed multiple errors (ScopeMismatch, DB Connection) and 2 EPUB test failures.
+- **Action &amp; Rationale**:
+    1.  **`ScopeMismatch` Errors**:
+        -   **Attempt 1**: Added `event_loop` parameter to `test_client` fixture in `tests/conftest.py`. Result: Errors persisted.
+        -   **Attempt 2**: Removed `event_loop` parameter from `test_client` fixture. Result: Errors persisted.
+        -   **Attempt 3 (Fix)**: Changed `test_client` fixture scope from "session" to "function" in `tests/conftest.py`. Result: `ScopeMismatch` errors resolved.
+    2.  **EPUB Generation Failures** (`test_generate_navdoc_full_epub_no_typeerror`, `test_generate_pippin_style_endnotes_epub_not_blank`):
+        -   **Analysis**: Files not found despite stdout claiming successful creation. Hypothesized missing directory creation.
+        -   **Fix**: Added `ensure_output_directories()` call from `synthetic_test_data.common` at the beginning of each failing test in `tests/synthetic_test_data/test_epub_generators.py`. Result: EPUB test failures resolved.
+    3.  **Database Connection `RuntimeError`** (`psycopg_pool.PoolTimeout: couldn't get a connection... failed to resolve host 'db'`):
+        -   **Analysis**: `pytest` running on host, app via `TestClient` trying to resolve 'db' (Docker service name) instead of 'localhost'. `DB_HOST` from `.env` likely being overridden or not taking precedence.
+        -   **Fix**: Explicitly set `os.environ['DB_HOST'] = 'localhost'` at the top of `tests/conftest.py` before FastAPI `app` import. Result: Database connection errors resolved.
+- **Outcome**: All tests now pass (359 passed, 8 skipped). Regression suite is green.
+- **Follow-up**: Proceed with `attempt_completion`.
+### [2025-05-10 06:05:40] - Blocker: Docker Environment Issue Prevents Test Execution
+- **Trigger**: Attempting to run `pytest` for EPUB generator tests.
+- **Context**: Task is to verify fixes for EPUB generation bugs by running tests in [`tests/synthetic_test_data/test_epub_generators.py`](tests/synthetic_test_data/test_epub_generators.py:1).
+- **Issue**: Multiple attempts to execute tests via `docker-compose exec` (and `docker compose exec`) failed with `docker.errors.DockerException: Error while fetching server API version: Not supported URL scheme http+docker`. This indicates an underlying Docker environment configuration problem.
+- **Attempts**:
+    1. `docker-compose exec -T philograph-backend pytest /app/tests/synthetic_test_data/test_epub_generators.py` (Failed: `URLSchemeUnknown: http+docker`)
+    2. `docker compose exec -T philograph-backend pytest /app/tests/synthetic_test_data/test_epub_generators.py` (Failed: `unknown shorthand flag: 'T'`)
+    3. `docker compose exec philograph-backend pytest /app/tests/synthetic_test_data/test_epub_generators.py` (Failed: `docker: 'compose' is not a docker command`)
+    4. `docker-compose exec philograph-backend pytest /app/tests/synthetic_test_data/test_epub_generators.py` (Failed: `URLSchemeUnknown: http+docker`)
+- **Analysis**: The persistent `URLSchemeUnknown: http+docker` error suggests a problem with how `docker-compose` is connecting to the Docker daemon, or a misconfiguration in the Docker environment itself. This is outside my ability to resolve.
+- **Outcome**: Unable to run tests and verify fixes.
+- **Follow-up**: Report blocker. Recommend user investigates Docker environment or provides test output manually.
+### [2025-05-10 05:49:08] - User Feedback: Test Strategy for EPUB Generation Bugs
+- **Trigger**: User feedback during test execution.
+- **Context**: Attempted to create failing tests for problematic synthetic EPUBs by running them through the full ingestion pipeline.
+- **Feedback**: User questioned why we are trying to ingest them and suggested testing them independent of the pipeline to directly target the generation bugs.
+- **Action**: Acknowledged feedback. Will revise strategy to create tests that directly call EPUB generation scripts and validate the output EPUBs for the known issues (TypeError for navdoc_full, blank content for pippin_style_endnotes), rather than testing the full ingestion pipeline at this stage.
+- **Rationale**: User feedback is correct; more direct tests of the EPUB generation process are appropriate for TDD targeting these specific bugs.
+- **Outcome**: Test strategy revised. Will create tests in `tests/synthetic_test_data/test_epub_generators.py`.
+- **Follow-up**: Implement new tests. Remove or refactor previously created ingestion pipeline tests for these EPUBs.
 ### [2025-05-05 20:47:45] - Final Test Suite Verification
 - **Trigger**: Task to perform final verification of the test suite on the integrated `feature/relationship-service` branch [Ref: Task 2025-05-05 20:45:14].
 - **Context**: Memory Bank active. All relevant branches merged into `feature/relationship-service`. Previous integration step confirmed 357 passed, 8 skipped.
