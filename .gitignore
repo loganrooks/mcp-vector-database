@@ -150,3 +150,16 @@ docs/classes/
 
 # Synthetic test data (generated files, not the scripts)
 synthetic_test_data/generated/
+memory-bank/activeContext.md
+memory-bank/globalContext.md
+memory-bank/feedback/code-feedback.md
+memory-bank/feedback/debug-feedback.md
+memory-bank/feedback/devops-feedback.md
+memory-bank/feedback/spec-pseudocode-feedback.md
+memory-bank/feedback/tdd-feedback.md
+memory-bank/mode-specific/code.md
+memory-bank/mode-specific/debug.md
+memory-bank/mode-specific/devops.md
+memory-bank/mode-specific/sparc.md
+memory-bank/mode-specific/spec-pseudocode.md
+memory-bank/mode-specific/tdd.md
