@@ -123,6 +123,165 @@ These are different ways to create horizontal rules.
         print(f"Successfully created Markdown: {filepath}")
     except Exception as e: print(f"Error creating Markdown {filepath}: {e}")
 
+def create_md_json_frontmatter(filename="json_frontmatter.md"):
+    """
+    Creates a Markdown file with JSON frontmatter.
+    """
+    filepath = os.path.join(MD_DIR, "frontmatter", filename)
+    
+    content = """{
+  "title": "JSON Frontmatter Test",
+  "author": "Synthetic Data Generator",
+  "date": "2025-05-10",
+  "tags": ["markdown", "json", "frontmatter"],
+  "data": {
+    "version": 1.2,
+    "active": true,
+    "keywords": null
+  }
+}
+
+# Document with JSON Frontmatter
+
+This document uses JSON for its frontmatter section. 
+While less common than YAML or TOML for Markdown, some systems might support it.
+
+The content itself is straightforward, focusing on the parsability of the JSON block.
+"""
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f: f.write(content)
+        print(f"Successfully created Markdown: {filepath}")
+    except Exception as e: print(f"Error creating Markdown {filepath}: {e}")
+
+def create_md_error_frontmatter(filename="error_frontmatter.md"):
+    """
+    Creates a Markdown file with syntactically incorrect YAML frontmatter.
+    """
+    filepath = os.path.join(MD_DIR, "frontmatter", filename)
+    
+    content = """---
+title: Erroneous Frontmatter
+author: Synthetic Data Generator
+date: 2025-05-10
+tags: [markdown, error
+description: This frontmatter has an unclosed list and a missing colon.
+another_field value_without_colon
+---
+
+# Document with Faulty Frontmatter
+
+The YAML frontmatter above contains intentional syntax errors.
+This is to test how parsers handle malformed metadata sections.
+They might ignore it, raise an error, or attempt partial parsing.
+"""
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f: f.write(content)
+        print(f"Successfully created Markdown: {filepath}")
+    except Exception as e: print(f"Error creating Markdown {filepath}: {e}")
+
+def create_md_no_frontmatter(filename="no_frontmatter.md"):
+    """
+    Creates a Markdown file with no frontmatter at all.
+    """
+    filepath = os.path.join(MD_DIR, "frontmatter", filename)
+    
+    content = """# Document Without Frontmatter
+
+This Markdown document begins directly with content, omitting any frontmatter section.
+This tests the system's ability to process files that lack formal metadata blocks. 
+It should rely on content-based extraction or default values if metadata is expected.
+
+The philosophical implications of absence are themselves quite profound. What is defined by what is not there?
+"""
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f: f.write(content)
+        print(f"Successfully created Markdown: {filepath}")
+    except Exception as e: print(f"Error creating Markdown {filepath}: {e}")
+
+def create_md_with_embedded_html(filename="embedded_html.md"):
+    """
+    Creates a Markdown file with embedded HTML, both simple and complex/malformed.
+    """
+    filepath = os.path.join(MD_DIR, "general_edge_cases", filename)
+    
+    content = """# Markdown with Embedded HTML
+
+This document tests the handling of HTML embedded within Markdown.
+
+## Simple Embedded HTML
+Here is some **bold Markdown text** followed by simple &lt;b&gt;bold HTML text&lt;/b&gt;.
+And here is &lt;em&gt;italic HTML text&lt;/em&gt; mixed with *italic Markdown*.
+
+A simple div:
+&lt;div style="color: blue; border: 1px solid green; padding: 5px;"&gt;
+  This is a div with inline styles. It contains &lt;strong&gt;strong HTML&lt;/strong&gt; text.
+&lt;/div&gt;
+
+## Complex or Malformed Embedded HTML
+This section includes HTML that might be more challenging for parsers.
+
+An unclosed HTML tag:
+&lt;p&gt;This paragraph starts, but the tag is not closed.
+What happens to the subsequent Markdown?
+
+A table created with HTML:
+&lt;table border="1"&gt;
+  &lt;tr&gt;&lt;th&gt;HTML Header 1&lt;/th&gt;&lt;th&gt;HTML Header 2&lt;/th&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Data A1&lt;/td&gt;&lt;td&gt;Data B1&lt;/td&gt;&lt;/tr&gt;
+  &lt;tr&gt;&lt;td&gt;Data A2&lt;/td&gt;&lt;td&gt;Data B2&lt;/td&gt;
+&lt;/table&gt;
+
+Markdown after the HTML table:
+- List item 1
+- List item 2
+
+A malformed tag: &lt;div class="test" id=unquoted_id&gt;Content of malformed div.&lt;/div class="mismatch"&gt;
+
+This tests whether the parser correctly identifies and handles (or ignores/passes through) these HTML blocks.
+"""
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f: f.write(content)
+        print(f"Successfully created Markdown: {filepath}")
+    except Exception as e: print(f"Error creating Markdown {filepath}: {e}")
+
+def create_md_with_latex(filename="with_latex.md"):
+    """
+    Creates a Markdown file with embedded LaTeX expressions.
+    """
+    filepath = os.path.join(MD_DIR, "general_edge_cases", filename)
+    
+    content = """# Markdown with LaTeX Expressions
+
+This document includes mathematical and logical expressions formatted using LaTeX.
+
+## Inline LaTeX
+An important equation is $E = mc^2$. This is an inline LaTeX expression.
+We can also write logical symbols like $\\forall x \\exists y (P(x) \\rightarrow Q(y))$.
+The sum $\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$ is a well-known formula.
+
+## Display LaTeX (Block)
+For more complex expressions, display mode is used:
+$$
+\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}
+$$
+
+Another example:
+$$
+\\mathcal{L}(\\theta | x) = f(x | \\theta)
+$$
+
+This tests the system's ability to recognize and potentially process or preserve these LaTeX blocks, 
+which are common in scientific and philosophical texts.
+"""
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f: f.write(content)
+        print(f"Successfully created Markdown: {filepath}")
+    except Exception as e: print(f"Error creating Markdown {filepath}: {e}")
 # Placeholder for more Markdown generation functions
 # def create_md_json_frontmatter(...):
 #   pass

@@ -6,6 +6,7 @@ from lxml import etree
 
 # Assuming generation scripts are importable this way.
 # This might need adjustment based on actual project structure and PYTHONPATH.
+from synthetic_test_data.common import ensure_output_directories
 from synthetic_test_data.epub_generators.toc import create_epub_navdoc_full
 from synthetic_test_data.epub_generators.notes import create_epub_pippin_style_endnotes
 
@@ -30,6 +31,7 @@ def test_generate_navdoc_full_epub_no_typeerror():
     The test asserts that parsing nav.xhtml *should* succeed.
     """
     try:
+        ensure_output_directories() # Ensure output directory exists
         # Call with default filename, output path is handled by the function
         create_epub_navdoc_full()
         assert NAVDOC_FULL_EPUB_PATH.exists(), f"{NAVDOC_FULL_EPUB_NAME} was not created at {NAVDOC_FULL_EPUB_PATH}"
@@ -78,6 +80,7 @@ def test_generate_pippin_style_endnotes_epub_not_blank():
     The test asserts that key content *should* be present.
     """
     try:
+        ensure_output_directories() # Ensure output directory exists
         # Call with default filename, output path is handled by the function
         create_epub_pippin_style_endnotes()
         assert PIPPIN_STYLE_EPUB_PATH.exists(), f"{PIPPIN_STYLE_EPUB_NAME} was not created at {PIPPIN_STYLE_EPUB_PATH}"

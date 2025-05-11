@@ -1,0 +1,1 @@
+# This file makes the 'synthetic_test_data' directory a Python package.
